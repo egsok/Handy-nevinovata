@@ -2427,6 +2427,7 @@ name = "handy"
 version = "0.9.0"
 dependencies = [
  "anyhow",
+ "arboard",
  "chrono",
  "clap",
  "cpal",
