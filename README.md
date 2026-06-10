@@ -1,7 +1,7 @@
-# Handy-custom
+# Handy-nevinovata
 
 > Personal fork of [cjpais/Handy](https://github.com/cjpais/Handy) with Russian-language transcription tweaks.
-> Pre-built installers (unsigned) on [Releases](https://github.com/egsok/Handy-custom/releases). Build from source for everything else.
+> Pre-built installers (unsigned) on [Releases](https://github.com/egsok/Handy-nevinovata/releases). Build from source for everything else.
 > [English] · [Русский](README.ru.md)
 
 This is my personal daily-driver fork of [Handy](https://github.com/cjpais/Handy), the offline speech-to-text Tauri app. I use it for Russian transcription on Windows. The fork stays close to upstream — I cherry-pick fixes and add small features that solve concrete problems I hit. Nothing here is meant to replace upstream Handy; if you don't have the same Russian-specific pain points, just use the original.
@@ -20,7 +20,7 @@ The first four live as commits on top of upstream in this repo. The `/O2` fix li
 
 ## Download
 
-Pre-built installers are published to [Releases](https://github.com/egsok/Handy-custom/releases).
+Pre-built installers are published to [Releases](https://github.com/egsok/Handy-nevinovata/releases).
 
 - **Windows:** download `Handy_0.8.3-N_x64-setup.exe` (NSIS) or `.msi` (N is the fork release number — 1, 2, ...). On first launch Windows SmartScreen will show "Windows protected your PC" — click **More info** → **Run anyway**. The binary is unsigned (see Build below).
 - **Linux:** download `Handy_..._amd64.deb` / `.AppImage` / `.rpm` for your distro.
@@ -36,7 +36,7 @@ Pre-built installers are published to [Releases](https://github.com/egsok/Handy-
   xattr -d com.apple.quarantine /Applications/Handy.app
   ```
 
-  (If that errors with permission, try `sudo xattr -cr /Applications/Handy.app`.) After this the app launches normally. The right-click → Open workaround that older guides mention no longer works on macOS 15+ for unsigned apps. Please report any post-launch issues in [issues](https://github.com/egsok/Handy-custom/issues).
+  (If that errors with permission, try `sudo xattr -cr /Applications/Handy.app`.) After this the app launches normally. The right-click → Open workaround that older guides mention no longer works on macOS 15+ for unsigned apps. Please report any post-launch issues in [issues](https://github.com/egsok/Handy-nevinovata/issues).
 
 ## Build
 

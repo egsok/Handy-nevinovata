@@ -1,7 +1,7 @@
-# Handy-custom
+# Handy-nevinovata
 
 > Персональный форк [cjpais/Handy](https://github.com/cjpais/Handy) с правками под русскую транскрипцию.
-> Готовые установщики (без подписи) — на [Releases](https://github.com/egsok/Handy-custom/releases). Сборка из исходников — для всего остального.
+> Готовые установщики (без подписи) — на [Releases](https://github.com/egsok/Handy-nevinovata/releases). Сборка из исходников — для всего остального.
 > [English](README.md) · [Русский]
 
 Это мой персональный daily-форк [Handy](https://github.com/cjpais/Handy) — оффлайн speech-to-text приложения на Tauri. Использую для русской транскрипции под Windows. Форк держится близко к upstream: cherry-pick'и фиксов плюс небольшие фичи под конкретные проблемы, которые ловлю в работе. Замена upstream это не пытается быть — если у тебя нет таких же специфических болячек на русском, просто бери оригинал.
@@ -20,7 +20,7 @@
 
 ## Загрузка
 
-Готовые установщики публикуются в [Releases](https://github.com/egsok/Handy-custom/releases).
+Готовые установщики публикуются в [Releases](https://github.com/egsok/Handy-nevinovata/releases).
 
 - **Windows:** скачай `Handy_0.8.3-N_x64-setup.exe` (NSIS) или `.msi` (N — номер форк-релиза: 1, 2, ...). При первом запуске Windows SmartScreen покажет "Windows protected your PC" — кликни **More info** → **Run anyway**. Бинарь не подписан (см. Сборка ниже).
 - **Linux:** скачай `Handy_..._amd64.deb` / `.AppImage` / `.rpm` под свой дистрибутив.
@@ -36,7 +36,7 @@
   xattr -d com.apple.quarantine /Applications/Handy.app
   ```
 
-  (Если ругнётся на permissions, попробуй `sudo xattr -cr /Applications/Handy.app`.) После этого приложение запускается нормально. Старый workaround "right-click → Open" на macOS 15+ для неподписанных приложений больше не работает. Баги после запуска репортить в [issues](https://github.com/egsok/Handy-custom/issues).
+  (Если ругнётся на permissions, попробуй `sudo xattr -cr /Applications/Handy.app`.) После этого приложение запускается нормально. Старый workaround "right-click → Open" на macOS 15+ для неподписанных приложений больше не работает. Баги после запуска репортить в [issues](https://github.com/egsok/Handy-nevinovata/issues).
 
 ## Сборка
 
