@@ -15,7 +15,11 @@ enum Command {
         binding_id: String,
         hotkey_string: String,
         is_pressed: bool,
-        push_to_talk: bool,
+        /// `None` = resolve from settings on the coordinator thread (keeps
+        /// the settings store off the hotkey manager thread). `Some(false)`
+        /// = signal/CLI toggles, which are always toggle-mode regardless of
+        /// the user's push-to-talk setting.
+        push_to_talk: Option<bool>,
     },
     Cancel {
         recording_was_active: bool,
@@ -42,6 +46,16 @@ fn stage_label(stage: &Stage) -> &'static str {
     }
 }
 
+/// Mirror the stage into the watchdog so stall reports can say what the
+/// pipeline was doing when a thread stopped responding.
+fn publish_stage(stage: &Stage) {
+    crate::watchdog::set_coordinator_stage(match stage {
+        Stage::Idle => 0,
+        Stage::Recording(_) => 1,
+        Stage::Processing => 2,
+    });
+}
+
 /// Serialises all transcription lifecycle events through a single thread
 /// to eliminate race conditions between keyboard shortcuts, signals, and
 /// the async transcribe-paste pipeline.
@@ -66,7 +80,13 @@ impl TranscriptionCoordinator {
                 // is the key timing for diagnosing "hotkey ignored briefly".
                 let mut processing_started: Option<Instant> = None;
 
-                while let Ok(cmd) = rx.recv() {
+                loop {
+                    crate::watchdog::beat_coordinator();
+                    let cmd = match rx.recv_timeout(Duration::from_secs(1)) {
+                        Ok(cmd) => cmd,
+                        Err(mpsc::RecvTimeoutError::Timeout) => continue,
+                        Err(mpsc::RecvTimeoutError::Disconnected) => break,
+                    };
                     match cmd {
                         Command::Input {
                             binding_id,
@@ -74,6 +94,13 @@ impl TranscriptionCoordinator {
                             is_pressed,
                             push_to_talk,
                         } => {
+                            // Resolve push-to-talk here, on the coordinator
+                            // thread — reading the settings store from the
+                            // hotkey manager thread risks stalling the hook.
+                            let push_to_talk = push_to_talk.unwrap_or_else(|| {
+                                crate::settings::get_settings(&app).push_to_talk
+                            });
+
                             info!(
                                 "coordinator: input(binding={}, pressed={}, ptt={}) | stage={}",
                                 binding_id,
@@ -143,6 +170,7 @@ impl TranscriptionCoordinator {
                                     stage_label(&stage)
                                 );
                                 stage = Stage::Idle;
+                                publish_stage(&stage);
                             } else {
                                 debug!(
                                     "coordinator: Cancel ignored (stage={}, recording_was_active={})",
@@ -156,20 +184,20 @@ impl TranscriptionCoordinator {
                                 .take()
                                 .map(|t| t.elapsed().as_millis())
                                 .unwrap_or(0);
-                            info!(
-                                "coordinator: stage Idle (Processing took {}ms)",
-                                elapsed_ms
-                            );
+                            info!("coordinator: stage Idle (Processing took {}ms)", elapsed_ms);
                             stage = Stage::Idle;
+                            publish_stage(&stage);
                         }
                         Command::ForceIdle => {
-                            let elapsed = processing_started.take().map(|t| t.elapsed().as_millis());
+                            let elapsed =
+                                processing_started.take().map(|t| t.elapsed().as_millis());
                             info!(
                                 "coordinator: ForceIdle (was stage={}, processing_elapsed={:?}ms)",
                                 stage_label(&stage),
                                 elapsed
                             );
                             stage = Stage::Idle;
+                            publish_stage(&stage);
                         }
                     }
                 }
@@ -184,13 +212,14 @@ impl TranscriptionCoordinator {
     }
 
     /// Send a keyboard/signal input event for a transcribe binding.
-    /// For signal-based toggles, use `is_pressed: true` and `push_to_talk: false`.
+    /// `push_to_talk`: `None` resolves the user's setting on the coordinator
+    /// thread; signal/CLI toggles pass `Some(false)` (always toggle-mode).
     pub fn send_input(
         &self,
         binding_id: &str,
         hotkey_string: &str,
         is_pressed: bool,
-        push_to_talk: bool,
+        push_to_talk: Option<bool>,
     ) {
         if self
             .tx
@@ -234,12 +263,26 @@ impl TranscriptionCoordinator {
     }
 }
 
+/// Threshold above which an action's synchronous part counts as a stall.
+/// `action.start` opens the mic stream and updates tray/overlay; `action.stop`
+/// updates tray/overlay and spawns the async transcription. All of those are
+/// normally well under 200ms.
+const ACTION_STALL: Duration = Duration::from_millis(1000);
+
 fn start(app: &AppHandle, stage: &mut Stage, binding_id: &str, hotkey_string: &str) {
     let Some(action) = ACTION_MAP.get(binding_id) else {
         warn!("No action in ACTION_MAP for '{binding_id}'");
         return;
     };
+    let t = Instant::now();
     action.start(app, binding_id, hotkey_string);
+    if t.elapsed() > ACTION_STALL {
+        warn!(
+            "coordinator: action.start blocked for {:?} — main-thread (tray/overlay) \
+             or audio-device stall; hotkey presses queued during this time",
+            t.elapsed()
+        );
+    }
     if app
         .try_state::<Arc<AudioRecordingManager>>()
         .map_or(false, |a| a.is_recording())
@@ -249,6 +292,7 @@ fn start(app: &AppHandle, stage: &mut Stage, binding_id: &str, hotkey_string: &s
     } else {
         debug!("Start for '{binding_id}' did not begin recording; staying idle");
     }
+    publish_stage(stage);
 }
 
 fn stop(
@@ -262,8 +306,17 @@ fn stop(
         warn!("No action in ACTION_MAP for '{binding_id}'");
         return;
     };
+    let t = Instant::now();
     action.stop(app, binding_id, hotkey_string);
+    if t.elapsed() > ACTION_STALL {
+        warn!(
+            "coordinator: action.stop blocked for {:?} — main-thread (tray/overlay) \
+             or audio-device stall; hotkey presses queued during this time",
+            t.elapsed()
+        );
+    }
     info!("coordinator: stage Processing (binding={binding_id})");
     *processing_started = Some(Instant::now());
     *stage = Stage::Processing;
+    publish_stage(stage);
 }

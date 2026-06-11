@@ -63,6 +63,13 @@ pub fn get_icon_path(theme: AppTheme, state: TrayIconState) -> &'static str {
 }
 
 pub fn change_tray_icon(app: &AppHandle, icon: TrayIconState) {
+    // `TrayIcon::set_icon` and the theme getter are proxied through the main
+    // thread and BLOCK until it responds. Timing this call is the primary
+    // diagnostic for main-thread stalls (e.g. a hung clipboard owner freezing
+    // `paste()`): a slow change_tray_icon means the main thread was blocked,
+    // and with it the whole hotkey pipeline.
+    let start = std::time::Instant::now();
+
     let tray = app.state::<TrayIcon>();
     let theme = get_current_theme(app);
 
@@ -79,6 +86,14 @@ pub fn change_tray_icon(app: &AppHandle, icon: TrayIconState) {
 
     // Update menu based on state
     update_tray_menu(app, &icon, None);
+
+    let elapsed = start.elapsed();
+    if elapsed > std::time::Duration::from_millis(500) {
+        warn!(
+            "change_tray_icon took {:?} — the main thread was blocked for that long",
+            elapsed
+        );
+    }
 }
 
 pub fn tray_tooltip() -> String {

@@ -19,6 +19,7 @@ mod transcription_coordinator;
 mod tray;
 mod tray_i18n;
 mod utils;
+mod watchdog;
 
 pub use cli::CliArgs;
 #[cfg(debug_assertions)]
@@ -229,15 +230,20 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                 cancel_current_operation(app);
             }
             "force_reset_pipeline" => {
-                use crate::utils::force_reset_to_idle;
                 log::info!("Tray: Force Reset Pipeline clicked");
-                force_reset_to_idle(app);
+                let app_clone = app.clone();
+                // Worker thread: reset stops the WASAPI stream and may unload
+                // the model — blocking work that must not run on the main
+                // thread (the menu callback runs there).
+                std::thread::spawn(move || {
+                    crate::utils::force_reset_to_idle(&app_clone);
+                });
             }
             "re_register_hotkeys" => {
                 log::info!("Tray: Re-register Hotkeys clicked");
                 let app_clone = app.clone();
-                // Run on a worker thread so we don't block the tray menu callback
-                // (reinstall waits on the old manager thread to join, ~10-100ms).
+                // Worker thread: keeps the tray menu callback snappy and
+                // avoids any chance of blocking the main thread.
                 std::thread::spawn(move || {
                     if let Err(e) = crate::shortcut::force_reinit(&app_clone) {
                         log::error!("Tray re-register failed: {}", e);
@@ -553,6 +559,11 @@ pub fn run(cli_args: CliArgs) {
             app.manage(TranscriptionCoordinator::new(app_handle.clone()));
 
             initialize_core_logic(&app_handle);
+
+            // Monitor the hotkey pipeline threads for stalls (the
+            // intermittent "hotkey deafness" bug) and auto-recover the
+            // keyboard hook when its manager thread stops responding.
+            watchdog::start(app_handle.clone());
 
             // Pre-warm GPU/accelerator enumeration on a background thread.
             // The first call into transcribe_rs::whisper_cpp::gpu::list_gpu_devices
