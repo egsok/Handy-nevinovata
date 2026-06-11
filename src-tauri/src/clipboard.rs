@@ -4,10 +4,10 @@ use crate::settings::TypingTool;
 use crate::settings::{get_settings, AutoSubmitKey, ClipboardHandling, PasteMethod};
 use arboard::Clipboard as ArboardClipboard;
 use enigo::{Direction, Enigo, Key, Keyboard};
-use log::info;
+use log::{info, warn};
 use std::borrow::Cow;
 use std::process::Command;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_clipboard_manager::ClipboardExt;
 
@@ -29,35 +29,81 @@ enum SavedClipboard {
     Empty,
 }
 
+/// Reads one clipboard format, logging a warning when the read is slow.
+/// `GetClipboardData` for delayed-rendered formats synchronously asks the
+/// clipboard-owner application to produce the data; if that app is hung or
+/// suspended the read can block for a very long time — knowing WHICH format
+/// stalled identifies the guilty app.
+fn timed_read<T>(format: &'static str, read: impl FnOnce() -> T) -> T {
+    let start = Instant::now();
+    let result = read();
+    let elapsed = start.elapsed();
+    if elapsed > Duration::from_millis(200) {
+        warn!(
+            "save_clipboard: reading {} took {:?} — clipboard owner app is slow to render",
+            format, elapsed
+        );
+    }
+    result
+}
+
 fn save_clipboard() -> SavedClipboard {
     let Ok(mut clipboard) = ArboardClipboard::new() else {
         return SavedClipboard::Empty;
     };
 
-    if let Ok(files) = clipboard.get().file_list() {
+    if let Ok(files) = timed_read("file_list", || clipboard.get().file_list()) {
         if !files.is_empty() {
             return SavedClipboard::Files(files);
         }
     }
-    if let Ok(image) = clipboard.get().image() {
+    if let Ok(image) = timed_read("image", || clipboard.get().image()) {
         return SavedClipboard::Image {
             rgba: image.bytes.into_owned(),
             width: image.width,
             height: image.height,
         };
     }
-    if let Ok(html) = clipboard.get().html() {
+    if let Ok(html) = timed_read("html", || clipboard.get().html()) {
         if !html.is_empty() {
-            let alt = clipboard.get().text().ok();
+            let alt = timed_read("text", || clipboard.get().text()).ok();
             return SavedClipboard::Html {
                 html,
                 alt_text: alt,
             };
         }
     }
-    match clipboard.get().text() {
+    match timed_read("text", || clipboard.get().text()) {
         Ok(text) if !text.is_empty() => SavedClipboard::Text(text),
         _ => SavedClipboard::Empty,
+    }
+}
+
+/// How long `paste()` is willing to wait for the clipboard snapshot before
+/// giving up on clipboard restore for this paste. Normal reads finish in
+/// single-digit milliseconds; hitting this budget means the clipboard owner
+/// is not responding (hung or OS-suspended app).
+const SAVE_CLIPBOARD_TIMEOUT: Duration = Duration::from_millis(1000);
+
+/// Runs `save_clipboard` on a worker thread with a timeout so a
+/// non-responding clipboard owner cannot freeze the caller (paste runs on
+/// the main thread — blocking it deafens the whole hotkey pipeline, because
+/// tray/overlay updates are proxied through the main thread).
+fn save_clipboard_with_timeout() -> SavedClipboard {
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let _ = tx.send(save_clipboard());
+    });
+    match rx.recv_timeout(SAVE_CLIPBOARD_TIMEOUT) {
+        Ok(saved) => saved,
+        Err(_) => {
+            warn!(
+                "save_clipboard timed out after {:?}; pasting WITHOUT clipboard restore \
+                 (previous clipboard content will be replaced by the transcription)",
+                SAVE_CLIPBOARD_TIMEOUT
+            );
+            SavedClipboard::Empty
+        }
     }
 }
 
@@ -107,9 +153,17 @@ fn paste_via_clipboard(
     app_handle: &AppHandle,
     paste_method: &PasteMethod,
     paste_delay_ms: u64,
+    restore: bool,
 ) -> Result<(), String> {
     let clipboard = app_handle.clipboard();
-    let saved = save_clipboard();
+    // When the user wants the transcription to stay on the clipboard
+    // (CopyToClipboard), restoring the old content right after would undo
+    // that — skip the snapshot entirely.
+    let saved = if restore {
+        save_clipboard_with_timeout()
+    } else {
+        SavedClipboard::Empty
+    };
 
     // Write text to clipboard first
     // On Wayland, prefer wl-copy for better compatibility (especially with umlauts)
@@ -149,10 +203,23 @@ fn paste_via_clipboard(
         }
     }
 
-    std::thread::sleep(std::time::Duration::from_millis(50));
+    if matches!(saved, SavedClipboard::Empty) {
+        return Ok(());
+    }
 
     // Restore original clipboard content (all formats: text, image, HTML, files)
-    restore_clipboard(saved);
+    // on a worker thread: the 50ms delay lets the target app read the pasted
+    // text first, and running off-thread means a slow clipboard write can
+    // never block the main thread (see save_clipboard_with_timeout).
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(50));
+        let start = Instant::now();
+        restore_clipboard(saved);
+        let elapsed = start.elapsed();
+        if elapsed > Duration::from_millis(500) {
+            warn!("restore_clipboard took {:?}", elapsed);
+        }
+    });
 
     Ok(())
 }
@@ -707,12 +774,14 @@ pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {
             )?;
         }
         PasteMethod::CtrlV | PasteMethod::CtrlShiftV | PasteMethod::ShiftInsert => {
+            let restore = settings.clipboard_handling != ClipboardHandling::CopyToClipboard;
             paste_via_clipboard(
                 &mut enigo,
                 &text,
                 &app_handle,
                 &paste_method,
                 paste_delay_ms,
+                restore,
             )?
         }
         PasteMethod::ExternalScript => {
