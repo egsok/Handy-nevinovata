@@ -133,8 +133,15 @@ pub fn start(app: AppHandle) {
     COORD_BEAT.store(now, Ordering::Relaxed);
     MAIN_BEAT.store(now, Ordering::Relaxed);
 
+    // The manager thread only exists for the HandyKeys backend. Read the
+    // setting once here (not in the loop — a hung settings store would take
+    // the watchdog down with it); switching backends needs a restart anyway
+    // for this monitor to follow.
+    let monitor_manager = crate::settings::get_settings(&app).keyboard_implementation
+        == crate::settings::KeyboardImplementation::HandyKeys;
+
     std::thread::spawn(move || {
-        info!("watchdog: started");
+        info!("watchdog: started (manager monitoring: {monitor_manager})");
         let mut manager = Monitor::new("hotkey-manager", &MANAGER_BEAT);
         let mut coordinator = Monitor::new("coordinator", &COORD_BEAT);
         let mut main = Monitor::new("main(event-loop)", &MAIN_BEAT);
@@ -150,7 +157,11 @@ pub fn start(app: AppHandle) {
             });
 
             let now = now_ms();
-            let manager_age = manager.check(now);
+            let manager_age = if monitor_manager {
+                manager.check(now)
+            } else {
+                0
+            };
             coordinator.check(now);
             main.check(now);
 
