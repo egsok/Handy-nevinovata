@@ -28,11 +28,11 @@
 //! via Tauri's event system.
 
 use handy_keys::{Hotkey, HotkeyId, HotkeyManager, HotkeyState, KeyboardListener};
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use serde::Serialize;
 use specta::Type;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
@@ -41,6 +41,13 @@ use tauri::{AppHandle, Emitter, Manager};
 use crate::settings::{self, get_settings, ShortcutBinding};
 
 use super::handler::handle_shortcut_event;
+
+/// Generation counter for manager threads. `reinstall_hook` bumps this and
+/// abandons the old thread WITHOUT joining it (a stuck thread would hang the
+/// caller forever). The old thread compares its generation before dispatching
+/// any event, so events it drained before stalling can never replay actions
+/// after a reinstall.
+static MANAGER_GENERATION: AtomicU64 = AtomicU64::new(0);
 
 /// Commands that can be sent to the hotkey manager thread
 enum ManagerCommand {
@@ -91,9 +98,10 @@ impl HandyKeysState {
         let (cmd_tx, cmd_rx) = mpsc::channel::<ManagerCommand>();
 
         // Start the manager thread
+        let generation = MANAGER_GENERATION.fetch_add(1, Ordering::SeqCst) + 1;
         let app_clone = app.clone();
         let thread_handle = thread::spawn(move || {
-            Self::manager_thread(cmd_rx, app_clone);
+            Self::manager_thread(cmd_rx, app_clone, generation);
         });
 
         Ok(Self {
@@ -107,8 +115,8 @@ impl HandyKeysState {
     }
 
     /// The main manager thread - owns the HotkeyManager and processes commands
-    fn manager_thread(cmd_rx: Receiver<ManagerCommand>, app: AppHandle) {
-        info!("handy-keys manager thread started");
+    fn manager_thread(cmd_rx: Receiver<ManagerCommand>, app: AppHandle, generation: u64) {
+        info!("handy-keys manager thread started (generation {generation})");
 
         // Time HotkeyManager creation — this is when the OS-level
         // WH_KEYBOARD_LL hook actually gets installed on Windows. Before this
@@ -139,8 +147,28 @@ impl HandyKeysState {
         let mut hotkey_to_binding: HashMap<HotkeyId, (String, String)> = HashMap::new(); // (binding_id, hotkey_string)
 
         loop {
+            crate::watchdog::beat_manager();
+
+            // A reinstall happened while we were (presumably) stuck — a fresh
+            // manager thread owns the pipeline now. Exit without dispatching
+            // anything else so queued stale events can't replay actions.
+            if MANAGER_GENERATION.load(Ordering::SeqCst) != generation {
+                warn!(
+                    "handy-keys manager thread (generation {generation}) superseded; \
+                     exiting and discarding queued events"
+                );
+                break;
+            }
+
             // Check for hotkey events (non-blocking)
             while let Some(event) = manager.try_recv() {
+                if MANAGER_GENERATION.load(Ordering::SeqCst) != generation {
+                    warn!(
+                        "handy-keys: dropping stale event for generation {generation} \
+                         (superseded by reinstall)"
+                    );
+                    break;
+                }
                 if let Some((binding_id, hotkey_string)) = hotkey_to_binding.get(&event.id) {
                     if !first_event_logged {
                         info!(
@@ -275,30 +303,32 @@ impl HandyKeysState {
     /// re-registered via `register()` since the new manager thread starts
     /// with empty maps.
     pub fn reinstall_hook(&self, app: AppHandle) -> Result<(), String> {
-        info!("HandyKeysState: reinstalling hook (tearing down old manager thread)");
+        info!("HandyKeysState: reinstalling hook (abandoning old manager thread)");
 
-        // Send Shutdown to old manager thread
+        // Bump the generation FIRST: from this moment the old thread refuses
+        // to dispatch events, even ones already drained into its local queue.
+        let generation = MANAGER_GENERATION.fetch_add(1, Ordering::SeqCst) + 1;
+
+        // Ask the old thread to shut down, but do NOT join it — if it's stuck
+        // (the very situation this recovery exists for), a join would hang
+        // the caller forever. A healthy thread exits via Shutdown; a stuck
+        // one exits via the generation check whenever it unstalls, dropping
+        // its HotkeyManager (and OS hook) at that point.
         if let Ok(sender) = self.command_sender.lock() {
             let _ = sender.send(ManagerCommand::Shutdown);
         }
-
-        // Join old thread (may block briefly while it processes remaining
-        // events and shuts down)
-        let old_handle = self
-            .thread_handle
-            .lock()
-            .ok()
-            .and_then(|mut g| g.take());
-        if let Some(handle) = old_handle {
-            let _ = handle.join();
+        if let Ok(mut handle_guard) = self.thread_handle.lock() {
+            let _ = handle_guard.take(); // drop the JoinHandle, detaching the thread
         }
 
         // Spawn fresh manager thread (this re-installs the OS hook via
-        // `HotkeyManager::new_with_blocking()` on the new thread)
+        // `HotkeyManager::new_with_blocking()` on the new thread). The newest
+        // WH_KEYBOARD_LL hook runs first in the chain, so it wins blocking
+        // decisions even while the old hook is still installed.
         let (new_tx, new_rx) = mpsc::channel::<ManagerCommand>();
         let app_clone = app.clone();
         let new_handle = thread::spawn(move || {
-            Self::manager_thread(new_rx, app_clone);
+            Self::manager_thread(new_rx, app_clone, generation);
         });
 
         // Replace command_sender + thread_handle in place
@@ -309,7 +339,7 @@ impl HandyKeysState {
             *handle_guard = Some(new_handle);
         }
 
-        info!("HandyKeysState: hook reinstalled (new manager thread spawned)");
+        info!("HandyKeysState: hook reinstalled (new manager thread, generation {generation})");
         Ok(())
     }
 
