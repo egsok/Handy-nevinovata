@@ -120,6 +120,10 @@ transcribe-rs = { git = "https://github.com/egsok/transcribe-rs-fork.git", branc
 # whisper-rs itself stays on upstream (crates.io v0.16.0) — this root [patch.crates-io] for whisper-rs-sys
 # propagates transitively through upstream whisper-rs 0.16.0, so a separate whisper-rs fork is not needed.
 whisper-rs-sys = { git = "https://github.com/egsok/whisper-rs-sys-fork.git", branch = "daily-stable" }
+# handy-keys fork: vanilla 0.2.4 + Windows modifier-state fix (live GetAsyncKeyState
+# instead of incremental tracking — fixes hotkey deafness / bare-Space triggering
+# from phantom stuck modifiers) + hook thread priority + resync diagnostics.
+handy-keys = { path = "../../handy-keys-fork" }
 
 [dev-dependencies]
 tempfile = "3"
