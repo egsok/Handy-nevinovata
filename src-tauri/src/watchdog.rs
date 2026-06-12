@@ -146,6 +146,7 @@ pub fn start(app: AppHandle) {
         let mut coordinator = Monitor::new("coordinator", &COORD_BEAT);
         let mut main = Monitor::new("main(event-loop)", &MAIN_BEAT);
         let mut reinit_fired_for_stall = false;
+        let mut last_resyncs = handy_keys::modifier_resync_count();
 
         loop {
             std::thread::sleep(CHECK_INTERVAL);
@@ -155,6 +156,21 @@ pub fn start(app: AppHandle) {
             let _ = app.run_on_main_thread(|| {
                 MAIN_BEAT.store(now_ms(), Ordering::Relaxed);
             });
+
+            // The hook callback can't log (no I/O allowed there), so drift
+            // corrections are surfaced here. Every count is a modifier
+            // transition the hook never saw — the root cause of "bare Space
+            // toggles dictation" / "Ctrl+Space goes deaf" before the fork fix.
+            let resyncs = handy_keys::modifier_resync_count();
+            if resyncs != last_resyncs {
+                warn!(
+                    "watchdog: keyboard hook resynced modifier state {} time(s) \
+                     (total {}) — missed modifier transitions were corrected",
+                    resyncs - last_resyncs,
+                    resyncs
+                );
+                last_resyncs = resyncs;
+            }
 
             let now = now_ms();
             let manager_age = if monitor_manager {
