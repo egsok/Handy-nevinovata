@@ -113,9 +113,7 @@ pub async fn update_history_limit(
     history_manager: State<'_, Arc<HistoryManager>>,
     limit: usize,
 ) -> Result<(), String> {
-    let mut settings = crate::settings::get_settings(&app);
-    settings.history_limit = limit;
-    crate::settings::write_settings(&app, settings);
+    crate::settings::update_settings(&app, |s| s.history_limit = limit);
 
     history_manager
         .cleanup_old_entries()
@@ -142,9 +140,7 @@ pub async fn update_recording_retention_period(
         _ => return Err(format!("Invalid retention period: {}", period)),
     };
 
-    let mut settings = crate::settings::get_settings(&app);
-    settings.recording_retention_period = retention_period;
-    crate::settings::write_settings(&app, settings);
+    crate::settings::update_settings(&app, |s| s.recording_retention_period = retention_period);
 
     history_manager
         .cleanup_old_entries()

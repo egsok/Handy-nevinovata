@@ -1,4 +1,4 @@
-use crate::settings::{get_settings, write_settings};
+use crate::settings::{get_settings, update_settings};
 use anyhow::Result;
 use flate2::read::GzDecoder;
 use futures_util::StreamExt;
@@ -787,26 +787,28 @@ impl ModelManager {
                     settings.selected_model
                 );
                 settings.selected_model = String::new();
-                write_settings(&self.app_handle, settings.clone());
+                update_settings(&self.app_handle, |s| s.selected_model = String::new());
             }
         }
 
         // If no model is selected, pick the first downloaded one
         if settings.selected_model.is_empty() {
             // Find the first available (downloaded) model
-            let models = self.available_models.lock().unwrap();
-            if let Some(available_model) = models.values().find(|model| model.is_downloaded) {
-                info!(
-                    "Auto-selecting model: {} ({})",
-                    available_model.id, available_model.name
-                );
+            let auto_selected = {
+                let models = self.available_models.lock().unwrap();
+                models
+                    .values()
+                    .find(|model| model.is_downloaded)
+                    .map(|model| (model.id.clone(), model.name.clone()))
+            };
+
+            if let Some((id, name)) = auto_selected {
+                info!("Auto-selecting model: {} ({})", id, name);
 
                 // Update settings with the selected model
-                let mut updated_settings = settings;
-                updated_settings.selected_model = available_model.id.clone();
-                write_settings(&self.app_handle, updated_settings);
+                update_settings(&self.app_handle, |s| s.selected_model = id.clone());
 
-                info!("Successfully auto-selected model: {}", available_model.id);
+                info!("Successfully auto-selected model: {}", id);
             }
         }
 
