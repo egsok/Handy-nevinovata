@@ -1,6 +1,6 @@
 use crate::actions::ACTION_MAP;
 use crate::managers::audio::AudioRecordingManager;
-use log::{debug, error, info, warn};
+use log::{debug, error, warn};
 use std::sync::mpsc::{self, Sender};
 use std::sync::Arc;
 use std::thread;
@@ -25,10 +25,6 @@ enum Command {
         recording_was_active: bool,
     },
     ProcessingFinished,
-    /// Bypasses the Processing-state guard that blocks `Cancel`. Used by the
-    /// "Force Reset Pipeline" tray item to recover from a stuck Processing
-    /// stage without restarting the app. See plan: hotkey debug session.
-    ForceIdle,
 }
 
 /// Pipeline lifecycle, owned exclusively by the coordinator thread.
@@ -101,7 +97,7 @@ impl TranscriptionCoordinator {
                                 crate::settings::get_settings(&app).push_to_talk
                             });
 
-                            info!(
+                            debug!(
                                 "coordinator: input(binding={}, pressed={}, ptt={}) | stage={}",
                                 binding_id,
                                 is_pressed,
@@ -149,7 +145,7 @@ impl TranscriptionCoordinator {
                                         );
                                     }
                                     _ => {
-                                        info!(
+                                        debug!(
                                             "coordinator: ignoring press for '{binding_id}' — \
                                              pipeline busy in stage={}",
                                             stage_label(&stage)
@@ -165,7 +161,7 @@ impl TranscriptionCoordinator {
                             if !matches!(stage, Stage::Processing)
                                 && (recording_was_active || matches!(stage, Stage::Recording(_)))
                             {
-                                info!(
+                                debug!(
                                     "coordinator: stage Idle (was {}, via Cancel)",
                                     stage_label(&stage)
                                 );
@@ -184,18 +180,7 @@ impl TranscriptionCoordinator {
                                 .take()
                                 .map(|t| t.elapsed().as_millis())
                                 .unwrap_or(0);
-                            info!("coordinator: stage Idle (Processing took {}ms)", elapsed_ms);
-                            stage = Stage::Idle;
-                            publish_stage(&stage);
-                        }
-                        Command::ForceIdle => {
-                            let elapsed =
-                                processing_started.take().map(|t| t.elapsed().as_millis());
-                            info!(
-                                "coordinator: ForceIdle (was stage={}, processing_elapsed={:?}ms)",
-                                stage_label(&stage),
-                                elapsed
-                            );
+                            debug!("coordinator: stage Idle (Processing took {}ms)", elapsed_ms);
                             stage = Stage::Idle;
                             publish_stage(&stage);
                         }
@@ -252,15 +237,6 @@ impl TranscriptionCoordinator {
             warn!("Transcription coordinator channel closed");
         }
     }
-
-    /// Force the coordinator back to `Idle` state, bypassing the guard that
-    /// normally blocks `Cancel` while in `Processing`. Used by the tray
-    /// "Force Reset Pipeline" recovery action when the pipeline is stuck.
-    pub fn force_idle(&self) {
-        if self.tx.send(Command::ForceIdle).is_err() {
-            warn!("Transcription coordinator channel closed");
-        }
-    }
 }
 
 /// Threshold above which an action's synchronous part counts as a stall.
@@ -287,7 +263,7 @@ fn start(app: &AppHandle, stage: &mut Stage, binding_id: &str, hotkey_string: &s
         .try_state::<Arc<AudioRecordingManager>>()
         .map_or(false, |a| a.is_recording())
     {
-        info!("coordinator: stage Recording (binding={binding_id})");
+        debug!("coordinator: stage Recording (binding={binding_id})");
         *stage = Stage::Recording(binding_id.to_string());
     } else {
         debug!("Start for '{binding_id}' did not begin recording; staying idle");
@@ -315,7 +291,7 @@ fn stop(
             t.elapsed()
         );
     }
-    info!("coordinator: stage Processing (binding={binding_id})");
+    debug!("coordinator: stage Processing (binding={binding_id})");
     *processing_started = Some(Instant::now());
     *stage = Stage::Processing;
     publish_stage(stage);

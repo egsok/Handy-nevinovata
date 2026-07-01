@@ -6,9 +6,7 @@
     "unloadModel": "Выгрузить модель",
     "model": "Модель",
     "quit": "Выход",
-    "cancel": "Отмена",
-    "forceResetPipeline": "Сбросить пайплайн (recovery)",
-    "reRegisterHotkeys": "Перерегистрировать хоткеи"
+    "cancel": "Отмена"
   },
   "sidebar": {
     "general": "Общие",
