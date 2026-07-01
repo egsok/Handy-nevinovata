@@ -6,9 +6,7 @@
     "unloadModel": "Unload Model",
     "model": "Model",
     "quit": "Quit",
-    "cancel": "Cancel",
-    "forceResetPipeline": "Force Reset Pipeline",
-    "reRegisterHotkeys": "Re-register Hotkeys"
+    "cancel": "Cancel"
   },
   "sidebar": {
     "general": "General",

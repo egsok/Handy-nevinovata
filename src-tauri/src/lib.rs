@@ -252,27 +252,6 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                 // Use centralized cancellation that handles all operations
                 cancel_current_operation(app);
             }
-            "force_reset_pipeline" => {
-                log::info!("Tray: Force Reset Pipeline clicked");
-                let app_clone = app.clone();
-                // Worker thread: reset stops the WASAPI stream and may unload
-                // the model — blocking work that must not run on the main
-                // thread (the menu callback runs there).
-                std::thread::spawn(move || {
-                    crate::utils::force_reset_to_idle(&app_clone);
-                });
-            }
-            "re_register_hotkeys" => {
-                log::info!("Tray: Re-register Hotkeys clicked");
-                let app_clone = app.clone();
-                // Worker thread: keeps the tray menu callback snappy and
-                // avoids any chance of blocking the main thread.
-                std::thread::spawn(move || {
-                    if let Err(e) = crate::shortcut::force_reinit(&app_clone) {
-                        log::error!("Tray re-register failed: {}", e);
-                    }
-                });
-            }
             "quit" => {
                 app.exit(0);
             }
@@ -623,8 +602,6 @@ pub fn run(cli_args: CliArgs) {
             commands::check_apple_intelligence_available,
             commands::initialize_enigo,
             commands::initialize_shortcuts,
-            commands::force_coordinator_reset,
-            commands::force_reinit_shortcuts,
             commands::models::get_available_models,
             commands::models::get_model_info,
             commands::models::download_model,
