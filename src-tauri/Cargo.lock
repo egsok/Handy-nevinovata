@@ -2489,6 +2489,7 @@ dependencies = [
 [[package]]
 name = "handy-keys"
 version = "0.2.4"
+source = "git+https://github.com/egsok/handy-keys-fork.git?branch=daily-stable#3664f9727480eb698743dd0b43c3fc0feea76d14"
 dependencies = [
  "bitflags 2.11.0",
  "block2",
