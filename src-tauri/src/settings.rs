@@ -1,9 +1,11 @@
 use log::{debug, warn};
+use once_cell::sync::Lazy;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
 use specta::Type;
 use std::collections::HashMap;
 use std::fmt;
+use std::sync::Mutex;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
@@ -522,11 +524,14 @@ fn default_auto_submit() -> bool {
 }
 
 fn default_history_limit() -> usize {
-    5
+    20
 }
 
+// Fork default: `PreserveLimit` silently hard-deletes recordings past the
+// limit (no Recycle Bin), which once wiped a training dataset when a settings
+// reset restored this default. `Never` makes data loss opt-in.
 fn default_recording_retention_period() -> RecordingRetentionPeriod {
-    RecordingRetentionPeriod::PreserveLimit
+    RecordingRetentionPeriod::Never
 }
 
 fn default_audio_feedback_volume() -> f32 {
@@ -931,6 +936,56 @@ pub fn load_or_create_app_settings(app: &AppHandle) -> AppSettings {
     }
 
     settings
+}
+
+/// Serializes the read-modify-write of the settings store across the whole
+/// process. `get_settings`/`write_settings` each take the store's own lock,
+/// but that lock does NOT span read->modify->write, so two concurrent mutators
+/// can lost-update each other. Holding this mutex across the entire RMW closes
+/// that race. Guards ordering only — the store still owns the data. Note that
+/// `get_settings` may itself persist migrations; that write happens under this
+/// lock too when reached through the helpers below.
+static SETTINGS_WRITE_LOCK: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
+
+/// Atomically read-modify-write the settings store.
+///
+/// Holds `SETTINGS_WRITE_LOCK` across a fresh `get_settings` -> `f` ->
+/// `write_settings`, so overlapping updates serialize and no field is lost.
+///
+/// The closure runs WHILE THE LOCK IS HELD. Keep it short and side-effect-free:
+/// never call `get_settings`/`write_settings`/`update_settings*` from inside it
+/// (re-entrant lock = deadlock), and do not block on I/O, model loads, network,
+/// or thread spawns — compute those before and capture the result.
+pub fn update_settings_with<R>(app: &AppHandle, f: impl FnOnce(&mut AppSettings) -> R) -> R {
+    // A poisoned lock on a `()` guard carries no invalid state — recover it.
+    let _guard = SETTINGS_WRITE_LOCK
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    let mut settings = get_settings(app);
+    let result = f(&mut settings);
+    write_settings(app, settings);
+    result
+}
+
+/// Convenience wrapper for the common no-return case.
+pub fn update_settings(app: &AppHandle, f: impl FnOnce(&mut AppSettings)) {
+    update_settings_with(app, f);
+}
+
+/// Fallible variant: writes ONLY when the closure returns `Ok`. Use for
+/// conditional-error commands where `Err` must mean "do not persist" (e.g.
+/// post-process prompt CRUD that validates before mutating).
+pub fn try_update_settings_with<T, E>(
+    app: &AppHandle,
+    f: impl FnOnce(&mut AppSettings) -> Result<T, E>,
+) -> Result<T, E> {
+    let _guard = SETTINGS_WRITE_LOCK
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    let mut settings = get_settings(app);
+    let result = f(&mut settings)?;
+    write_settings(app, settings);
+    Ok(result)
 }
 
 pub fn get_settings(app: &AppHandle) -> AppSettings {
