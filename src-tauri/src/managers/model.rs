@@ -1,7 +1,7 @@
 use super::model_capabilities::{
     CapabilityProbe, CapabilityProber, Compatibility, GgufHeaderProber,
 };
-use crate::settings::{get_settings, write_settings};
+use crate::settings::{get_settings, update_settings};
 use anyhow::Result;
 use flate2::read::GzDecoder;
 use futures_util::StreamExt;
@@ -1376,7 +1376,7 @@ impl ModelManager {
                     settings.selected_model
                 );
                 settings.selected_model = String::new();
-                write_settings(&self.app_handle, settings.clone());
+                update_settings(&self.app_handle, |s| s.selected_model = String::new());
             }
         }
 
@@ -1402,9 +1402,9 @@ impl ModelManager {
                 );
 
                 // Update settings with the selected model
-                let mut updated_settings = settings;
-                updated_settings.selected_model = available_model.id.clone();
-                write_settings(&self.app_handle, updated_settings);
+                update_settings(&self.app_handle, |s| {
+                    s.selected_model = available_model.id.clone()
+                });
 
                 info!("Successfully auto-selected model: {}", available_model.id);
             }

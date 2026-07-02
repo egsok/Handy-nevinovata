@@ -1,5 +1,5 @@
 use crate::managers::transcription::TranscriptionManager;
-use crate::settings::{get_settings, write_settings, ModelUnloadTimeout};
+use crate::settings::{update_settings, ModelUnloadTimeout};
 use serde::Serialize;
 use specta::Type;
 use tauri::{AppHandle, State};
@@ -13,9 +13,7 @@ pub struct ModelLoadStatus {
 #[tauri::command]
 #[specta::specta]
 pub fn set_model_unload_timeout(app: AppHandle, timeout: ModelUnloadTimeout) {
-    let mut settings = get_settings(&app);
-    settings.model_unload_timeout = timeout;
-    write_settings(&app, settings);
+    update_settings(&app, |s| s.model_unload_timeout = timeout);
 }
 
 #[tauri::command]
