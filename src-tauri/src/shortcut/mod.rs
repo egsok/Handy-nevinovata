@@ -728,6 +728,13 @@ pub fn update_custom_words(app: AppHandle, words: Vec<String>) -> Result<(), Str
 
 #[tauri::command]
 #[specta::specta]
+pub fn update_transcription_prompt(app: AppHandle, prompt: Option<String>) -> Result<(), String> {
+    settings::update_settings(&app, |s| s.transcription_prompt = prompt);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_word_correction_threshold_setting(
     app: AppHandle,
     threshold: f64,

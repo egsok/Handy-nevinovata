@@ -1,4 +1,6 @@
-use crate::audio_toolkit::{apply_custom_words, filter_transcription_output};
+use crate::audio_toolkit::{
+    apply_custom_words, filter_transcription_output, fix_word_boundary_glue,
+};
 use crate::managers::audio::AudioRecordingManager;
 use crate::managers::model::{EngineType, ModelManager};
 use crate::settings::{
@@ -1113,6 +1115,19 @@ impl TranscriptionManager {
             return Ok(String::new());
         }
 
+        // Near-silent audio makes whisper-family models hallucinate plausible
+        // phrases; skip it before it ever reaches the engine.
+        const RMS_SILENCE_THRESHOLD: f32 = 0.005;
+        let rms = (audio.iter().map(|&s| s * s).sum::<f32>() / audio.len() as f32).sqrt();
+        if rms < RMS_SILENCE_THRESHOLD {
+            debug!(
+                "Audio RMS {:.6} below silence threshold {:.4}; skipping transcription",
+                rms, RMS_SILENCE_THRESHOLD
+            );
+            self.maybe_unload_immediately("silent audio");
+            return Ok(String::new());
+        }
+
         // Check if model is loaded, if not try to load it
         {
             // If the model is loading, wait for it to complete.
@@ -1204,20 +1219,36 @@ impl TranscriptionManager {
             let transcribe_result = catch_unwind(AssertUnwindSafe(|| -> Result<String> {
                 match &mut engine {
                     LoadedEngine::TranscribeCpp(session) => {
-                        // Custom words become the initial prompt ONLY for models
-                        // that accept one (whisper family). Attaching the
-                        // whisper run extension to a non-whisper arch is rejected
-                        // with INVALID_ARG, so skip it there and let the fuzzy
+                        // Custom words and the free-text transcription prompt
+                        // become the initial prompt ONLY for models that accept
+                        // one (whisper family). Attaching the whisper run
+                        // extension to a non-whisper arch is rejected with
+                        // INVALID_ARG, so skip it there and let the fuzzy
                         // post-correction handle custom words instead.
-                        let family =
-                            if settings.custom_words.is_empty() || !model_takes_initial_prompt {
+                        let initial_prompt = {
+                            let mut parts = Vec::new();
+                            if !settings.custom_words.is_empty() {
+                                parts.push(settings.custom_words.join(", "));
+                            }
+                            if let Some(ref prompt) = settings.transcription_prompt {
+                                if !prompt.trim().is_empty() {
+                                    parts.push(prompt.clone());
+                                }
+                            }
+                            if parts.is_empty() {
                                 None
                             } else {
-                                Some(RunExtension::Whisper(WhisperRunOptions {
-                                    initial_prompt: Some(settings.custom_words.join(", ")),
-                                    ..Default::default()
-                                }))
-                            };
+                                Some(parts.join("\n\n"))
+                            }
+                        };
+                        let family = if initial_prompt.is_none() || !model_takes_initial_prompt {
+                            None
+                        } else {
+                            Some(RunExtension::Whisper(WhisperRunOptions {
+                                initial_prompt,
+                                ..Default::default()
+                            }))
+                        };
 
                         let run_plan = transcribe_cpp_run_plan(
                             settings.translate_to_english,
@@ -1612,8 +1643,20 @@ fn post_process_transcription_text(
         raw
     };
 
+    // Breeze ASR's Mandarin code-switch training glues sentence boundaries
+    // on Cyrillic and Cyrillic↔Latin output. Run unglue BEFORE filler
+    // filtering so word-boundary regexes inside filter_transcription_output
+    // match correctly on what would otherwise be a single token. The gate
+    // matches both the legacy predefined id ("breeze-asr") and the catalog
+    // GGUF id ("handy-computer/Breeze-ASR-25-gguf/…").
+    let unglued = if settings.selected_model.to_lowercase().contains("breeze") {
+        fix_word_boundary_glue(&corrected)
+    } else {
+        corrected
+    };
+
     filter_transcription_output(
-        &corrected,
+        &unglued,
         &settings.app_language,
         &settings.custom_filler_words,
     )

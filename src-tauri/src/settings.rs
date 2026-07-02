@@ -440,6 +440,10 @@ pub struct AppSettings {
     /// `overlay_position` (position `none` → style `None`).
     #[serde(default = "default_overlay_style")]
     pub overlay_style: OverlayStyle,
+    /// Free-text initial prompt for whisper-family models, joined after
+    /// custom_words (fork feature — steers punctuation/style/bilingual output).
+    #[serde(default)]
+    pub transcription_prompt: Option<String>,
 }
 
 fn default_model() -> String {
@@ -859,6 +863,7 @@ pub fn get_default_settings() -> AppSettings {
         extra_recording_buffer_ms: 0,
         vad_enabled: default_vad_enabled(),
         overlay_style: default_overlay_style(),
+        transcription_prompt: None,
     }
 }
 
