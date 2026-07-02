@@ -2424,9 +2424,10 @@ dependencies = [
 
 [[package]]
 name = "handy"
-version = "0.9.0"
+version = "0.9.0-1"
 dependencies = [
  "anyhow",
+ "arboard",
  "chrono",
  "clap",
  "cpal",
@@ -2488,8 +2489,7 @@ dependencies = [
 [[package]]
 name = "handy-keys"
 version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1c1bb519fbead4e7344bf0fe32718c4cea30fc05e03fc65c242df064f515b03"
+source = "git+https://github.com/egsok/handy-keys-fork.git?branch=daily-stable#3664f9727480eb698743dd0b43c3fc0feea76d14"
 dependencies = [
  "bitflags 2.11.0",
  "block2",
