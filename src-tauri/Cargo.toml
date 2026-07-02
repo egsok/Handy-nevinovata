@@ -123,7 +123,7 @@ whisper-rs-sys = { git = "https://github.com/egsok/whisper-rs-sys-fork.git", bra
 # handy-keys fork: vanilla 0.2.4 + Windows modifier-state fix (live GetAsyncKeyState
 # instead of incremental tracking — fixes hotkey deafness / bare-Space triggering
 # from phantom stuck modifiers) + hook thread priority + resync diagnostics.
-handy-keys = { path = "../../handy-keys-fork" }
+handy-keys = { git = "https://github.com/egsok/handy-keys-fork.git", branch = "daily-stable" }
 
 [dev-dependencies]
 tempfile = "3"
