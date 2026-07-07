@@ -1241,11 +1241,28 @@ impl TranscriptionManager {
                                 Some(parts.join("\n\n"))
                             }
                         };
-                        let family = if initial_prompt.is_none() || !model_takes_initial_prompt {
+                        // Attach the whisper extension whenever the model can
+                        // take one, not only when a prompt is set: conditioning
+                        // needs the same <|startofprev|> token the prompt does.
+                        //
+                        // condition_on_prev_tokens: transcribe-cpp defaults to
+                        // HF parity (no conditioning, prompt on the first window
+                        // only), so on >30s audio every window after the first
+                        // decodes with zero textual context and punctuation
+                        // collapses mid-dictation. Carrying decoded context
+                        // restores whisper.cpp's rolling-context behavior from
+                        // the 0.8.3 line. The engine already bounds the classic
+                        // repetition-loop risk: a chunk accepted at a hot
+                        // temperature (>= 0.5) disables the carry for the next
+                        // chunk, and compression_ratio/logprob thresholds stay
+                        // at their defaults.
+                        let has_initial_prompt = initial_prompt.is_some();
+                        let family = if !model_takes_initial_prompt {
                             None
                         } else {
                             Some(RunExtension::Whisper(WhisperRunOptions {
                                 initial_prompt,
+                                condition_on_prev_tokens: Some(true),
                                 ..Default::default()
                             }))
                         };
@@ -1279,9 +1296,7 @@ impl TranscriptionManager {
 
                         debug!(
                             "transcribe-cpp run: task={:?}, language={:?}, initial_prompt={}",
-                            run_options.task,
-                            run_options.language,
-                            run_options.family.is_some()
+                            run_options.task, run_options.language, has_initial_prompt
                         );
 
                         session
