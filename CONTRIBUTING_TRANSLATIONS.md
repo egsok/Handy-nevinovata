@@ -1,6 +1,6 @@
-# Contributing Translations to Handy
+# Contributing Translations to klava-nevinovata
 
-Thank you for helping translate Handy! This guide explains how to add or improve translations.
+Thank you for helping translate klava-nevinovata! This guide explains how to add or improve translations.
 
 ## Quick Start
 
@@ -120,7 +120,7 @@ Found a typo or better translation?
 
 ### Don't:
 
-- Translate brand names (Handy, Whisper.cpp, OpenAI)
+- Translate brand names (klava-nevinovata, Whisper.cpp, OpenAI)
 - Change or remove `{{variables}}`
 - Modify JSON keys
 - Add extra spaces or formatting
@@ -171,4 +171,4 @@ We'd love help with:
 
 ---
 
-Thank you for making Handy accessible to more people around the world!
+Thank you for making klava-nevinovata accessible to more people around the world!

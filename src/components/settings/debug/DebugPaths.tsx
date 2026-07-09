@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { commands } from "@/bindings";
 import { SettingContainer } from "../../ui/SettingContainer";
 
 interface DebugPathsProps {
@@ -12,6 +13,22 @@ export const DebugPaths: React.FC<DebugPathsProps> = ({
   grouped = false,
 }) => {
   const { t } = useTranslation();
+  const [appDir, setAppDir] = useState<string>("");
+
+  useEffect(() => {
+    const loadAppDir = async () => {
+      try {
+        const result = await commands.getAppDirPath();
+        if (result.status === "ok") {
+          setAppDir(result.data);
+        }
+      } catch (err) {
+        console.error("Failed to load app directory:", err);
+      }
+    };
+
+    loadAppDir();
+  }, []);
 
   return (
     <SettingContainer
@@ -25,25 +42,22 @@ export const DebugPaths: React.FC<DebugPathsProps> = ({
           <span className="font-medium">
             {t("settings.debug.paths.appData")}
           </span>{" "}
-          {/* eslint-disable-next-line i18next/no-literal-string */}
-          <span className="font-mono text-xs select-text">%APPDATA%/handy</span>
+          <span className="font-mono text-xs select-text">{appDir}</span>
         </div>
         <div>
           <span className="font-medium">
             {t("settings.debug.paths.models")}
           </span>{" "}
-          {/* eslint-disable-next-line i18next/no-literal-string */}
           <span className="font-mono text-xs select-text">
-            %APPDATA%/handy/models
+            {appDir && `${appDir}/models`}
           </span>
         </div>
         <div>
           <span className="font-medium">
             {t("settings.debug.paths.settings")}
           </span>{" "}
-          {/* eslint-disable-next-line i18next/no-literal-string */}
           <span className="font-mono text-xs select-text">
-            %APPDATA%/handy/settings_store.json
+            {appDir && `${appDir}/settings_store.json`}
           </span>
         </div>
       </div>

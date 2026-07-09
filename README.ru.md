@@ -1,7 +1,7 @@
-# Handy-nevinovata
+# klava-nevinovata
 
 > Персональный форк [cjpais/Handy](https://github.com/cjpais/Handy) с правками под русскую транскрипцию.
-> Готовые установщики (без подписи) — на [Releases](https://github.com/egsok/Handy-nevinovata/releases). Сборка из исходников — для всего остального.
+> Готовые установщики (без подписи) — на [Releases](https://github.com/egsok/klava-nevinovata/releases). Сборка из исходников — для всего остального.
 > [English](README.md) · [Русский]
 
 Это мой персональный daily-форк [Handy](https://github.com/cjpais/Handy) — оффлайн speech-to-text приложения на Tauri. Использую для русской транскрипции под Windows. Форк держится близко к upstream: cherry-pick'и фиксов плюс небольшие фичи под конкретные проблемы, которые ловлю в работе. Замена upstream это не пытается быть — если у тебя нет таких же специфических болячек на русском, просто бери оригинал.
@@ -11,7 +11,7 @@
 ## Чем отличается от upstream
 
 - **Custom transcription prompt.** Поле под язык в Settings → Advanced для Whisper-моделей — задаёшь initial prompt. Полезно, чтобы вытаскивать имена, термины и стилистику.
-- **Multi-format clipboard preservation.** Paste-and-restore теперь сохраняет ВСЕ форматы буфера (Files / Image / HTML / Text), не только plain text. Если в буфере было что-то посерьёзнее текста, и Handy перехватил буфер для вставки транскрипта — после возврата не теряется.
+- **Multi-format clipboard preservation.** Paste-and-restore теперь сохраняет ВСЕ форматы буфера (Files / Image / HTML / Text), не только plain text. Если в буфере было что-то посерьёзнее текста, и klava-nevinovata перехватил буфер для вставки транскрипта — после возврата не теряется.
 - **Anti-hallucination toggle для Whisper.** Переключатель в Settings → Advanced применяет `n_max_text_ctx=128` + `entropy_thold=2.8` к `WhisperInferenceParams` (эквивалент OpenWhispr PR #552 / whisper.cpp#1507). Гасит зацикленные галлюцинации на длинных тишинах ("и я хочу и я хочу...").
 - **Cyrillic word-boundary фиксы для Breeze ASR.** Пять regex-проходов разлепляют слова, которые Mandarin-trained Breeze склеивает (`cyr.cyr`, `lat.cyr`, `cyrCYR`, `latCYR`, single-letter варианты, uppercase Latin аббревиатуры). Гейтится `selected_model == "breeze-asr"`, чистый post-process в `src-tauri/src/audio_toolkit/text.rs`.
 - **`/O2` фикс компилятора в whisper-rs-sys форке.** cmake 4.2.3 + VS2022 молча дропает `CMAKE_*_FLAGS_RELEASE` инициализаторы → whisper.cpp собирается с `/Od` вместо `/O2`. Форк явно задаёт `/MD /O2 /Ob2 /DNDEBUG`. Эмпирически проверено: `large-v3` RTF 0.10 → 0.06 (~1.67× быстрее Whisper-инференса на Windows).
@@ -20,30 +20,30 @@
 
 ## Загрузка
 
-Готовые установщики публикуются в [Releases](https://github.com/egsok/Handy-nevinovata/releases).
+Готовые установщики публикуются в [Releases](https://github.com/egsok/klava-nevinovata/releases).
 
-- **Windows:** скачай `Handy_0.8.3-N_x64-setup.exe` (NSIS) или `.msi` (N — номер форк-релиза: 1, 2, ...). При первом запуске Windows SmartScreen покажет "Windows protected your PC" — кликни **More info** → **Run anyway**. Бинарь не подписан (см. Сборка ниже).
-- **Linux:** скачай `Handy_..._amd64.deb` / `.AppImage` / `.rpm` под свой дистрибутив.
+- **Windows:** скачай `klava-nevinovata_0.8.3-N_x64-setup.exe` (NSIS) или `.msi` (N — номер форк-релиза: 1, 2, ...). При первом запуске Windows SmartScreen покажет "Windows protected your PC" — кликни **More info** → **Run anyway**. Бинарь не подписан (см. Сборка ниже).
+- **Linux:** скачай `klava-nevinovata_..._amd64.deb` / `.AppImage` / `.rpm` под свой дистрибутив.
 - **macOS:** две сборки — выбирай по чипу твоего Mac'а:
-  - `Handy_..._aarch64.dmg` — **Apple Silicon** Mac (M1 / M2 / M3 / M4, модели с конца 2020 года и новее)
-  - `Handy_..._x64.dmg` — **Intel** Mac (старые модели, ~2006–2020)
+  - `klava-nevinovata_..._aarch64.dmg` — **Apple Silicon** Mac (M1 / M2 / M3 / M4, модели с конца 2020 года и новее)
+  - `klava-nevinovata_..._x64.dmg` — **Intel** Mac (старые модели, ~2006–2020)
 
   Не уверен какой у тебя? Клик по → **About This Mac** (или «Об этом Mac»). Если строка "Chip" / «Чип» с надписью "Apple M1" и т.п. → нужен `aarch64`. Если строка "Processor" / «Процессор» с "Intel Core ..." → нужен `x64`.
 
-  Перетащи `Handy.app` в `/Applications`. При первом запуске macOS покажет **"Handy is damaged and can't be opened, you should move it to the Bin"** — это вводящее в заблуждение сообщение; приложение не повреждено, оно просто не подписано и помечено quarantine-атрибутом при скачивании. Фикс — удалить quarantine через Терминал:
+  Перетащи `klava-nevinovata.app` в `/Applications`. При первом запуске macOS покажет **"klava-nevinovata is damaged and can't be opened, you should move it to the Bin"** — это вводящее в заблуждение сообщение; приложение не повреждено, оно просто не подписано и помечено quarantine-атрибутом при скачивании. Фикс — удалить quarantine через Терминал:
 
   ```bash
-  xattr -d com.apple.quarantine /Applications/Handy.app
+  xattr -d com.apple.quarantine /Applications/klava-nevinovata.app
   ```
 
-  (Если ругнётся на permissions, попробуй `sudo xattr -cr /Applications/Handy.app`.) После этого приложение запускается нормально. Старый workaround "right-click → Open" на macOS 15+ для неподписанных приложений больше не работает. Баги после запуска репортить в [issues](https://github.com/egsok/Handy-nevinovata/issues).
+  (Если ругнётся на permissions, попробуй `sudo xattr -cr /Applications/klava-nevinovata.app`.) После этого приложение запускается нормально. Старый workaround "right-click → Open" на macOS 15+ для неподписанных приложений больше не работает. Баги после запуска репортить в [issues](https://github.com/egsok/klava-nevinovata/issues).
 
 ## Сборка
 
 Если хочешь bleeding edge, платформу не покрытую релизами или сам проверить билд — собирай локально. (Иначе бери готовый установщик из [Загрузка](#загрузка) выше.)
 
 1. Платформенные пререквизиты — в upstream [BUILD.md](BUILD.md).
-2. Три соседних форка должны лежать рядом с `Handy/` и быть на ветке `daily-stable` (см. секцию `[patch.crates-io]` в `src-tauri/Cargo.toml`).
+2. Три соседних форка должны лежать рядом с `klava-nevinovata/` и быть на ветке `daily-stable` (см. секцию `[patch.crates-io]` в `src-tauri/Cargo.toml`).
 3. На Windows ставь `CARGO_TARGET_DIR=d:/t/handy` (короткий путь — Vulkan-шейдеры whisper-rs-sys иначе упираются в MAX_PATH) и `CARGO_BUILD_JOBS=2` (release-профиль с `lto=true`, параллельный линк OOM'нется на 16 ГБ).
 4. `bun install && bun run tauri build`. Финальное "failed to bundle project: program not found" игнорируй — это custom-signing step, сам `.exe` собран нормально.
 
@@ -55,7 +55,7 @@
 
 ## Автор
 
-Сделал [Егор Соколов](https://egorsokolov.ru/) — 10 лет в продукте (Сбер, Рольф, Клаустрофобия). Пишу и экспериментирую с AI-инструментами — в основном Claude Code, Codex и dev-воркфлоу. Сам пользуюсь Handy для русских голосовых заметок; этот форк — то, что из этого выпало в код.
+Сделал [Егор Соколов](https://egorsokolov.ru/) — 10 лет в продукте (Сбер, Рольф, Клаустрофобия). Пишу и экспериментирую с AI-инструментами — в основном Claude Code, Codex и dev-воркфлоу. Сам пользуюсь klava-nevinovata для русских голосовых заметок; этот форк — то, что из этого выпало в код.
 
 Telegram-канал про AI-инструменты: [@neiroset_ne_vinovata](https://t.me/neiroset_ne_vinovata).
 
