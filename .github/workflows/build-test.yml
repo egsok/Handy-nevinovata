@@ -32,7 +32,7 @@ jobs:
       target: ${{ matrix.target }}
       build-args: ${{ matrix.args }}
       sign-binaries: false
-      asset-prefix: "handy-test"
+      asset-prefix: "klava-nevinovata-test"
       upload-artifacts: true
       is-debug-build: ${{ contains(matrix.args, '--debug') }}
     secrets: inherit
