@@ -1,6 +1,6 @@
 # Build Instructions
 
-This guide covers how to set up the development environment and build Handy from source across different platforms.
+This guide covers how to set up the development environment and build klava-nevinovata from source across different platforms.
 
 ## Prerequisites
 
@@ -76,8 +76,8 @@ ORT_LIB_LOCATION=$(brew --prefix onnxruntime)/lib ORT_PREFER_DYNAMIC_LINK=1 bun 
 ### 1. Clone the Repository
 
 ```bash
-git clone git@github.com:cjpais/Handy.git
-cd Handy
+git clone git@github.com:egsok/klava-nevinovata.git
+cd klava-nevinovata
 ```
 
 ### 2. Install Dependencies
@@ -108,12 +108,12 @@ The raw binary (`src-tauri/target/release/handy`) cannot run standalone — it n
 
 ```bash
 cd /tmp
-ar x /path/to/Handy/src-tauri/target/release/bundle/deb/Handy_*_amd64.deb data.tar.gz
+ar x /path/to/klava-nevinovata/src-tauri/target/release/bundle/deb/klava-nevinovata_*_amd64.deb data.tar.gz
 tar xzf data.tar.gz
 sudo cp usr/bin/handy /usr/bin/
 sudo cp -a usr/lib/. /usr/lib/
 sudo cp -r usr/share/icons/hicolor/* /usr/share/icons/hicolor/
-sudo cp usr/share/applications/Handy.desktop /usr/share/applications/
+sudo cp usr/share/applications/klava-nevinovata.desktop /usr/share/applications/
 sudo ldconfig
 ```
 
@@ -136,7 +136,7 @@ Resources only need re-copying if they change upstream (new icons, sounds, model
 The error from Tauri:
 
 ```
-Bundling Handy_*_amd64.AppImage
+Bundling klava-nevinovata_*_amd64.AppImage
 failed to bundle project `failed to run linuxdeploy`
 ```
 
@@ -145,7 +145,7 @@ Tauri swallows the real linuxdeploy error. To see it, run linuxdeploy manually:
 ```bash
 cd src-tauri/target/release/bundle/appimage
 ~/.cache/tauri/linuxdeploy-x86_64.AppImage --appimage-extract-and-run \
-  --appdir Handy.AppDir --plugin gtk --output appimage
+  --appdir klava-nevinovata.AppDir --plugin gtk --output appimage
 ```
 
 **Workaround:** The binary, deb, and rpm bundles all build fine — only the AppImage step fails. To skip it:
@@ -171,7 +171,7 @@ sub-project (`...\vulkan-shaders-gen-prefix\src\vulkan-shaders-gen-build\...`),
 which alone adds ~140 characters on top of Cargo's already-deep
 `target\release\build\<crate>-<hash>\out\build\...` directory. If your checkout
 isn't very shallow, MSBuild's `.tlog` write overflows the limit. (CI doesn't hit
-this because it builds from a short root such as `D:\a\Handy`.)
+this because it builds from a short root such as `D:\a\klava-nevinovata`.)
 
 Either fix works; the first is the most reliable:
 
@@ -183,11 +183,11 @@ bun run tauri build
 ```
 
 Artifacts then land in `C:\h\release\...` instead of the repo's `src-tauri\target\`.
-Alternatively, clone the repo to a short root (e.g. `C:\Handy`).
+Alternatively, clone the repo to a short root (e.g. `C:\klava-nevinovata`).
 
 **2. Enable Windows long paths** (one-time, machine-wide; needs an Administrator
 PowerShell, and modern Visual Studio 2022). This removes the limit for every
-build, not just Handy:
+build, not just klava-nevinovata:
 
 ```powershell
 Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' LongPathsEnabled 1
