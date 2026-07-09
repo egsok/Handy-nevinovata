@@ -2,13 +2,13 @@
 
 @theme {
   /* Design tokens */
-  --color-text: #0f0f0f;
-  --color-background: #fbfbfb;
-  --color-background-ui: #da5893;
-  --color-logo-primary: #faa2ca;
-  --color-logo-stroke: #382731;
-  --color-text-stroke: #f6f6f6;
-  --color-mid-gray: #808080;
+  --color-text: #2A2419;
+  --color-background: #F9F5EB;
+  --color-background-ui: #B9751C;
+  --color-logo-primary: #C4791B;
+  --color-logo-stroke: #3A2E1A;
+  --color-text-stroke: #F8F4EA;
+  --color-mid-gray: #8A7F6B;
 }
 
 :root {
@@ -55,10 +55,11 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Colors - Dark Theme */
-    --color-text: #fbfbfb;
-    --color-background: #2c2b29;
-    --color-logo-primary: #f28cbb;
-    --color-logo-stroke: #fad1ed;
+    --color-text: #EDE4CF;
+    --color-background: #262019;
+    --color-background-ui: #C4791B;
+    --color-logo-primary: #E3A33C;
+    --color-logo-stroke: #4A3D22;
   }
 }
 
