@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "Permissões Necessárias",
-      "description": "O klava-nevinovata precisa de algumas permissões para funcionar corretamente.",
+      "description": "O {{appName}} precisa de algumas permissões para funcionar corretamente.",
       "microphone": {
         "title": "Acesso ao Microfone",
         "description": "Necessário para ouvir sua voz para transcrição."
@@ -158,7 +158,7 @@
     "general": {
       "title": "Geral",
       "shortcut": {
-        "title": "Atalhos do klava-nevinovata",
+        "title": "Atalhos do {{appName}}",
         "description": "Configure atalhos de teclado para iniciar a gravação de voz para texto",
         "loading": "Carregando atalhos...",
         "none": "Nenhum atalho configurado",
@@ -276,11 +276,11 @@
       },
       "autostart": {
         "label": "Iniciar na Inicialização",
-        "description": "Iniciar automaticamente o klava-nevinovata quando você fizer login no seu computador."
+        "description": "Iniciar automaticamente o {{appName}} quando você fizer login no seu computador."
       },
       "showTrayIcon": {
         "label": "Mostrar ícone na bandeja",
-        "description": "Exibir o ícone do klava-nevinovata na bandeja do sistema."
+        "description": "Exibir o ícone do {{appName}} na bandeja do sistema."
       },
       "overlay": {
         "title": "Posição da Sobreposição",
@@ -474,7 +474,7 @@
       },
       "updateChecks": {
         "label": "Verificar Atualizações",
-        "description": "Verificar automaticamente novas versões do klava-nevinovata"
+        "description": "Verificar automaticamente novas versões do {{appName}}"
       },
       "soundTheme": {
         "label": "Tema de Som",
@@ -542,11 +542,11 @@
       "title": "Sobre",
       "version": {
         "title": "Versão",
-        "description": "Versão atual do klava-nevinovata"
+        "description": "Versão atual do {{appName}}"
       },
       "appDataDirectory": {
         "title": "Diretório de Dados do App",
-        "description": "Local onde o klava-nevinovata armazena seus dados"
+        "description": "Local onde o {{appName}} armazena seus dados"
       },
       "sourceCode": {
         "title": "Código Fonte",
@@ -558,7 +558,7 @@
         "whisper": {
           "title": "Whisper.cpp",
           "description": "Inferência de alto desempenho do modelo de reconhecimento automático de fala Whisper da OpenAI",
-          "details": "O klava-nevinovata usa Whisper.cpp para processamento rápido e local de fala para texto. Agradecemos ao incrível trabalho de Georgi Gerganov e colaboradores."
+          "details": "O {{appName}} usa Whisper.cpp para processamento rápido e local de fala para texto. Agradecemos ao incrível trabalho de Georgi Gerganov e colaboradores."
         }
       }
     }
@@ -604,7 +604,7 @@
   },
   "accessibility": {
     "permissionsRequired": "Permissões de Acessibilidade Necessárias",
-    "permissionsDescription": "O klava-nevinovata precisa de permissões de acessibilidade para digitar o texto transcrito.",
+    "permissionsDescription": "O {{appName}} precisa de permissões de acessibilidade para digitar o texto transcrito.",
     "openSettings": "Abrir Configurações do Sistema",
     "dismiss": "Dispensar"
   },
@@ -627,7 +627,7 @@
   },
   "appLanguage": {
     "title": "Idioma da Aplicação",
-    "description": "Alterar o idioma da interface do klava-nevinovata"
+    "description": "Alterar o idioma da interface do {{appName}}"
   },
   "overlay": {
     "transcribing": "Transcrevendo...",

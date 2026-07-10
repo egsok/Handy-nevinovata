@@ -102,9 +102,9 @@ pub fn tray_tooltip() -> String {
 
 fn version_label() -> String {
     if cfg!(debug_assertions) {
-        format!("klava-nevinovata v{} (Dev)", env!("CARGO_PKG_VERSION"))
+        format!("{} v{} (Dev)", crate::APP_NAME, env!("CARGO_PKG_VERSION"))
     } else {
-        format!("klava-nevinovata v{}", env!("CARGO_PKG_VERSION"))
+        format!("{} v{}", crate::APP_NAME, env!("CARGO_PKG_VERSION"))
     }
 }
 

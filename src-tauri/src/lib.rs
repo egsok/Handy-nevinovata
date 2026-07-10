@@ -47,6 +47,11 @@ use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKi
 
 use crate::settings::get_settings;
 
+/// User-facing product name; keep in sync with tauri.conf.json's productName.
+pub const APP_NAME: &str = "klava-nevinovata";
+/// Project repository; keep in sync with README and CI.
+pub const REPO_URL: &str = "https://github.com/egsok/klava-nevinovata";
+
 // Global atomic to store the file log level filter
 // We use u8 to store the log::LevelFilter as a number
 pub static FILE_LOG_LEVEL: AtomicU8 = AtomicU8::new(log::LevelFilter::Debug as u8);
@@ -507,7 +512,7 @@ pub fn run(cli_args: CliArgs) {
             // for portable mode (redirects WebView2 cache to portable Data dir)
             let mut win_builder =
                 tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("/".into()))
-                    .title("klava-nevinovata")
+                    .title(APP_NAME)
                     .inner_size(680.0, 570.0)
                     .min_inner_size(680.0, 570.0)
                     .resizable(true)

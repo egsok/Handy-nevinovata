@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "Behörigheter krävs",
-      "description": "klava-nevinovata behöver ett par behörigheter för att fungera korrekt.",
+      "description": "{{appName}} behöver ett par behörigheter för att fungera korrekt.",
       "microphone": {
         "title": "Mikrofonåtkomst",
         "description": "Krävs för att höra din röst för transkription."
@@ -158,7 +158,7 @@
     "general": {
       "title": "Allmänt",
       "shortcut": {
-        "title": "klava-nevinovata-kortkommandon",
+        "title": "{{appName}}-kortkommandon",
         "description": "Konfigurera kortkommandon för att starta tal-till-text-inspelning",
         "loading": "Laddar kortkommandon...",
         "none": "Inga kortkommandon konfigurerade",
@@ -276,11 +276,11 @@
       },
       "autostart": {
         "label": "Starta vid uppstart",
-        "description": "Starta klava-nevinovata automatiskt när du loggar in på din dator."
+        "description": "Starta {{appName}} automatiskt när du loggar in på din dator."
       },
       "showTrayIcon": {
         "label": "Visa ikon i systemfältet",
-        "description": "Visa klava-nevinovata-ikonen i systemfältet."
+        "description": "Visa {{appName}}-ikonen i systemfältet."
       },
       "overlay": {
         "title": "Överlagringsposition",
@@ -474,7 +474,7 @@
       },
       "updateChecks": {
         "label": "Sök efter uppdateringar",
-        "description": "Sök automatiskt efter nya versioner av klava-nevinovata"
+        "description": "Sök automatiskt efter nya versioner av {{appName}}"
       },
       "soundTheme": {
         "label": "Ljudtema",
@@ -542,11 +542,11 @@
       "title": "Om",
       "version": {
         "title": "Version",
-        "description": "Nuvarande version av klava-nevinovata"
+        "description": "Nuvarande version av {{appName}}"
       },
       "appDataDirectory": {
         "title": "Mapp för appdata",
-        "description": "Plats där klava-nevinovata lagrar sina data"
+        "description": "Plats där {{appName}} lagrar sina data"
       },
       "sourceCode": {
         "title": "Källkod",
@@ -558,7 +558,7 @@
         "whisper": {
           "title": "Whisper.cpp",
           "description": "Högpresterande inferens av OpenAI:s Whisper-modell för automatisk taligenkänning",
-          "details": "klava-nevinovata använder Whisper.cpp för snabb, lokal tal-till-text-behandling. Tack till det fantastiska arbete som utförts av Georgi Gerganov med medarbetare."
+          "details": "{{appName}} använder Whisper.cpp för snabb, lokal tal-till-text-behandling. Tack till det fantastiska arbete som utförts av Georgi Gerganov med medarbetare."
         }
       }
     }
@@ -604,7 +604,7 @@
   },
   "accessibility": {
     "permissionsRequired": "Behörigheter för hjälpmedel krävs",
-    "permissionsDescription": "klava-nevinovata behöver behörighet för hjälpmedel för att kunna skriva transkriberad text.",
+    "permissionsDescription": "{{appName}} behöver behörighet för hjälpmedel för att kunna skriva transkriberad text.",
     "openSettings": "Öppna systeminställningar",
     "dismiss": "Avvisa"
   },
@@ -627,7 +627,7 @@
   },
   "appLanguage": {
     "title": "Applikationsspråk",
-    "description": "Ändra språket i klava-nevinovata-gränssnittet"
+    "description": "Ändra språket i {{appName}}-gränssnittet"
   },
   "overlay": {
     "transcribing": "Transkriberar...",

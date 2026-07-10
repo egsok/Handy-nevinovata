@@ -7,6 +7,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { ProgressBar } from "../shared";
 import { useSettings } from "../../hooks/useSettings";
 import { commands } from "../../bindings";
+import { REPO_URL } from "@/lib/constants/brand";
 
 interface UpdateCheckerProps {
   className?: string;
@@ -203,7 +204,7 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
               <button
                 className="px-3 py-1.5 text-sm rounded bg-logo-primary text-white hover:bg-logo-primary/80 transition-colors"
                 onClick={() => {
-                  openUrl("https://github.com/egsok/klava-nevinovata/releases/latest");
+                  openUrl(`${REPO_URL}/releases/latest`);
                   setShowPortableUpdateDialog(false);
                 }}
               >

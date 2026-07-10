@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "Потрібні дозволи",
-      "description": "klava-nevinovata потребує деяких дозволів для коректної роботи.",
+      "description": "{{appName}} потребує деяких дозволів для коректної роботи.",
       "microphone": {
         "title": "Доступ до мікрофона",
         "description": "Потрібен для прослуховування вашого голосу для транскрипції."
@@ -276,11 +276,11 @@
       },
       "autostart": {
         "label": "Запуск при старті системи",
-        "description": "Автоматично запускати klava-nevinovata при вході в систему"
+        "description": "Автоматично запускати {{appName}} при вході в систему"
       },
       "showTrayIcon": {
         "label": "Показати значок у треї",
-        "description": "Відображати значок klava-nevinovata у системному треї."
+        "description": "Відображати значок {{appName}} у системному треї."
       },
       "overlay": {
         "title": "Позиція оверлею",
@@ -474,7 +474,7 @@
       },
       "updateChecks": {
         "label": "Перевірка оновлень",
-        "description": "Автоматично перевіряти наявність нових версій klava-nevinovata"
+        "description": "Автоматично перевіряти наявність нових версій {{appName}}"
       },
       "soundTheme": {
         "label": "Звукова тема",
@@ -542,11 +542,11 @@
       "title": "Інфо",
       "version": {
         "title": "Версія",
-        "description": "Поточна версія klava-nevinovata"
+        "description": "Поточна версія {{appName}}"
       },
       "appDataDirectory": {
         "title": "Папка даних програми",
-        "description": "Розташування даних klava-nevinovata"
+        "description": "Розташування даних {{appName}}"
       },
       "sourceCode": {
         "title": "Вихідний код",
@@ -558,7 +558,7 @@
         "whisper": {
           "title": "Whisper.cpp",
           "description": "Високопродуктивний інференс моделі автоматичного розпізнавання мовлення Whisper від OpenAI",
-          "details": "klava-nevinovata використовує Whisper.cpp для швидкої локальної обробки мовлення в текст. Дякуємо за чудову роботу Георгію Герганову та контриб'юторам."
+          "details": "{{appName}} використовує Whisper.cpp для швидкої локальної обробки мовлення в текст. Дякуємо за чудову роботу Георгію Герганову та контриб'юторам."
         }
       }
     }
@@ -604,7 +604,7 @@
   },
   "accessibility": {
     "permissionsRequired": "Потрібні права доступу",
-    "permissionsDescription": "klava-nevinovata потребує дозволи доступності для введення транскрибованого тексту.",
+    "permissionsDescription": "{{appName}} потребує дозволи доступності для введення транскрибованого тексту.",
     "openSettings": "Відкрити Системні налаштування",
     "dismiss": "Закрити"
   },
@@ -627,7 +627,7 @@
   },
   "appLanguage": {
     "title": "Мова інтерфейсу",
-    "description": "Змінити мову інтерфейсу klava-nevinovata"
+    "description": "Змінити мову інтерфейсу {{appName}}"
   },
   "overlay": {
     "transcribing": "Обробка...",

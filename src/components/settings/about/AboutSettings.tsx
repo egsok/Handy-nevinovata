@@ -8,6 +8,7 @@ import { Button } from "../../ui/Button";
 import { AppDataDirectory } from "../AppDataDirectory";
 import { AppLanguageSelector } from "../AppLanguageSelector";
 import { LogDirectory } from "../debug";
+import { REPO_URL } from "@/lib/constants/brand";
 
 export const AboutSettings: React.FC = () => {
   const { t } = useTranslation();
@@ -48,7 +49,7 @@ export const AboutSettings: React.FC = () => {
           <Button
             variant="secondary"
             size="md"
-            onClick={() => openUrl("https://github.com/egsok/klava-nevinovata")}
+            onClick={() => openUrl(REPO_URL)}
           >
             {t("settings.about.sourceCode.button")}
           </Button>
