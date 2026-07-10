@@ -731,6 +731,29 @@ Section Install
 
   !insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
 
+  ; --- REBRAND MIGRATION --- Uninstall the legacy "Handy" install (pre-rebrand
+  ; product name). The reinstall detection is keyed on ${UNINSTKEY}, which now
+  ; contains the new product name, so an existing "Handy" install would survive
+  ; as a parallel copy: its autostart Run entry keeps launching the old build,
+  ; and (the bundle identifier being unchanged) the old instance would win the
+  ; single-instance mutex over the freshly installed one.
+  ${If} $PortableMode <> 1
+    ReadRegStr $R1 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\Handy" "UninstallString"
+    ${If} $R1 != ""
+      DetailPrint "Removing previous Handy installation"
+      ReadRegStr $R2 SHCTX "Software\${MANUFACTURER}\Handy" ""
+      ${IfThen} $R2 == "" ${|} StrCpy $R2 "$LOCALAPPDATA\Handy" ${|}
+      ClearErrors
+      ExecWait '$R1 /P _?=$R2' $0
+      ; Running in-place (_?=) means the uninstaller cannot delete itself
+      Delete "$R2\uninstall.exe"
+      RMDir "$R2"
+      ; Belt and braces: drop the old autostart entry even if the uninstaller
+      ; failed, so a stale build cannot grab the single-instance mutex at login
+      DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Handy"
+    ${EndIf}
+  ${EndIf}
+
   ; Copy main executable
   File "${MAINBINARYSRCPATH}"
 
