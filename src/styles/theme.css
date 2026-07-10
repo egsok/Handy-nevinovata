@@ -1,18 +1,35 @@
 /* klava-nevinovata Colors */
 
 :root {
-  --color-text: #2a2419;
-  --color-background: #f9f5eb;
-  --color-background-ui: #b9751c;
-  --color-logo-primary: #c4791b;
+  /* Palette source of truth. Each themed color is defined once as a
+     light/dark pair; the active tokens below and the `data-theme` overrides
+     in App.css reference these, so a hex value lives in exactly one place. */
+  --light-color-text: #2a2419;
+  --light-color-background: #f9f5eb;
+  --light-color-background-ui: #b9751c;
+  --light-color-logo-primary: #c4791b;
+
+  --dark-color-text: #ede4cf;
+  --dark-color-background: #262019;
+  --dark-color-background-ui: #c4791b;
+  --dark-color-logo-primary: #e3a33c;
+
+  /* Tokens that do not change between light and dark */
   --color-mid-gray: #8a7f6b;
+
+  /* Active palette — defaults to light, follows the OS via the media query
+     below, or is forced by `data-theme` (see App.css). */
+  --color-text: var(--light-color-text);
+  --color-background: var(--light-color-background);
+  --color-background-ui: var(--light-color-background-ui);
+  --color-logo-primary: var(--light-color-logo-primary);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-text: #ede4cf;
-    --color-background: #262019;
-    --color-background-ui: #c4791b;
-    --color-logo-primary: #e3a33c;
+    --color-text: var(--dark-color-text);
+    --color-background: var(--dark-color-background);
+    --color-background-ui: var(--dark-color-background-ui);
+    --color-logo-primary: var(--dark-color-logo-primary);
   }
 }

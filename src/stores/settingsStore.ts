@@ -125,6 +125,8 @@ const settingUpdaters: {
     commands.changeWordCorrectionThresholdSetting(value as number),
   paste_delay_ms: (value) =>
     commands.changePasteDelayMsSetting(value as number),
+  paste_delay_after_ms: (value) =>
+    commands.changePasteDelayAfterMsSetting(value as number),
   paste_method: (value) => commands.changePasteMethodSetting(value as string),
   typing_tool: (value) => commands.changeTypingToolSetting(value as string),
   external_script_path: (value) =>
@@ -145,6 +147,7 @@ const settingUpdaters: {
     commands.changeAppendTrailingSpaceSetting(value as boolean),
   log_level: (value) => commands.setLogLevel(value as any),
   app_language: (value) => commands.changeAppLanguageSetting(value as string),
+  theme: (value) => commands.changeThemeSetting(value as string),
   experimental_enabled: (value) =>
     commands.changeExperimentalEnabledSetting(value as boolean),
   lazy_stream_close: (value) =>
@@ -337,7 +340,7 @@ export const useSettingsStore = create<SettingsStore>()(
                 bindings: {
                   ...state.settings.bindings,
                   [id]: {
-                    ...state.settings.bindings[id]!,
+                    ...state.settings.bindings?.[id]!,
                     current_binding: binding,
                   },
                 },
@@ -368,7 +371,7 @@ export const useSettingsStore = create<SettingsStore>()(
                   bindings: {
                     ...state.settings.bindings,
                     [id]: {
-                      ...state.settings.bindings[id]!,
+                      ...state.settings.bindings?.[id]!,
                       current_binding: originalBinding,
                     },
                   },

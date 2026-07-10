@@ -186,6 +186,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     app_handle.manage(model_manager.clone());
     app_handle.manage(transcription_manager.clone());
     app_handle.manage(history_manager.clone());
+    app_handle.manage(tray::CurrentTrayIconState::new());
 
     // Note: Shortcuts are NOT initialized here.
     // The frontend is responsible for calling the `initialize_shortcuts` command
@@ -269,7 +270,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                             log::error!("Failed to switch model via tray: {}", e);
                         }
                     }
-                    tray::update_tray_menu(&app_clone, &tray::TrayIconState::Idle, None);
+                    tray::update_tray_menu(&app_clone, None);
                 });
             }
             _ => {}
@@ -279,7 +280,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     app_handle.manage(tray);
 
     // Initialize tray menu with idle state
-    utils::update_tray_menu(app_handle, &utils::TrayIconState::Idle, None);
+    utils::update_tray_menu(app_handle, None);
 
     // Apply show_tray_icon setting
     let settings = settings::get_settings(app_handle);
@@ -290,7 +291,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     // Refresh tray menu when model state changes
     let app_handle_for_listener = app_handle.clone();
     app_handle.listen("model-state-changed", move |_| {
-        tray::update_tray_menu(&app_handle_for_listener, &tray::TrayIconState::Idle, None);
+        tray::update_tray_menu(&app_handle_for_listener, None);
     });
 
     // Get the autostart manager and configure based on user setting
@@ -537,6 +538,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_audio_feedback_setting,
             shortcut::change_audio_feedback_volume_setting,
             shortcut::change_sound_theme_setting,
+            shortcut::change_theme_setting,
             shortcut::change_start_hidden_setting,
             shortcut::change_autostart_setting,
             shortcut::change_translate_to_english_setting,
@@ -547,6 +549,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_word_correction_threshold_setting,
             shortcut::change_extra_recording_buffer_setting,
             shortcut::change_paste_delay_ms_setting,
+            shortcut::change_paste_delay_after_ms_setting,
             shortcut::change_paste_method_setting,
             shortcut::get_available_typing_tools,
             shortcut::change_typing_tool_setting,
@@ -813,6 +816,13 @@ pub fn run(cli_args: CliArgs) {
 
             let mut settings = get_settings(app.handle());
 
+            // Apply the persisted appearance theme to the Windows title bar before
+            // the window is shown, so it matches the in-app palette without a flash
+            // of the wrong theme. On macOS/Linux, Tauri themes are app-wide and
+            // would also affect windows that intentionally keep the system theme.
+            #[cfg(target_os = "windows")]
+            shortcut::apply_window_theme(app.handle(), settings.theme);
+
             // CLI --debug flag overrides debug_mode and log level (runtime-only, not persisted)
             if cli_args.debug {
                 settings.debug_mode = true;
@@ -898,8 +908,8 @@ pub fn run(cli_args: CliArgs) {
             }
             tauri::WindowEvent::ThemeChanged(theme) => {
                 log::info!("Theme changed to: {:?}", theme);
-                // Update tray icon to match new theme, maintaining idle state
-                utils::change_tray_icon(window.app_handle(), utils::TrayIconState::Idle);
+                // Re-apply the current tray state with the new theme's icon set
+                utils::refresh_tray_icon(window.app_handle());
             }
             _ => {}
         })

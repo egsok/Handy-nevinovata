@@ -1,6 +1,6 @@
 [package]
 name = "handy"
-version = "0.9.0-3"
+version = "0.9.1-1"
 description = "klava-nevinovata"
 authors = ["cjpais"]
 edition = "2021"
@@ -73,8 +73,8 @@ sha2 = "0.10"
 # transcribe-rs is now ONNX-only (Parakeet, Moonshine, SenseVoice, GigaAM,
 # Canary, Cohere). Per-platform backend features are added in the target tables.
 transcribe-rs = { version = "0.3.8", features = ["onnx"] }
-transcribe-cpp = { version = "0.1.0", default-features = false }
-handy-keys = "0.2.4"
+transcribe-cpp = { version = "0.1.2", default-features = false }
+handy-keys = "0.3.0"
 ferrous-opencc = "0.2.3"
 arboard = { version = "3.6", features = ["image-data"] }
 clap = { version = "4", features = ["derive"] }
@@ -127,22 +127,22 @@ winreg = "0.55"
 # signtool verify entirely. CI pins -DGGML_NATIVE=OFF (see build.yml) so the
 # static build targets a portable ARM baseline, not the build runner's CPU.
 [target.'cfg(all(windows, target_arch = "x86_64"))'.dependencies]
-transcribe-cpp = { version = "0.1.0", default-features = false, features = [
+transcribe-cpp = { version = "0.1.2", default-features = false, features = [
   "dynamic-backends",
   "vulkan",
 ] }
 
 [target.'cfg(all(windows, target_arch = "aarch64"))'.dependencies]
-transcribe-cpp = { version = "0.1.0", default-features = false }
+transcribe-cpp = { version = "0.1.2", default-features = false }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2.1" }
-transcribe-cpp = { version = "0.1.0", default-features = false, features = ["metal"] }
+transcribe-cpp = { version = "0.1.2", default-features = false, features = ["metal"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk-layer-shell = { version = "0.8", features = ["v0_6"] }
 gtk = "0.18"
-transcribe-cpp = { version = "0.1.0", default-features = false, features = [
+transcribe-cpp = { version = "0.1.2", default-features = false, features = [
   "dynamic-backends",
   "vulkan",
 ] }
@@ -151,12 +151,13 @@ transcribe-cpp = { version = "0.1.0", default-features = false, features = [
 tauri-runtime = { git = "https://github.com/cjpais/tauri.git", branch = "handy-2.10.2" }
 tauri-runtime-wry = { git = "https://github.com/cjpais/tauri.git", branch = "handy-2.10.2" }
 tauri-utils = { git = "https://github.com/cjpais/tauri.git", branch = "handy-2.10.2" }
-# handy-keys fork: vanilla 0.2.4 + Windows modifier-state fix (live GetAsyncKeyState
-# instead of incremental tracking — fixes hotkey deafness / bare-Space triggering
-# from phantom stuck modifiers) + hook thread priority + resync diagnostics.
+# handy-keys fork: vanilla 0.3.0 + hook-thread priority + modifier_resync_count()
+# telemetry (consumed by watchdog.rs). Upstream 0.3.0's reconcile_modifiers
+# supersedes our 0.2.4-era live-GetAsyncKeyState modifier-state fix, so the fork
+# now carries only the hook-thread priority bump and the resync-count telemetry.
 # The 0.8.3-line transcribe-rs / whisper-rs-sys fork patches are obsolete here:
-# on v0.9.0 whisper runs via the transcribe-cpp crate.
-handy-keys = { git = "https://github.com/egsok/handy-keys-fork.git", branch = "daily-stable" }
+# on v0.9.x whisper runs via the transcribe-cpp crate.
+handy-keys = { git = "https://github.com/egsok/handy-keys-fork.git", branch = "v0.3.0-stable" }
 
 [dev-dependencies]
 tempfile = "3"
