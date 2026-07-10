@@ -1,4 +1,12 @@
-# klava-nevinovata
+<p align="center">
+  <img src=".github/assets/logo.svg" width="104" alt="">
+</p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/wordmark-dark.svg">
+    <img src=".github/assets/wordmark-light.svg" width="430" alt="klava-nevinovata">
+  </picture>
+</p>
 
 > Персональный форк [cjpais/Handy](https://github.com/cjpais/Handy) с правками под русскую транскрипцию.
 > Готовые установщики (без подписи) — на [Releases](https://github.com/egsok/klava-nevinovata/releases). Сборка из исходников — для всего остального.
