@@ -751,6 +751,10 @@ Section Install
       ; Belt and braces: drop the old autostart entry even if the uninstaller
       ; failed, so a stale build cannot grab the single-instance mutex at login
       DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Handy"
+      ; The legacy uninstaller keeps its manufacturer key (install location,
+      ; installer language) unless the delete-app-data box was ticked
+      DeleteRegKey SHCTX "Software\${MANUFACTURER}\Handy"
+      DeleteRegKey /ifempty SHCTX "Software\${MANUFACTURER}"
     ${EndIf}
   ${EndIf}
 
