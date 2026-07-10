@@ -17,16 +17,33 @@ const HandyTextLogo = ({
       viewBox="0 0 940 140"
       xmlns="http://www.w3.org/2000/svg"
     >
+      {/* textLength pins glyph advances so the wordmark ends at x=845 on every
+          platform; without it, fallback monospace fonts (~0.6em advance vs
+          Consolas' 0.55em) push the text under the cursor rect at x=858. */}
       <text
         x="0"
         y="102"
         fontFamily="Consolas, 'Cascadia Mono', ui-monospace, monospace"
         fontSize="96"
       >
-        {/* eslint-disable-next-line i18next/no-literal-string */}
-        <tspan fontWeight="700" className="logo-primary">klava</tspan>
-        {/* eslint-disable-next-line i18next/no-literal-string */}
-        <tspan fill="var(--color-mid-gray)">-nevinovata</tspan>
+        {/* eslint-disable i18next/no-literal-string -- brand name is not translated */}
+        <tspan
+          fontWeight="700"
+          className="logo-primary"
+          textLength="264"
+          lengthAdjust="spacingAndGlyphs"
+        >
+          klava
+        </tspan>
+        <tspan
+          fill="var(--color-mid-gray)"
+          x="264"
+          textLength="581"
+          lengthAdjust="spacingAndGlyphs"
+        >
+          -nevinovata
+        </tspan>
+        {/* eslint-enable i18next/no-literal-string */}
       </text>
       <rect
         x="858"
