@@ -65,15 +65,13 @@ fn build_headers(provider: &PostProcessProvider, api_key: &str) -> Result<Header
 
     // Common headers
     headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-    headers.insert(
-        REFERER,
-        HeaderValue::from_static("https://github.com/egsok/klava-nevinovata"),
-    );
+    headers.insert(REFERER, HeaderValue::from_static(crate::REPO_URL));
     headers.insert(
         USER_AGENT,
-        HeaderValue::from_static("klava-nevinovata/1.0 (+https://github.com/egsok/klava-nevinovata)"),
+        HeaderValue::from_str(&format!("{}/1.0 (+{})", crate::APP_NAME, crate::REPO_URL))
+            .map_err(|e| format!("Invalid user agent header value: {}", e))?,
     );
-    headers.insert("X-Title", HeaderValue::from_static("klava-nevinovata"));
+    headers.insert("X-Title", HeaderValue::from_static(crate::APP_NAME));
 
     // Provider-specific auth headers
     if !api_key.is_empty() {

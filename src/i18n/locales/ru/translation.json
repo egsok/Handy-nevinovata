@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "Требуются разрешения",
-      "description": "klava-nevinovata требуются некоторые разрешения для корректной работы.",
+      "description": "{{appName}} требуются некоторые разрешения для корректной работы.",
       "microphone": {
         "title": "Доступ к микрофону",
         "description": "Необходим для прослушивания вашего голоса для транскрипции."
@@ -172,13 +172,13 @@
       "searchPlaceholder": "Поиск моделей по имени…",
       "rescan": {
         "label": "Пересканировать",
-        "tooltip": "Пересканировать модели, добавленные в папку моделей или кэш Hugging Face вне klava-nevinovata"
+        "tooltip": "Пересканировать модели, добавленные в папку моделей или кэш Hugging Face вне {{appName}}"
       }
     },
     "general": {
       "title": "Общие",
       "shortcut": {
-        "title": "Ярлыки klava-nevinovata",
+        "title": "Ярлыки {{appName}}",
         "description": "Настройте сочетания клавиш для запуска записи речи в текст",
         "loading": "Загрузка ярлыков...",
         "none": "Ярлыки не настроены",
@@ -274,11 +274,11 @@
       },
       "autostart": {
         "label": "Запускать при старте",
-        "description": "Автоматически запускать klava-nevinovata при входе в систему."
+        "description": "Автоматически запускать {{appName}} при входе в систему."
       },
       "showTrayIcon": {
         "label": "Показать значок в трее",
-        "description": "Отображать значок klava-nevinovata в системном трее."
+        "description": "Отображать значок {{appName}} в системном трее."
       },
       "overlay": {
         "style": {
@@ -486,7 +486,7 @@
       },
       "updateChecks": {
         "label": "Проверять наличие обновлений",
-        "description": "Автоматически проверять наличие новых версий klava-nevinovata"
+        "description": "Автоматически проверять наличие новых версий {{appName}}"
       },
       "soundTheme": {
         "label": "Звуковая тема",
@@ -561,11 +561,11 @@
       "title": "О программе",
       "version": {
         "title": "Версия",
-        "description": "Текущая версия klava-nevinovata"
+        "description": "Текущая версия {{appName}}"
       },
       "appDataDirectory": {
         "title": "Каталог данных приложения",
-        "description": "Место, где klava-nevinovata хранит свои данные"
+        "description": "Место, где {{appName}} хранит свои данные"
       },
       "sourceCode": {
         "title": "Исходный код",
@@ -577,12 +577,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Высокопроизводительная модель автоматического распознавания речи OpenAI Whisper",
-          "details": "klava-nevinovata использует ggml для быстрого локального преобразования речи в текст. Спасибо великолепной работе Георгия Герганова и участников."
+          "details": "{{appName}} использует ggml для быстрого локального преобразования речи в текст. Спасибо великолепной работе Георгия Герганова и участников."
         }
       },
       "whatsNewUpdates": {
         "label": "Показывать новинки",
-        "description": "Показывать примечания к выпуску после обновлений klava-nevinovata"
+        "description": "Показывать примечания к выпуску после обновлений {{appName}}"
       }
     }
   },
@@ -609,7 +609,7 @@
     "noOptionsFound": "Вариантов не найдено"
   },
   "accessibility": {
-    "permissionsDescription": "klava-nevinovata необходимы разрешения на доступ для ввода расшифрованного текста.",
+    "permissionsDescription": "{{appName}} необходимы разрешения на доступ для ввода расшифрованного текста.",
     "openSettings": "Открыть настройки системы"
   },
   "errors": {
@@ -632,13 +632,13 @@
   },
   "appLanguage": {
     "title": "Язык приложения",
-    "description": "Изменить язык интерфейса klava-nevinovata"
+    "description": "Изменить язык интерфейса {{appName}}"
   },
   "overlay": {
     "transcribing": "Расшифровка...",
     "processing": "Обработка..."
   },
   "whatsNew": {
-    "title": "Новое в klava-nevinovata v{{version}}"
+    "title": "Новое в {{appName}} v{{version}}"
   }
 }

@@ -8,8 +8,6 @@
   --color-background: var(--color-background);
   --color-background-ui: var(--color-background-ui);
   --color-logo-primary: var(--color-logo-primary);
-  --color-logo-stroke: var(--color-logo-stroke);
-  --color-text-stroke: var(--color-text-stroke);
   --color-mid-gray: var(--color-mid-gray);
 }
 
@@ -88,18 +86,6 @@
   background-color: var(--scrollbar-thumb-hover);
 }
 
-@layer utilities {
-  .text-stroke {
-    -webkit-text-stroke: 2px var(--color-text-stroke);
-  }
-}
-
 .logo-primary {
   fill: var(--color-logo-primary);
-}
-
-.logo-stroke {
-  fill: var(--color-logo-stroke);
-  stroke: var(--color-logo-stroke);
-  stroke-width: 1;
 }

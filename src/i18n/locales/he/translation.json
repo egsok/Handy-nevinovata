@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "נדרשות הרשאות",
-      "description": "klava-nevinovata צריך כמה הרשאות כדי לעבוד כמו שצריך.",
+      "description": "{{appName}} צריך כמה הרשאות כדי לעבוד כמו שצריך.",
       "microphone": {
         "title": "גישה למיקרופון",
         "description": "נדרש כדי לשמוע את הקול שלך לצורך תמלול."
@@ -160,7 +160,7 @@
     "general": {
       "title": "כללי",
       "shortcut": {
-        "title": "קיצורי מקשים של klava-nevinovata",
+        "title": "קיצורי מקשים של {{appName}}",
         "description": "הגדר קיצורי מקשים כדי להפעיל הקלטה ותמלול דיבור",
         "loading": "טוען קיצורי מקשים...",
         "none": "לא הוגדרו קיצורי מקשים",
@@ -213,7 +213,7 @@
       "searchPlaceholder": "חיפוש מודלים לפי שם…",
       "rescan": {
         "label": "סריקה מחדש",
-        "tooltip": "סריקה מחדש לאיתור מודלים שנוספו לתיקיית המודלים או למטמון של Hugging Face מחוץ ל-klava-nevinovata"
+        "tooltip": "סריקה מחדש לאיתור מודלים שנוספו לתיקיית המודלים או למטמון של Hugging Face מחוץ ל-{{appName}}"
       }
     },
     "sound": {
@@ -274,11 +274,11 @@
       },
       "autostart": {
         "label": "הפעל עם עליית המערכת",
-        "description": "הפעל את klava-nevinovata אוטומטית כשאתה מתחבר למחשב."
+        "description": "הפעל את {{appName}} אוטומטית כשאתה מתחבר למחשב."
       },
       "showTrayIcon": {
         "label": "הצג אייקון במגש",
-        "description": "הצג את האייקון של klava-nevinovata במגש המערכת."
+        "description": "הצג את האייקון של {{appName}} במגש המערכת."
       },
       "overlay": {
         "style": {
@@ -486,7 +486,7 @@
       },
       "updateChecks": {
         "label": "בדוק עדכונים",
-        "description": "בדוק אוטומטית אם קיימות גרסאות חדשות של klava-nevinovata"
+        "description": "בדוק אוטומטית אם קיימות גרסאות חדשות של {{appName}}"
       },
       "soundTheme": {
         "label": "ערכת צלילים",
@@ -561,11 +561,11 @@
       "title": "אודות",
       "version": {
         "title": "גרסה",
-        "description": "הגרסה הנוכחית של klava-nevinovata"
+        "description": "הגרסה הנוכחית של {{appName}}"
       },
       "appDataDirectory": {
         "title": "תיקיית נתוני אפליקציה",
-        "description": "המיקום שבו klava-nevinovata שומר את הנתונים שלו"
+        "description": "המיקום שבו {{appName}} שומר את הנתונים שלו"
       },
       "sourceCode": {
         "title": "קוד מקור",
@@ -577,12 +577,12 @@
         "ggml": {
           "title": "ggml",
           "description": "הסקה מהירה לביצועים גבוהים עבור מודל זיהוי הדיבור Whisper של OpenAI",
-          "details": "klava-nevinovata משתמש ב-ggml לתמלול מהיר ומקומי. תודה לעבודה המדהימה של Georgi Gerganov וכל התורמים."
+          "details": "{{appName}} משתמש ב-ggml לתמלול מהיר ומקומי. תודה לעבודה המדהימה של Georgi Gerganov וכל התורמים."
         }
       },
       "whatsNewUpdates": {
         "label": "הצג מה חדש",
-        "description": "הצג הערות גרסה לאחר עדכוני klava-nevinovata"
+        "description": "הצג הערות גרסה לאחר עדכוני {{appName}}"
       }
     }
   },
@@ -609,7 +609,7 @@
     "noOptionsFound": "לא נמצאו אפשרויות"
   },
   "accessibility": {
-    "permissionsDescription": "klava-nevinovata צריך הרשאות נגישות כדי להקליד את הטקסט המתומלל.",
+    "permissionsDescription": "{{appName}} צריך הרשאות נגישות כדי להקליד את הטקסט המתומלל.",
     "openSettings": "פתח את הגדרות המערכת"
   },
   "errors": {
@@ -632,13 +632,13 @@
   },
   "appLanguage": {
     "title": "שפת האפליקציה",
-    "description": "שנה את שפת הממשק של klava-nevinovata"
+    "description": "שנה את שפת הממשק של {{appName}}"
   },
   "overlay": {
     "transcribing": "מתמלל...",
     "processing": "מעבד..."
   },
   "whatsNew": {
-    "title": "חדש ב-klava-nevinovata v{{version}}"
+    "title": "חדש ב-{{appName}} v{{version}}"
   }
 }

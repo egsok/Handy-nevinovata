@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "Behörigheter krävs",
-      "description": "klava-nevinovata behöver ett par behörigheter för att fungera korrekt.",
+      "description": "{{appName}} behöver ett par behörigheter för att fungera korrekt.",
       "microphone": {
         "title": "Mikrofonåtkomst",
         "description": "Krävs för att höra din röst för transkription."
@@ -160,7 +160,7 @@
     "general": {
       "title": "Allmänt",
       "shortcut": {
-        "title": "klava-nevinovata-kortkommandon",
+        "title": "{{appName}}-kortkommandon",
         "description": "Konfigurera kortkommandon för att starta tal-till-text-inspelning",
         "loading": "Laddar kortkommandon...",
         "none": "Inga kortkommandon konfigurerade",
@@ -213,7 +213,7 @@
       "searchPlaceholder": "Sök modeller efter namn…",
       "rescan": {
         "label": "Skanna om",
-        "tooltip": "Skanna om efter modeller som lagts till i modellmappen eller Hugging Face-cachen utanför klava-nevinovata"
+        "tooltip": "Skanna om efter modeller som lagts till i modellmappen eller Hugging Face-cachen utanför {{appName}}"
       }
     },
     "sound": {
@@ -274,11 +274,11 @@
       },
       "autostart": {
         "label": "Starta vid uppstart",
-        "description": "Starta klava-nevinovata automatiskt när du loggar in på din dator."
+        "description": "Starta {{appName}} automatiskt när du loggar in på din dator."
       },
       "showTrayIcon": {
         "label": "Visa ikon i systemfältet",
-        "description": "Visa klava-nevinovata-ikonen i systemfältet."
+        "description": "Visa {{appName}}-ikonen i systemfältet."
       },
       "overlay": {
         "style": {
@@ -486,7 +486,7 @@
       },
       "updateChecks": {
         "label": "Sök efter uppdateringar",
-        "description": "Sök automatiskt efter nya versioner av klava-nevinovata"
+        "description": "Sök automatiskt efter nya versioner av {{appName}}"
       },
       "soundTheme": {
         "label": "Ljudtema",
@@ -561,11 +561,11 @@
       "title": "Om",
       "version": {
         "title": "Version",
-        "description": "Nuvarande version av klava-nevinovata"
+        "description": "Nuvarande version av {{appName}}"
       },
       "appDataDirectory": {
         "title": "Mapp för appdata",
-        "description": "Plats där klava-nevinovata lagrar sina data"
+        "description": "Plats där {{appName}} lagrar sina data"
       },
       "sourceCode": {
         "title": "Källkod",
@@ -577,12 +577,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Högpresterande inferens av OpenAI:s Whisper-modell för automatisk taligenkänning",
-          "details": "klava-nevinovata använder ggml för snabb, lokal tal-till-text-behandling. Tack till det fantastiska arbete som utförts av Georgi Gerganov med medarbetare."
+          "details": "{{appName}} använder ggml för snabb, lokal tal-till-text-behandling. Tack till det fantastiska arbete som utförts av Georgi Gerganov med medarbetare."
         }
       },
       "whatsNewUpdates": {
         "label": "Visa nyheter",
-        "description": "Visa versionsinformation efter klava-nevinovata-uppdateringar"
+        "description": "Visa versionsinformation efter {{appName}}-uppdateringar"
       }
     }
   },
@@ -609,7 +609,7 @@
     "noOptionsFound": "Inga alternativ hittades"
   },
   "accessibility": {
-    "permissionsDescription": "klava-nevinovata behöver behörighet för hjälpmedel för att kunna skriva transkriberad text.",
+    "permissionsDescription": "{{appName}} behöver behörighet för hjälpmedel för att kunna skriva transkriberad text.",
     "openSettings": "Öppna systeminställningar"
   },
   "errors": {
@@ -632,13 +632,13 @@
   },
   "appLanguage": {
     "title": "Applikationsspråk",
-    "description": "Ändra språket i klava-nevinovata-gränssnittet"
+    "description": "Ändra språket i {{appName}}-gränssnittet"
   },
   "overlay": {
     "transcribing": "Transkriberar...",
     "processing": "Bearbetar..."
   },
   "whatsNew": {
-    "title": "Nytt i klava-nevinovata v{{version}}"
+    "title": "Nytt i {{appName}} v{{version}}"
   }
 }

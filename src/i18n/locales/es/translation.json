@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "Permisos Requeridos",
-      "description": "klava-nevinovata necesita algunos permisos para funcionar correctamente.",
+      "description": "{{appName}} necesita algunos permisos para funcionar correctamente.",
       "microphone": {
         "title": "Acceso al Micrófono",
         "description": "Necesario para escuchar tu voz para la transcripción."
@@ -172,13 +172,13 @@
       "searchPlaceholder": "Buscar modelos por nombre…",
       "rescan": {
         "label": "Volver a escanear",
-        "tooltip": "Vuelve a escanear en busca de modelos añadidos a la carpeta de modelos o a la caché de Hugging Face fuera de klava-nevinovata"
+        "tooltip": "Vuelve a escanear en busca de modelos añadidos a la carpeta de modelos o a la caché de Hugging Face fuera de {{appName}}"
       }
     },
     "general": {
       "title": "General",
       "shortcut": {
-        "title": "Atajos de klava-nevinovata",
+        "title": "Atajos de {{appName}}",
         "description": "Configura atajos de teclado para activar la grabación de voz a texto",
         "loading": "Cargando atajos...",
         "none": "No hay atajos configurados",
@@ -274,11 +274,11 @@
       },
       "autostart": {
         "label": "Iniciar al Arranque",
-        "description": "Iniciar klava-nevinovata automáticamente cuando inicies sesión en tu computadora."
+        "description": "Iniciar {{appName}} automáticamente cuando inicies sesión en tu computadora."
       },
       "showTrayIcon": {
         "label": "Mostrar Icono de Bandeja",
-        "description": "Mostrar el icono de klava-nevinovata en la bandeja del sistema."
+        "description": "Mostrar el icono de {{appName}} en la bandeja del sistema."
       },
       "overlay": {
         "style": {
@@ -486,7 +486,7 @@
       },
       "updateChecks": {
         "label": "Buscar Actualizaciones",
-        "description": "Buscar automáticamente nuevas versiones de klava-nevinovata"
+        "description": "Buscar automáticamente nuevas versiones de {{appName}}"
       },
       "soundTheme": {
         "label": "Tema de Sonido",
@@ -561,11 +561,11 @@
       "title": "Acerca de",
       "version": {
         "title": "Versión",
-        "description": "Versión actual de klava-nevinovata"
+        "description": "Versión actual de {{appName}}"
       },
       "appDataDirectory": {
         "title": "Directorio de Datos de la Aplicación",
-        "description": "Ubicación donde klava-nevinovata almacena sus datos"
+        "description": "Ubicación donde {{appName}} almacena sus datos"
       },
       "sourceCode": {
         "title": "Código Fuente",
@@ -577,12 +577,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Inferencia de alto rendimiento del modelo de reconocimiento automático de voz Whisper de OpenAI",
-          "details": "klava-nevinovata usa ggml para procesamiento de voz a texto rápido y local. Gracias al increíble trabajo de Georgi Gerganov y colaboradores."
+          "details": "{{appName}} usa ggml para procesamiento de voz a texto rápido y local. Gracias al increíble trabajo de Georgi Gerganov y colaboradores."
         }
       },
       "whatsNewUpdates": {
         "label": "Mostrar novedades",
-        "description": "Mostrar notas de la versión después de las actualizaciones de klava-nevinovata"
+        "description": "Mostrar notas de la versión después de las actualizaciones de {{appName}}"
       }
     }
   },
@@ -609,7 +609,7 @@
     "noOptionsFound": "No se encontraron opciones"
   },
   "accessibility": {
-    "permissionsDescription": "klava-nevinovata necesita permisos de accesibilidad para escribir texto transcrito.",
+    "permissionsDescription": "{{appName}} necesita permisos de accesibilidad para escribir texto transcrito.",
     "openSettings": "Abrir Ajustes del Sistema"
   },
   "errors": {
@@ -632,13 +632,13 @@
   },
   "appLanguage": {
     "title": "Idioma de la aplicación",
-    "description": "Cambia el idioma de la interfaz de klava-nevinovata"
+    "description": "Cambia el idioma de la interfaz de {{appName}}"
   },
   "overlay": {
     "transcribing": "Transcribiendo...",
     "processing": "Procesando..."
   },
   "whatsNew": {
-    "title": "Nuevo en klava-nevinovata v{{version}}"
+    "title": "Nuevo en {{appName}} v{{version}}"
   }
 }

@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "Необходими разрешения",
-      "description": "klava-nevinovata се нуждае от няколко разрешения, за да работи правилно.",
+      "description": "{{appName}} се нуждае от няколко разрешения, за да работи правилно.",
       "microphone": {
         "title": "Достъп до микрофон",
         "description": "Необходим е, за да чуе гласа ви при транскрипция."
@@ -160,7 +160,7 @@
     "general": {
       "title": "Общи",
       "shortcut": {
-        "title": "Бързи клавиши на klava-nevinovata",
+        "title": "Бързи клавиши на {{appName}}",
         "description": "Настройте клавишни комбинации за стартиране на запис за реч към текст",
         "loading": "Зареждане на бързите клавиши...",
         "none": "Няма настроени бързи клавиши",
@@ -213,7 +213,7 @@
       "searchPlaceholder": "Търсене на модели по име…",
       "rescan": {
         "label": "Сканиране отново",
-        "tooltip": "Сканиране отново за модели, добавени в папката с модели или кеша на Hugging Face извън klava-nevinovata"
+        "tooltip": "Сканиране отново за модели, добавени в папката с модели или кеша на Hugging Face извън {{appName}}"
       }
     },
     "sound": {
@@ -274,11 +274,11 @@
       },
       "autostart": {
         "label": "Стартиране със системата",
-        "description": "Автоматично стартиране на klava-nevinovata при влизане в профила ви."
+        "description": "Автоматично стартиране на {{appName}} при влизане в профила ви."
       },
       "showTrayIcon": {
         "label": "Икона в системната област",
-        "description": "Показване на иконата на klava-nevinovata в системната област."
+        "description": "Показване на иконата на {{appName}} в системната област."
       },
       "overlay": {
         "style": {
@@ -486,7 +486,7 @@
       },
       "updateChecks": {
         "label": "Проверка за актуализации",
-        "description": "Автоматична проверка за нови версии на klava-nevinovata"
+        "description": "Автоматична проверка за нови версии на {{appName}}"
       },
       "soundTheme": {
         "label": "Звукова тема",
@@ -561,11 +561,11 @@
       "title": "За приложението",
       "version": {
         "title": "Версия",
-        "description": "Текуща версия на klava-nevinovata"
+        "description": "Текуща версия на {{appName}}"
       },
       "appDataDirectory": {
         "title": "Папка с данни на приложението",
-        "description": "Мястото, където klava-nevinovata съхранява данните си"
+        "description": "Мястото, където {{appName}} съхранява данните си"
       },
       "sourceCode": {
         "title": "Изходен код",
@@ -577,12 +577,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Високопроизводително изпълнение на автоматичния модел за разпознаване на реч Whisper на OpenAI",
-          "details": "klava-nevinovata използва ggml за бързо локално реч-към-текст. Благодарности на Georgi Gerganov и сътрудниците за отличната работа."
+          "details": "{{appName}} използва ggml за бързо локално реч-към-текст. Благодарности на Georgi Gerganov и сътрудниците за отличната работа."
         }
       },
       "whatsNewUpdates": {
         "label": "Показвай новостите",
-        "description": "Показвай бележки към изданието след актуализации на klava-nevinovata"
+        "description": "Показвай бележки към изданието след актуализации на {{appName}}"
       }
     }
   },
@@ -609,7 +609,7 @@
     "noOptionsFound": "Няма намерени опции"
   },
   "accessibility": {
-    "permissionsDescription": "klava-nevinovata се нуждае от разрешения за достъпност, за да въвежда транскрибирания текст.",
+    "permissionsDescription": "{{appName}} се нуждае от разрешения за достъпност, за да въвежда транскрибирания текст.",
     "openSettings": "Отваряне на системните настройки"
   },
   "errors": {
@@ -632,13 +632,13 @@
   },
   "appLanguage": {
     "title": "Език на приложението",
-    "description": "Промяна на езика на интерфейса на klava-nevinovata"
+    "description": "Промяна на езика на интерфейса на {{appName}}"
   },
   "overlay": {
     "transcribing": "Транскрибиране...",
     "processing": "Обработка..."
   },
   "whatsNew": {
-    "title": "Ново в klava-nevinovata v{{version}}"
+    "title": "Ново в {{appName}} v{{version}}"
   }
 }

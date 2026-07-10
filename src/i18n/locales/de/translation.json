@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "Berechtigungen erforderlich",
-      "description": "klava-nevinovata benötigt einige Berechtigungen, um richtig zu funktionieren.",
+      "description": "{{appName}} benötigt einige Berechtigungen, um richtig zu funktionieren.",
       "microphone": {
         "title": "Mikrofonzugriff",
         "description": "Erforderlich, um deine Stimme für die Transkription zu hören."
@@ -172,13 +172,13 @@
       "searchPlaceholder": "Modelle nach Namen suchen…",
       "rescan": {
         "label": "Neu scannen",
-        "tooltip": "Erneut nach Modellen scannen, die außerhalb von klava-nevinovata zum Modellordner oder Hugging-Face-Cache hinzugefügt wurden"
+        "tooltip": "Erneut nach Modellen scannen, die außerhalb von {{appName}} zum Modellordner oder Hugging-Face-Cache hinzugefügt wurden"
       }
     },
     "general": {
       "title": "Allgemein",
       "shortcut": {
-        "title": "klava-nevinovata-Tastenkürzel",
+        "title": "{{appName}}-Tastenkürzel",
         "description": "Tastenkürzel für die Sprachaufnahme konfigurieren",
         "loading": "Tastenkürzel werden geladen...",
         "none": "Keine Tastenkürzel konfiguriert",
@@ -274,11 +274,11 @@
       },
       "autostart": {
         "label": "Beim Start ausführen",
-        "description": "klava-nevinovata automatisch beim Anmelden starten."
+        "description": "{{appName}} automatisch beim Anmelden starten."
       },
       "showTrayIcon": {
         "label": "Taskleistensymbol anzeigen",
-        "description": "Das klava-nevinovata-Symbol in der Taskleiste anzeigen."
+        "description": "Das {{appName}}-Symbol in der Taskleiste anzeigen."
       },
       "overlay": {
         "style": {
@@ -486,7 +486,7 @@
       },
       "updateChecks": {
         "label": "Nach Updates suchen",
-        "description": "Automatisch nach neuen Versionen von klava-nevinovata suchen"
+        "description": "Automatisch nach neuen Versionen von {{appName}} suchen"
       },
       "soundTheme": {
         "label": "Sound-Thema",
@@ -561,11 +561,11 @@
       "title": "Info",
       "version": {
         "title": "Version",
-        "description": "Aktuelle Version von klava-nevinovata"
+        "description": "Aktuelle Version von {{appName}}"
       },
       "appDataDirectory": {
         "title": "App-Datenverzeichnis",
-        "description": "Speicherort der klava-nevinovata-Daten"
+        "description": "Speicherort der {{appName}}-Daten"
       },
       "sourceCode": {
         "title": "Quellcode",
@@ -577,12 +577,12 @@
         "ggml": {
           "title": "ggml",
           "description": "Hochleistungs-Inferenz des Whisper-Spracherkennungsmodells von OpenAI",
-          "details": "klava-nevinovata verwendet ggml für schnelle, lokale Sprach-zu-Text-Verarbeitung. Dank an Georgi Gerganov und die Mitwirkenden für ihre großartige Arbeit."
+          "details": "{{appName}} verwendet ggml für schnelle, lokale Sprach-zu-Text-Verarbeitung. Dank an Georgi Gerganov und die Mitwirkenden für ihre großartige Arbeit."
         }
       },
       "whatsNewUpdates": {
         "label": "Neuerungen anzeigen",
-        "description": "Versionshinweise nach klava-nevinovata-Updates anzeigen"
+        "description": "Versionshinweise nach {{appName}}-Updates anzeigen"
       }
     }
   },
@@ -609,7 +609,7 @@
     "noOptionsFound": "Keine Optionen gefunden"
   },
   "accessibility": {
-    "permissionsDescription": "klava-nevinovata benötigt Bedienungshilfen-Berechtigungen, um transkribierten Text einzugeben.",
+    "permissionsDescription": "{{appName}} benötigt Bedienungshilfen-Berechtigungen, um transkribierten Text einzugeben.",
     "openSettings": "Systemeinstellungen öffnen"
   },
   "errors": {
@@ -632,13 +632,13 @@
   },
   "appLanguage": {
     "title": "Anwendungssprache",
-    "description": "Sprache der klava-nevinovata-Oberfläche ändern"
+    "description": "Sprache der {{appName}}-Oberfläche ändern"
   },
   "overlay": {
     "transcribing": "Transkribiere...",
     "processing": "Verarbeite..."
   },
   "whatsNew": {
-    "title": "Neu in klava-nevinovata v{{version}}"
+    "title": "Neu in {{appName}} v{{version}}"
   }
 }

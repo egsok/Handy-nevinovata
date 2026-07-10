@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "الأذونات المطلوبة",
-      "description": ".يحتاج klava-nevinovata إلى بعض الأذونات ليعمل بشكل صحيح",
+      "description": ".يحتاج {{appName}} إلى بعض الأذونات ليعمل بشكل صحيح",
       "microphone": {
         "title": "الوصول إلى الميكروفون",
         "description": ".مطلوب لسماع صوتك من أجل التفريغ الصوتي"
@@ -157,7 +157,7 @@
     "general": {
       "title": "عام",
       "shortcut": {
-        "title": "اختصارات klava-nevinovata",
+        "title": "اختصارات {{appName}}",
         "description": "إعداد اختصارات لوحة المفاتيح لبدء تسجيل التفريغ الصوتي",
         "loading": "...جاري تحميل الاختصارات",
         "none": "لا توجد اختصارات مجهزة",
@@ -253,11 +253,11 @@
       },
       "autostart": {
         "label": "التشغيل عند بدء التشغيل",
-        "description": ".بدء تشغيل klava-nevinovata تلقائياً عند تسجيل الدخول إلى جهاز الكمبيوتر الخاص بك"
+        "description": ".بدء تشغيل {{appName}} تلقائياً عند تسجيل الدخول إلى جهاز الكمبيوتر الخاص بك"
       },
       "showTrayIcon": {
         "label": "إظهار أيقونة شريط النظام",
-        "description": ".عرض أيقونة klava-nevinovata في شريط النظام"
+        "description": ".عرض أيقونة {{appName}} في شريط النظام"
       },
       "overlay": {
         "style": {
@@ -465,7 +465,7 @@
       },
       "updateChecks": {
         "label": "التحقق من وجود تحديثات",
-        "description": "التحقق تلقائياً من وجود إصدارات جديدة من klava-nevinovata"
+        "description": "التحقق تلقائياً من وجود إصدارات جديدة من {{appName}}"
       },
       "soundTheme": {
         "label": "سمة الصوت",
@@ -540,11 +540,11 @@
       "title": "حول",
       "version": {
         "title": "الإصدار",
-        "description": "الإصدار الحالي من klava-nevinovata"
+        "description": "الإصدار الحالي من {{appName}}"
       },
       "appDataDirectory": {
         "title": "مجلد بيانات التطبيق",
-        "description": "الموقع الذي يخزن فيه klava-nevinovata بياناته"
+        "description": "الموقع الذي يخزن فيه {{appName}} بياناته"
       },
       "sourceCode": {
         "title": "كود المصدر",
@@ -556,12 +556,12 @@
         "ggml": {
           "title": "ggml",
           "description": "استنتاج عالي الأداء لنموذج التعرف التلقائي على الكلام Whisper من OpenAI",
-          "details": ".يستخدم klava-nevinovata برنامج ggml لمعالجة سريعة ومحلية لتحويل الكلام إلى نص. شكراً للعمل الرائع الذي قام به Georgi Gerganov والمساهمون"
+          "details": ".يستخدم {{appName}} برنامج ggml لمعالجة سريعة ومحلية لتحويل الكلام إلى نص. شكراً للعمل الرائع الذي قام به Georgi Gerganov والمساهمون"
         }
       },
       "whatsNewUpdates": {
         "label": "إظهار الجديد",
-        "description": "إظهار ملاحظات الإصدار بعد تحديثات klava-nevinovata"
+        "description": "إظهار ملاحظات الإصدار بعد تحديثات {{appName}}"
       }
     },
     "modelSettings": {
@@ -582,7 +582,7 @@
       "searchPlaceholder": "ابحث عن النماذج بالاسم…",
       "rescan": {
         "label": "إعادة الفحص",
-        "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج klava-nevinovata"
+        "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج {{appName}}"
       }
     }
   },
@@ -609,7 +609,7 @@
     "noOptionsFound": "لم يتم العثور على خيارات"
   },
   "accessibility": {
-    "permissionsDescription": ".يحتاج klava-nevinovata إلى أذونات إمكانية الوصول لكتابة النص المفرغ",
+    "permissionsDescription": ".يحتاج {{appName}} إلى أذونات إمكانية الوصول لكتابة النص المفرغ",
     "openSettings": "فتح إعدادات النظام"
   },
   "errors": {
@@ -632,13 +632,13 @@
   },
   "appLanguage": {
     "title": "لغة التطبيق",
-    "description": "تغيير لغة واجهة klava-nevinovata"
+    "description": "تغيير لغة واجهة {{appName}}"
   },
   "overlay": {
     "transcribing": "...جاري التفريغ",
     "processing": "...جاري المعالجة"
   },
   "whatsNew": {
-    "title": "الجديد في klava-nevinovata v{{version}}"
+    "title": "الجديد في {{appName}} v{{version}}"
   }
 }

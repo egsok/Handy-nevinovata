@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "İzinler Gerekli",
-      "description": "klava-nevinovata'nin düzgün çalışabilmesi için birkaç izne ihtiyacı var.",
+      "description": "{{appName}}'nin düzgün çalışabilmesi için birkaç izne ihtiyacı var.",
       "microphone": {
         "title": "Mikrofon Erişimi",
         "description": "Sesinizi transkripsiyon için alabilmek için gereklidir."
@@ -172,13 +172,13 @@
       "searchPlaceholder": "Modelleri ada göre ara…",
       "rescan": {
         "label": "Yeniden tara",
-        "tooltip": "klava-nevinovata dışında modeller klasörüne veya Hugging Face önbelleğine eklenen modelleri yeniden tara"
+        "tooltip": "{{appName}} dışında modeller klasörüne veya Hugging Face önbelleğine eklenen modelleri yeniden tara"
       }
     },
     "general": {
       "title": "Genel",
       "shortcut": {
-        "title": "klava-nevinovata Kısayolları",
+        "title": "{{appName}} Kısayolları",
         "description": "Sesle yazma kaydını başlatmak için klavye kısayollarını yapılandırın",
         "loading": "Kısayollar yükleniyor...",
         "none": "Kısayol yapılandırılmadı",
@@ -274,11 +274,11 @@
       },
       "autostart": {
         "label": "Başlangıçta Çalıştır",
-        "description": "Bilgisayara giriş yaptığınızda klava-nevinovata otomatik olarak başlatılır."
+        "description": "Bilgisayara giriş yaptığınızda {{appName}} otomatik olarak başlatılır."
       },
       "showTrayIcon": {
         "label": "Tepsi simgesini göster",
-        "description": "klava-nevinovata simgesini sistem tepsisinde göster."
+        "description": "{{appName}} simgesini sistem tepsisinde göster."
       },
       "overlay": {
         "style": {
@@ -486,7 +486,7 @@
       },
       "updateChecks": {
         "label": "Güncellemeleri Kontrol Et",
-        "description": "klava-nevinovata için yeni sürümleri otomatik olarak kontrol eder"
+        "description": "{{appName}} için yeni sürümleri otomatik olarak kontrol eder"
       },
       "soundTheme": {
         "label": "Ses Teması",
@@ -561,11 +561,11 @@
       "title": "Hakkında",
       "version": {
         "title": "Sürüm",
-        "description": "klava-nevinovata'nin mevcut sürümü"
+        "description": "{{appName}}'nin mevcut sürümü"
       },
       "appDataDirectory": {
         "title": "Uygulama Veri Dizini",
-        "description": "klava-nevinovata'nin verilerini sakladığı konum"
+        "description": "{{appName}}'nin verilerini sakladığı konum"
       },
       "sourceCode": {
         "title": "Kaynak Kodu",
@@ -577,12 +577,12 @@
         "ggml": {
           "title": "ggml",
           "description": "OpenAI'nin Whisper otomatik konuşma tanıma modelinin yüksek performanslı çıkarımı",
-          "details": "klava-nevinovata, hızlı ve yerel konuşmadan metne dönüştürme için ggml kullanır. Georgi Gerganov ve katkıda bulunanların harika çalışmaları için teşekkür ederiz."
+          "details": "{{appName}}, hızlı ve yerel konuşmadan metne dönüştürme için ggml kullanır. Georgi Gerganov ve katkıda bulunanların harika çalışmaları için teşekkür ederiz."
         }
       },
       "whatsNewUpdates": {
         "label": "Yenilikleri Göster",
-        "description": "klava-nevinovata güncellemelerinden sonra sürüm notlarını göster"
+        "description": "{{appName}} güncellemelerinden sonra sürüm notlarını göster"
       }
     }
   },
@@ -609,7 +609,7 @@
     "noOptionsFound": "Seçenek bulunamadı"
   },
   "accessibility": {
-    "permissionsDescription": "klava-nevinovata, transkribe edilen metni yazabilmek için erişilebilirlik izinlerine ihtiyaç duyar.",
+    "permissionsDescription": "{{appName}}, transkribe edilen metni yazabilmek için erişilebilirlik izinlerine ihtiyaç duyar.",
     "openSettings": "Sistem Ayarlarını Aç"
   },
   "errors": {
@@ -632,13 +632,13 @@
   },
   "appLanguage": {
     "title": "Uygulama Dili",
-    "description": "klava-nevinovata arayüzünün dilini değiştirin"
+    "description": "{{appName}} arayüzünün dilini değiştirin"
   },
   "overlay": {
     "transcribing": "Transkribe ediliyor...",
     "processing": "İşleniyor..."
   },
   "whatsNew": {
-    "title": "klava-nevinovata v{{version}} yenilikleri"
+    "title": "{{appName}} v{{version}} yenilikleri"
   }
 }

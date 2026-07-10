@@ -92,7 +92,7 @@ jobs:
         run: |
           BODY="$(gh release view "v${{ needs.create-release.outputs.version }}" --json body -q .body --repo "${{ github.repository }}")"
           gh release edit "v${{ needs.create-release.outputs.version }}" \
-            --notes "$(printf 'See [Installation instructions](https://github.com/egsok/klava-nevinovata#download) in README.\n\n%s' "$BODY")" \
+            --notes "$(printf 'See [Installation instructions](https://github.com/${{ github.repository }}#download) in README.\n\n%s' "$BODY")" \
             --repo "${{ github.repository }}"
 
       - name: Flip draft to false
