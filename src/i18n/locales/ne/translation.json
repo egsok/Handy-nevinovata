@@ -367,6 +367,31 @@
       "voiceActivityDetection": {
         "title": "भ्वाइस एक्टिभिटी डिटेक्सन",
         "description": "रेकर्डिङबाट मौनता हटाउँछ। स्ट्रिमिङ-सक्षम मोडेलहरूले लामो VAD टेल प्रयोग गर्छन्; VAD अफ गर्दा कच्चा अडियो रेकर्ड हुन्छ।"
+      },
+      "transcriptionPrompt": {
+        "title": "ट्रान्स्क्रिप्सन प्रम्प्ट",
+        "description": "Whisper को विराम चिह्न, ठूला अक्षर र क्षेत्र-विशेष शब्दावली निर्देशित गर्न सन्दर्भ वा शैली संकेतहरू दिनुहोस्। Whisper मोडेलहरूमा मात्र लागू हुन्छ।",
+        "placeholder": "जस्तै: उचित विराम चिह्न र ठूला अक्षर प्रयोग गर्नुहोस्। यो सफ्टवेयर इन्जिनियरिङबारे प्राविधिक छलफल हो।",
+        "tokenBudgetHint": "कस्टम शब्दहरूसँग टोकन बजेट साझा गर्छ — छोटो प्रम्प्टले कस्टम शब्दहरूका लागि बढी ठाउँ छोड्छ।",
+        "languageWarning": "ट्रान्स्क्रिप्सन भाषा \"Auto\" मा सेट हुँदा, प्रम्प्टले भाषा पहिचानको शुद्धता घटाउन सक्छ।",
+        "whisperOnly": "यो सेटिङ Whisper मोडेलहरूमा मात्र लागू हुन्छ। हाल चयन गरिएको मोडेलका लागि बेवास्ता गरिनेछ।",
+        "presets": {
+          "label": "प्रिसेटहरू",
+          "none": "कुनै पनि होइन",
+          "english": "English",
+          "spanish": "Español",
+          "french": "Français",
+          "german": "Deutsch",
+          "portuguese": "Português",
+          "italian": "Italiano",
+          "russianV1": "V1 — Русский",
+          "ruEnV2": "V2 — Ru-En (code-switch)",
+          "ruEnV3": "V3 — Ru-En (instruction)",
+          "ruEnV4": "V4 — Ru-En (example)",
+          "japanese": "日本語",
+          "chineseSimplified": "中文（简体）",
+          "chineseTraditional": "中文（繁體）"
+        }
       }
     },
     "postProcessing": {
@@ -562,6 +587,14 @@
           "description": "अन-डिभाइस मेसिन लर्निङ अनुमानका लागि उच्च-प्रदर्शन टेन्सर लाइब्रेरी",
           "details": "{{appName}} को स्थानीय स्पिच-टु-टेक्स्ट transcribe.cpp र ggml मा आधारित छ। Georgi Gerganov र योगदानकर्ताहरूको उत्कृष्ट कामका लागि धन्यवाद।"
         }
+      },
+      "brand": {
+        "tagline": "स्थानीय डिक्टेसन — «{{channelName}}» च्यानलको परियोजना"
+      },
+      "telegram": {
+        "title": "टेलिग्राम च्यानल",
+        "description": "समाचार, छलफल र सहयोग — «{{channelName}}»",
+        "button": "खोल्नुहोस्"
       }
     }
   },

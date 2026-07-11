@@ -367,6 +367,31 @@
       "voiceActivityDetection": {
         "title": "Spraakactiviteitsdetectie (VAD)",
         "description": "Filter stilte uit opnames. Streaming-modellen gebruiken een langere VAD-uitloop; het uitschakelen van VAD neemt de ruwe audio op."
+      },
+      "transcriptionPrompt": {
+        "title": "Transcriptieprompt",
+        "description": "Geef context of stijlhints om Whisper te sturen bij interpunctie, hoofdlettergebruik en vakspecifieke woordenschat. Geldt alleen voor Whisper-modellen.",
+        "placeholder": "bijv. Gebruik correcte interpunctie en hoofdletters. Dit is een technische discussie over softwareontwikkeling.",
+        "tokenBudgetHint": "Deelt een tokenbudget met aangepaste woorden — een kortere prompt laat meer ruimte voor aangepaste woorden.",
+        "languageWarning": "Als de transcriptietaal op \"Auto\" staat, kan een prompt de nauwkeurigheid van taaldetectie verminderen.",
+        "whisperOnly": "Deze instelling geldt alleen voor Whisper-modellen. Voor het geselecteerde model wordt ze genegeerd.",
+        "presets": {
+          "label": "Voorinstellingen",
+          "none": "Geen",
+          "english": "English",
+          "spanish": "Español",
+          "french": "Français",
+          "german": "Deutsch",
+          "portuguese": "Português",
+          "italian": "Italiano",
+          "russianV1": "V1 — Русский",
+          "ruEnV2": "V2 — Ru-En (code-switch)",
+          "ruEnV3": "V3 — Ru-En (instruction)",
+          "ruEnV4": "V4 — Ru-En (example)",
+          "japanese": "日本語",
+          "chineseSimplified": "中文（简体）",
+          "chineseTraditional": "中文（繁體）"
+        }
       }
     },
     "postProcessing": {
@@ -562,6 +587,14 @@
           "description": "Krachtige tensorbibliotheek voor lokale AI-verwerking",
           "details": "{{appName}}'s lokale spraak-naar-tekst is gebouwd op transcribe.cpp en ggml. Met dank aan het geweldige werk van Georgi Gerganov en alle bijdragers."
         }
+      },
+      "brand": {
+        "tagline": "Lokaal dicteren — een project van het kanaal “{{channelName}}”"
+      },
+      "telegram": {
+        "title": "Telegram-kanaal",
+        "description": "Nieuws, discussies en ondersteuning — “{{channelName}}”",
+        "button": "Openen"
       }
     }
   },
