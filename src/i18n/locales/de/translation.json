@@ -553,6 +553,9 @@
         "description": "Quellcode ansehen und beitragen",
         "button": "Auf GitHub ansehen"
       },
+      "brand": {
+        "tagline": "Lokales Diktieren — ein Projekt des Kanals „{{channelName}}“"
+      },
       "telegram": {
         "title": "Telegram-Kanal",
         "description": "Neuigkeiten, Diskussionen und Support — „{{channelName}}“",

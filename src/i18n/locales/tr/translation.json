@@ -553,6 +553,9 @@
         "description": "Kaynak kodunu görüntüle ve katkıda bulun",
         "button": "GitHub'da Görüntüle"
       },
+      "brand": {
+        "tagline": "Yerel dikte — “{{channelName}}” kanalının projesi"
+      },
       "telegram": {
         "title": "Telegram kanalı",
         "description": "Haberler, tartışmalar ve destek — “{{channelName}}”",

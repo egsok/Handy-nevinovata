@@ -553,6 +553,9 @@
         "description": "View source code and contribute",
         "button": "View on GitHub"
       },
+      "brand": {
+        "tagline": "Local dictation — a project of the “{{channelName}}” channel"
+      },
       "telegram": {
         "title": "Telegram channel",
         "description": "News, discussions and support — “{{channelName}}”",

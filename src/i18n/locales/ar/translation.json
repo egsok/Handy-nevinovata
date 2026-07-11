@@ -531,6 +531,9 @@
         "description": "عرض كود المصدر والمساهمة",
         "button": "عرض على GitHub"
       },
+      "brand": {
+        "tagline": "إملاء محلي — مشروع من قناة «{{channelName}}»"
+      },
       "telegram": {
         "title": "قناة تيليجرام",
         "description": "الأخبار والنقاشات والدعم — «{{channelName}}»",

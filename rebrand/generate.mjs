@@ -1,4 +1,8 @@
-// klava-nevinovata brand asset generator — v3 (2026-07-09)
+// klava-nevinovata brand asset generator — v4 (2026-07-11)
+// v4: halo got an ink outline (matches capsule), cradle arc hugs the capsule
+//     (uniform 55-unit gap; the old deep bowl wasted ~15% of canvas height),
+//     mark enlarged +20%, composition vertically balanced (was 9px from top).
+//     Tray glyph: uniform 6-unit stroke (halo was 4.6 — sub-pixel at 16px).
 // v3: keycap dropped — mark is now "mic + halo" (keycap didn't survive 16-24px;
 //     Egor's call). Klava meaning is carried by the wordmark.
 // v2: increased glyph scale.
@@ -23,28 +27,32 @@ const MONO_INK = "#1E1913";   // tray icons on light taskbar (*_dark suffix)
 const svgOpen = (vb) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">`;
 
 // ---- app logo 1024: big mic + halo on warm plate ----
+// Halo is two concentric strokes (ink under amber) — SVG strokes can't have
+// their own outline. Halo is drawn first so its lower edge tucks behind the
+// capsule.
 const logo = `${svgOpen("0 0 1024 1024")}
   <rect x="32" y="32" width="960" height="960" rx="212" fill="${PLATE}"/>
-  <ellipse cx="530" cy="150" rx="240" ry="75" fill="none" stroke="${AMBER}" stroke-width="52" transform="rotate(-9 530 150)"/>
-  <rect x="362" y="292" width="300" height="356" rx="150" fill="${AMBER_DEEP}" stroke="${INK}" stroke-width="28"/>
-  <path d="M 282 590 a 230 230 0 0 0 460 0" fill="none" stroke="${INK}" stroke-width="44" stroke-linecap="round"/>
-  <line x1="512" y1="820" x2="512" y2="890" stroke="${INK}" stroke-width="44" stroke-linecap="round"/>
+  <ellipse cx="524" cy="238" rx="258" ry="80" fill="none" stroke="${INK}" stroke-width="94" transform="rotate(-8 524 238)"/>
+  <ellipse cx="524" cy="238" rx="258" ry="80" fill="none" stroke="${AMBER}" stroke-width="62" transform="rotate(-8 524 238)"/>
+  <rect x="332" y="347" width="360" height="420" rx="180" fill="${AMBER_DEEP}" stroke="${INK}" stroke-width="30"/>
+  <path d="M 238 587 a 274 274 0 0 0 548 0" fill="none" stroke="${INK}" stroke-width="48" stroke-linecap="round"/>
+  <line x1="512" y1="861" x2="512" y2="895" stroke="${INK}" stroke-width="48" stroke-linecap="round"/>
 </svg>`;
 
 // ---- tray icons 64: mic + halo, glyph fills the canvas ----
 // idle = outline capsule, recording = filled capsule, transcribing = three dots.
 const HALO = (c) =>
-  `<ellipse cx="33" cy="7" rx="17" ry="5" fill="none" stroke="${c}" stroke-width="4.6" transform="rotate(-9 33 7)"/>`;
-const ARC = (c, sw = 5) =>
-  `<path d="M 14 38 a 18 18 0 0 0 36 0" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/>
-   <line x1="32" y1="56" x2="32" y2="61" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/>`;
-const CAPSULE = (attrs) => `<rect x="21" y="15" width="22" height="28" rx="11" ${attrs}/>`;
+  `<ellipse cx="32.5" cy="8" rx="19" ry="5.8" fill="none" stroke="${c}" stroke-width="6" transform="rotate(-9 32.5 8)"/>`;
+const ARC = (c, sw = 6) =>
+  `<path d="M 12 40 a 20 20 0 0 0 40 0" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/>
+   <line x1="32" y1="59.5" x2="32" y2="60.5" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/>`;
+const CAPSULE = (attrs) => `<rect x="19.5" y="17" width="25" height="28" rx="12.5" ${attrs}/>`;
 const DOTS = (c) =>
-  `<circle cx="20" cy="29" r="4.5" fill="${c}"/><circle cx="32" cy="29" r="4.5" fill="${c}"/><circle cx="44" cy="29" r="4.5" fill="${c}"/>`;
+  `<circle cx="19" cy="31" r="5" fill="${c}"/><circle cx="32" cy="31" r="5" fill="${c}"/><circle cx="45" cy="31" r="5" fill="${c}"/>`;
 
 function trayMono(c, state) {
   let body = "";
-  if (state === "idle") body = CAPSULE(`fill="none" stroke="${c}" stroke-width="5"`) + ARC(c);
+  if (state === "idle") body = CAPSULE(`fill="none" stroke="${c}" stroke-width="6"`) + ARC(c);
   if (state === "recording") body = CAPSULE(`fill="${c}"`) + ARC(c);
   if (state === "transcribing") body = DOTS(c) + ARC(c);
   return `${svgOpen("0 0 64 64")}${HALO(c)}${body}</svg>`;

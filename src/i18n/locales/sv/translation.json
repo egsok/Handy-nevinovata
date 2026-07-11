@@ -553,6 +553,9 @@
         "description": "Visa källkod och bidra",
         "button": "Visa på GitHub"
       },
+      "brand": {
+        "tagline": "Lokal diktering — ett projekt från kanalen ”{{channelName}}”"
+      },
       "telegram": {
         "title": "Telegram-kanal",
         "description": "Nyheter, diskussioner och support — ”{{channelName}}”",

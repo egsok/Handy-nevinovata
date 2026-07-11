@@ -553,6 +553,9 @@
         "description": "Vedi e contribuisci al codice sorgente",
         "button": "Vedi su GitHub"
       },
+      "brand": {
+        "tagline": "Dettatura locale — un progetto del canale «{{channelName}}»"
+      },
       "telegram": {
         "title": "Canale Telegram",
         "description": "Novità, discussioni e supporto — «{{channelName}}»",

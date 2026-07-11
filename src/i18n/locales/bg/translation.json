@@ -553,6 +553,9 @@
         "description": "Преглед на изходния код и принос",
         "button": "Вижте в GitHub"
       },
+      "brand": {
+        "tagline": "Локална диктовка — проект на канала „{{channelName}}“"
+      },
       "telegram": {
         "title": "Telegram канал",
         "description": "Новини, дискусии и поддръжка — „{{channelName}}“",

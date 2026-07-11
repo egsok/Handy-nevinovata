@@ -553,6 +553,9 @@
         "description": "檢視原始碼並參與貢獻",
         "button": "在 GitHub 上檢視"
       },
+      "brand": {
+        "tagline": "本地聽寫 — 「{{channelName}}」頻道出品"
+      },
       "telegram": {
         "title": "Telegram 頻道",
         "description": "新聞、討論與支援 — 「{{channelName}}」",

@@ -5,6 +5,8 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { SettingsGroup } from "../../ui/SettingsGroup";
 import { SettingContainer } from "../../ui/SettingContainer";
 import { Button } from "../../ui/Button";
+import AppMark from "../../icons/AppMark";
+import HandyTextLogo from "../../icons/HandyTextLogo";
 import { AppDataDirectory } from "../AppDataDirectory";
 import { AppLanguageSelector } from "../AppLanguageSelector";
 import { LogDirectory } from "../debug";
@@ -30,17 +32,20 @@ export const AboutSettings: React.FC = () => {
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
+      <div className="flex items-center gap-4 border border-mid-gray/20 rounded-lg p-4">
+        <AppMark width={52} height={52} className="shrink-0" />
+        <div className="min-w-0">
+          <HandyTextLogo width={180} />
+          <div className="text-xs text-mid-gray mt-1 truncate">
+            {/* eslint-disable-next-line i18next/no-literal-string */}
+            <span className="font-mono">v{version} · </span>
+            {t("settings.about.brand.tagline")}
+          </div>
+        </div>
+      </div>
+
       <SettingsGroup title={t("settings.about.title")}>
         <AppLanguageSelector descriptionMode="tooltip" grouped={true} />
-        <SettingContainer
-          title={t("settings.about.version.title")}
-          description={t("settings.about.version.description")}
-          grouped={true}
-        >
-          {/* eslint-disable-next-line i18next/no-literal-string */}
-          <span className="text-sm font-mono">v{version}</span>
-        </SettingContainer>
-
         <SettingContainer
           title={t("settings.about.sourceCode.title")}
           description={t("settings.about.sourceCode.description")}

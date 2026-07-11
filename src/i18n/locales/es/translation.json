@@ -553,6 +553,9 @@
         "description": "Ver código fuente y contribuir",
         "button": "Ver en GitHub"
       },
+      "brand": {
+        "tagline": "Dictado local — un proyecto del canal «{{channelName}}»"
+      },
       "telegram": {
         "title": "Canal de Telegram",
         "description": "Noticias, debates y soporte — «{{channelName}}»",

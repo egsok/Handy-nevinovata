@@ -553,6 +553,9 @@
         "description": "查看源代码并贡献",
         "button": "在 GitHub 上查看"
       },
+      "brand": {
+        "tagline": "本地听写 — “{{channelName}}”频道出品"
+      },
       "telegram": {
         "title": "Telegram 频道",
         "description": "新闻、讨论与支持 — “{{channelName}}”",
