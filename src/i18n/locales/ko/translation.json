@@ -576,6 +576,9 @@
         "description": "소스 코드 보기 및 기여",
         "button": "GitHub에서 보기"
       },
+      "brand": {
+        "tagline": "로컬 받아쓰기 — “{{channelName}}” 채널의 프로젝트"
+      },
       "telegram": {
         "title": "텔레그램 채널",
         "description": "소식, 토론 및 지원 — “{{channelName}}”",

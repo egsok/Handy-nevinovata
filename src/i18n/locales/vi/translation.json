@@ -576,6 +576,9 @@
         "description": "Xem mã nguồn và đóng góp",
         "button": "Xem trên GitHub"
       },
+      "brand": {
+        "tagline": "Đọc chính tả cục bộ — dự án của kênh “{{channelName}}”"
+      },
       "telegram": {
         "title": "Kênh Telegram",
         "description": "Tin tức, thảo luận và hỗ trợ — “{{channelName}}”",

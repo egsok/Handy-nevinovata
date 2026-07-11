@@ -576,6 +576,9 @@
         "description": "ソースコードを見て貢献する",
         "button": "GitHub で見る"
       },
+      "brand": {
+        "tagline": "ローカル音声入力 —「{{channelName}}」チャンネルのプロジェクト"
+      },
       "telegram": {
         "title": "Telegramチャンネル",
         "description": "ニュース・交流・サポート —「{{channelName}}」",

@@ -576,6 +576,9 @@
         "description": "צפה בקוד המקור ותרום",
         "button": "צפה ב-GitHub"
       },
+      "brand": {
+        "tagline": "הכתבה מקומית — פרויקט של ערוץ «{{channelName}}»"
+      },
       "telegram": {
         "title": "ערוץ טלגרם",
         "description": "חדשות, דיונים ותמיכה — «{{channelName}}»",

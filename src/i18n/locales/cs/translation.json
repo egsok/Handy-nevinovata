@@ -576,6 +576,9 @@
         "description": "Zobrazit zdrojový kód a přispět",
         "button": "Zobrazit na GitHubu"
       },
+      "brand": {
+        "tagline": "Lokální diktování — projekt kanálu „{{channelName}}“"
+      },
       "telegram": {
         "title": "Telegramový kanál",
         "description": "Novinky, diskuse a podpora — „{{channelName}}“",
