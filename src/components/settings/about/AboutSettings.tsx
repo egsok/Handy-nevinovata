@@ -38,7 +38,7 @@ export const AboutSettings: React.FC = () => {
         <AppMark width={52} height={52} className="shrink-0" />
         <div className="min-w-0">
           <HandyTextLogo width={180} />
-          <div className="text-xs text-mid-gray mt-1 truncate">
+          <div className="text-xs text-mid-gray mt-1">
             {/* eslint-disable-next-line i18next/no-literal-string */}
             <span className="font-mono">v{version} · </span>
             {t("settings.about.brand.tagline")}
