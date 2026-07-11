@@ -553,6 +553,11 @@
         "description": "צפה בקוד המקור ותרום",
         "button": "צפה ב-GitHub"
       },
+      "telegram": {
+        "title": "ערוץ טלגרם",
+        "description": "חדשות, דיונים ותמיכה — «{{channelName}}»",
+        "button": "פתח"
+      },
       "acknowledgments": {
         "title": "תודות",
         "whisper": {

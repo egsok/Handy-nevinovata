@@ -553,6 +553,11 @@
         "description": "查看源代码并贡献",
         "button": "在 GitHub 上查看"
       },
+      "telegram": {
+        "title": "Telegram 频道",
+        "description": "新闻、讨论与支持 — “{{channelName}}”",
+        "button": "打开"
+      },
       "acknowledgments": {
         "title": "致谢",
         "whisper": {

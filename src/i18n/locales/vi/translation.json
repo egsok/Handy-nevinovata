@@ -553,6 +553,11 @@
         "description": "Xem mã nguồn và đóng góp",
         "button": "Xem trên GitHub"
       },
+      "telegram": {
+        "title": "Kênh Telegram",
+        "description": "Tin tức, thảo luận và hỗ trợ — “{{channelName}}”",
+        "button": "Mở"
+      },
       "acknowledgments": {
         "title": "Lời cảm ơn",
         "whisper": {

@@ -3,7 +3,7 @@ import { initReactI18next } from "react-i18next";
 import { locale } from "@tauri-apps/plugin-os";
 import { LANGUAGE_METADATA } from "./languages";
 import { commands } from "@/bindings";
-import { APP_NAME } from "@/lib/constants/brand";
+import { APP_NAME, TELEGRAM_CHANNEL_NAME } from "@/lib/constants/brand";
 import {
   getLanguageDirection,
   updateDocumentDirection,
@@ -82,6 +82,7 @@ i18n.use(initReactI18next).init({
     escapeValue: false, // React already escapes values
     defaultVariables: {
       appName: APP_NAME, // brand name is not translated; see CONTRIBUTING_TRANSLATIONS.md
+      channelName: TELEGRAM_CHANNEL_NAME, // channel name is a brand too
     },
   },
   react: {

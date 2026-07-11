@@ -553,6 +553,11 @@
         "description": "Преглед на изходния код и принос",
         "button": "Вижте в GitHub"
       },
+      "telegram": {
+        "title": "Telegram канал",
+        "description": "Новини, дискусии и поддръжка — „{{channelName}}“",
+        "button": "Отвори"
+      },
       "acknowledgments": {
         "title": "Благодарности",
         "whisper": {

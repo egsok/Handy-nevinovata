@@ -85,3 +85,24 @@
 .logo-primary {
   fill: var(--color-logo-primary);
 }
+
+/* Range inputs: the track is painted inline per component, but the thumb
+   falls back to the webview's native rendering (blue in current Chromium)
+   unless explicitly restyled. */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-background-ui);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-background-ui);
+}

@@ -553,6 +553,11 @@
         "description": "Переглянути вихідний код та зробити внесок",
         "button": "Переглянути на GitHub"
       },
+      "telegram": {
+        "title": "Телеграм-канал",
+        "description": "Новини, обговорення та підтримка — «{{channelName}}»",
+        "button": "Відкрити"
+      },
       "acknowledgments": {
         "title": "Подяки",
         "whisper": {

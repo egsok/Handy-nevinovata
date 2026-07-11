@@ -553,6 +553,11 @@
         "description": "Quellcode ansehen und beitragen",
         "button": "Auf GitHub ansehen"
       },
+      "telegram": {
+        "title": "Telegram-Kanal",
+        "description": "Neuigkeiten, Diskussionen und Support — „{{channelName}}“",
+        "button": "Öffnen"
+      },
       "acknowledgments": {
         "title": "Danksagungen",
         "whisper": {
