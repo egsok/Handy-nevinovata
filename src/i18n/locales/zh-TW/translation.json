@@ -576,6 +576,11 @@
         "description": "檢視原始碼並參與貢獻",
         "button": "在 GitHub 上檢視"
       },
+      "telegram": {
+        "title": "Telegram 頻道",
+        "description": "新聞、討論與支援 — 「{{channelName}}」",
+        "button": "開啟"
+      },
       "acknowledgments": {
         "title": "致謝",
         "ggml": {

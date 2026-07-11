@@ -555,6 +555,11 @@
         "description": "عرض كود المصدر والمساهمة",
         "button": "عرض على GitHub"
       },
+      "telegram": {
+        "title": "قناة تيليجرام",
+        "description": "الأخبار والنقاشات والدعم — «{{channelName}}»",
+        "button": "فتح"
+      },
       "acknowledgments": {
         "title": "شكر وتقدير",
         "ggml": {

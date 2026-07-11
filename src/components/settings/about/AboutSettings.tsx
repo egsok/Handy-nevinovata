@@ -10,7 +10,7 @@ import { AppLanguageSelector } from "../AppLanguageSelector";
 import { ShowWhatsNewOnUpdate } from "../ShowWhatsNewOnUpdate";
 import { ThemeSelector } from "../ThemeSelector";
 import { LogDirectory } from "../debug";
-import { REPO_URL } from "@/lib/constants/brand";
+import { REPO_URL, TELEGRAM_URL_ABOUT } from "@/lib/constants/brand";
 
 export const AboutSettings: React.FC = () => {
   const { t } = useTranslation();
@@ -57,6 +57,20 @@ export const AboutSettings: React.FC = () => {
             onClick={() => openUrl(REPO_URL)}
           >
             {t("settings.about.sourceCode.button")}
+          </Button>
+        </SettingContainer>
+
+        <SettingContainer
+          title={t("settings.about.telegram.title")}
+          description={t("settings.about.telegram.description")}
+          grouped={true}
+        >
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => openUrl(TELEGRAM_URL_ABOUT)}
+          >
+            {t("settings.about.telegram.button")}
           </Button>
         </SettingContainer>
 

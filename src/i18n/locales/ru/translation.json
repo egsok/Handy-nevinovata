@@ -576,6 +576,11 @@
         "description": "Просмотреть исходный код и внести свой вклад",
         "button": "Посмотреть на GitHub"
       },
+      "telegram": {
+        "title": "Телеграм-канал",
+        "description": "Новости, обсуждения и поддержка — «{{channelName}}»",
+        "button": "Открыть"
+      },
       "acknowledgments": {
         "title": "Благодарности",
         "ggml": {

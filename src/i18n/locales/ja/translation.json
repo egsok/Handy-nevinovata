@@ -576,6 +576,11 @@
         "description": "ソースコードを見て貢献する",
         "button": "GitHub で見る"
       },
+      "telegram": {
+        "title": "Telegramチャンネル",
+        "description": "ニュース・交流・サポート —「{{channelName}}」",
+        "button": "開く"
+      },
       "acknowledgments": {
         "title": "謝辞",
         "ggml": {

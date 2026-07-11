@@ -576,6 +576,11 @@
         "description": "소스 코드 보기 및 기여",
         "button": "GitHub에서 보기"
       },
+      "telegram": {
+        "title": "텔레그램 채널",
+        "description": "소식, 토론 및 지원 — “{{channelName}}”",
+        "button": "열기"
+      },
       "acknowledgments": {
         "title": "감사의 말",
         "ggml": {

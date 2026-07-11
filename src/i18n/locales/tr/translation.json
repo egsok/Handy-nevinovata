@@ -576,6 +576,11 @@
         "description": "Kaynak kodunu görüntüle ve katkıda bulun",
         "button": "GitHub'da Görüntüle"
       },
+      "telegram": {
+        "title": "Telegram kanalı",
+        "description": "Haberler, tartışmalar ve destek — “{{channelName}}”",
+        "button": "Aç"
+      },
       "acknowledgments": {
         "title": "Teşekkürler",
         "ggml": {

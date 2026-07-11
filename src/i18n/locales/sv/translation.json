@@ -576,6 +576,11 @@
         "description": "Visa källkod och bidra",
         "button": "Visa på GitHub"
       },
+      "telegram": {
+        "title": "Telegram-kanal",
+        "description": "Nyheter, diskussioner och support — ”{{channelName}}”",
+        "button": "Öppna"
+      },
       "acknowledgments": {
         "title": "Tack till",
         "ggml": {

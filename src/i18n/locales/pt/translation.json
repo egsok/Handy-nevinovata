@@ -576,6 +576,11 @@
         "description": "Visualizar código fonte e contribuir",
         "button": "Ver no GitHub"
       },
+      "telegram": {
+        "title": "Canal no Telegram",
+        "description": "Notícias, discussões e suporte — “{{channelName}}”",
+        "button": "Abrir"
+      },
       "acknowledgments": {
         "title": "Agradecimentos",
         "ggml": {

@@ -576,6 +576,11 @@
         "description": "Zobrazit zdrojový kód a přispět",
         "button": "Zobrazit na GitHubu"
       },
+      "telegram": {
+        "title": "Telegramový kanál",
+        "description": "Novinky, diskuse a podpora — „{{channelName}}“",
+        "button": "Otevřít"
+      },
       "acknowledgments": {
         "title": "Poděkování",
         "ggml": {
