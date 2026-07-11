@@ -2,7 +2,9 @@
 // v4: halo got an ink outline (matches capsule), cradle arc hugs the capsule
 //     (uniform 55-unit gap; the old deep bowl wasted ~15% of canvas height),
 //     mark enlarged +20%, composition vertically balanced (was 9px from top).
-//     Tray glyph: uniform 6-unit stroke (halo was 4.6 — sub-pixel at 16px).
+//     Tray glyph iter2 (per Windows mic reference): cradle hugs the capsule
+//     (~1px gap at 16px), narrower capsule, compact halo kept fully inside
+//     the canvas (the tilt widens the ellipse bbox — iter1 clipped 1.5 units).
 // v3: keycap dropped — mark is now "mic + halo" (keycap didn't survive 16-24px;
 //     Egor's call). Klava meaning is carried by the wordmark.
 // v2: increased glyph scale.
@@ -42,17 +44,17 @@ const logo = `${svgOpen("0 0 1024 1024")}
 // ---- tray icons 64: mic + halo, glyph fills the canvas ----
 // idle = outline capsule, recording = filled capsule, transcribing = three dots.
 const HALO = (c) =>
-  `<ellipse cx="32.5" cy="8" rx="19" ry="5.8" fill="none" stroke="${c}" stroke-width="6" transform="rotate(-9 32.5 8)"/>`;
-const ARC = (c, sw = 6) =>
-  `<path d="M 12 40 a 20 20 0 0 0 40 0" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/>
-   <line x1="32" y1="59.5" x2="32" y2="60.5" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/>`;
-const CAPSULE = (attrs) => `<rect x="19.5" y="17" width="25" height="28" rx="12.5" ${attrs}/>`;
+  `<ellipse cx="32.5" cy="9.2" rx="16.5" ry="4.8" fill="none" stroke="${c}" stroke-width="5.5" transform="rotate(-9 32.5 9.2)"/>`;
+const ARC = (c, sw = 5.5) =>
+  `<path d="M 12.5 37.5 a 19.5 19.5 0 0 0 39 0" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/>
+   <line x1="32" y1="57" x2="32" y2="59.5" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/>`;
+const CAPSULE = (attrs) => `<rect x="21.5" y="18" width="21" height="30" rx="10.5" ${attrs}/>`;
 const DOTS = (c) =>
-  `<circle cx="19" cy="31" r="5" fill="${c}"/><circle cx="32" cy="31" r="5" fill="${c}"/><circle cx="45" cy="31" r="5" fill="${c}"/>`;
+  `<circle cx="19" cy="33" r="4.8" fill="${c}"/><circle cx="32" cy="33" r="4.8" fill="${c}"/><circle cx="45" cy="33" r="4.8" fill="${c}"/>`;
 
 function trayMono(c, state) {
   let body = "";
-  if (state === "idle") body = CAPSULE(`fill="none" stroke="${c}" stroke-width="6"`) + ARC(c);
+  if (state === "idle") body = CAPSULE(`fill="none" stroke="${c}" stroke-width="5.5"`) + ARC(c);
   if (state === "recording") body = CAPSULE(`fill="${c}"`) + ARC(c);
   if (state === "transcribing") body = DOTS(c) + ARC(c);
   return `${svgOpen("0 0 64 64")}${HALO(c)}${body}</svg>`;
