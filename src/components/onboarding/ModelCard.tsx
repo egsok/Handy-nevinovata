@@ -171,7 +171,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
               <Badge variant="primary">{t("onboarding.recommended")}</Badge>
             )}
             {status === "active" && (
-              <Badge variant="primary">
+              <Badge variant="state">
                 <Check className="w-3 h-3 mr-1" />
                 {t("modelSelector.active")}
               </Badge>

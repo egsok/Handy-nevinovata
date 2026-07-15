@@ -19,14 +19,21 @@
                                           shouts; this reads at 4.8:1 and sits. */
   --light-color-mid-gray: #3a2a7a; /* violet-ink — captions, hairlines */
 
-  /* Ink wall */
-  --dark-color-text: #ece3cd; /* cream on the wall */
-  --dark-color-background: #160f2c; /* wall */
-  --dark-color-surface: #1e1640; /* wall-2 — the tools section of the wall */
+  /* Ink wall.
+
+     Printed a stop lighter than the poster palette: cream on #160f2c runs at
+     14.4:1, which is right for a cover and glares in a window full of rows.
+     The wall moves to the brand's second-pass tone and the impression eases to
+     11.4:1 — comfortable, still unmistakably an ink wall.
+     (If it still tires the eye, the next stop down is #211a44 / #2d2464 /
+     #d2c9b2 / #9c9179 at 9.8:1 — softer, but the wall starts reading grey.) */
+  --dark-color-text: #ddd4bd; /* cream, one stop off full strength */
+  --dark-color-background: #1e1640; /* wall-2 */
+  --dark-color-surface: #2a2060; /* the sheet, lifted to match */
   --dark-color-background-ui: #e11b76; /* magenta — actions */
   --dark-color-logo-primary: #ff2f88; /* brighter magenta — accent text needs it
-                                         to clear the wall (5.3:1 vs 4.1:1) */
-  --dark-color-mid-gray: #c8bda1; /* cream-mut — captions, hairlines */
+                                         to clear the wall (4.8:1) */
+  --dark-color-mid-gray: #a99e83; /* cream-mut, eased with the text */
 
   /* Second ink, in two roles.
 

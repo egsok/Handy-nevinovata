@@ -19,10 +19,10 @@ mod palette {
         (b as u32) << 16 | (g as u32) << 8 | (r as u32)
     }
 
-    /// --dark-color-background #160f2c
-    pub const WALL: u32 = colorref(0x16, 0x0f, 0x2c);
-    /// --dark-color-text #ece3cd
-    pub const CREAM: u32 = colorref(0xec, 0xe3, 0xcd);
+    /// --dark-color-background #1e1640
+    pub const WALL: u32 = colorref(0x1e, 0x16, 0x40);
+    /// --dark-color-text #ddd4bd
+    pub const CREAM: u32 = colorref(0xdd, 0xd4, 0xbd);
     /// --light-color-background #e9dfc8
     pub const KRAFT: u32 = colorref(0xe9, 0xdf, 0xc8);
     /// --light-color-text #2c1a72

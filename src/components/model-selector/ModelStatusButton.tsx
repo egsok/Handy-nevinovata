@@ -42,11 +42,11 @@ const ModelStatusButton: React.FC<ModelStatusButtonProps> = ({
       case "error":
         return "bg-red-400";
       case "unloaded":
-        return "bg-mid-gray/60";
+        return "bg-mid-gray/35";
       case "none":
         return "bg-red-400";
       default:
-        return "bg-mid-gray/60";
+        return "bg-mid-gray/35";
     }
   };
 
