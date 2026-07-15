@@ -216,7 +216,10 @@ export const TranscriptionPrompt: React.FC<TranscriptionPromptProps> =
             disabled={isUpdating("transcription_prompt")}
           />
           <div className="flex items-start justify-between gap-2 text-xs">
-            <div className="flex flex-col gap-0.5 text-logo-primary">
+            {/* A standing note, not an alarm: the text stays quiet and the
+                magenta says "look here" as a rule in the margin — the way a
+                proof gets marked up — instead of shouting in full colour. */}
+            <div className="flex flex-col gap-0.5 border-s-2 border-logo-primary ps-2 text-mid-gray">
               {!isWhisper && (
                 <span>
                   {t("settings.advanced.transcriptionPrompt.whisperOnly")}

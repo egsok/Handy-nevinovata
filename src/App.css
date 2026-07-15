@@ -22,8 +22,11 @@
   /* Typography settings */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Ink on paper reads thinner than cream on a wall: dark-on-light loses the
+     halation that fattens light-on-dark, and `antialiased` thins it further.
+     Kraft keeps full-weight rendering; the wall gets `antialiased` below. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
   -webkit-text-size-adjust: 100%;
 
   --scrollbar-thumb: color-mix(in srgb, var(--color-text), transparent 85%);
@@ -56,6 +59,8 @@
   :root {
     /* Just a bit darker than the (already dark) background, keeping its warm tint */
     --color-log-surface: color-mix(in srgb, var(--color-background), black 15%);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -67,6 +72,8 @@
  * `system` (or no attribute) leaves the OS in charge.
  */
 :root[data-theme="light"] {
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
   --color-text: var(--light-color-text);
   --color-background: var(--light-color-background);
   --color-surface: var(--light-color-surface);
@@ -76,6 +83,8 @@
 }
 
 :root[data-theme="dark"] {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   --color-text: var(--dark-color-text);
   --color-background: var(--dark-color-background);
   --color-surface: var(--dark-color-surface);
