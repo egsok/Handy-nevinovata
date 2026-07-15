@@ -23,9 +23,10 @@ export const SettingsGroup: React.FC<SettingsGroupProps> = ({
           )}
         </div>
       )}
-      {/* No border: the sheet is already a shade off the ground, and outlining it
-          too cut the page into slabs. Colour alone marks the edge. */}
-      <div className="bg-surface rounded-lg overflow-visible">
+      {/* Grouped rows sit on the page itself, fenced by a hairline — same as the
+          history list. Giving them a lighter fill turned each group into an
+          island and chopped the page into slabs. */}
+      <div className="bg-background border border-mid-gray/20 rounded-lg overflow-visible">
         <div className="divide-y divide-mid-gray/20">{children}</div>
       </div>
     </div>

@@ -219,7 +219,7 @@ export const TranscriptionPrompt: React.FC<TranscriptionPromptProps> =
             {/* A standing note, not an alarm: the text stays quiet and the
                 magenta says "look here" as a rule in the margin — the way a
                 proof gets marked up — instead of shouting in full colour. */}
-            <div className="flex flex-col gap-0.5 border-s-2 border-logo-primary ps-2 text-mid-gray">
+            <div className="flex flex-col gap-0.5 border-s-2 border-logo-primary ps-2 text-text/90">
               {!isWhisper && (
                 <span>
                   {t("settings.advanced.transcriptionPrompt.whisperOnly")}
@@ -250,7 +250,7 @@ export const TranscriptionPrompt: React.FC<TranscriptionPromptProps> =
             </div>
           </div>
           {localValue.length > 0 && (
-            <span className="text-mid-gray/60 text-xs">
+            <span className="text-mid-gray text-xs">
               {t("settings.advanced.transcriptionPrompt.tokenBudgetHint")}
             </span>
           )}

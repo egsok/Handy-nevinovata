@@ -11,8 +11,6 @@
   /* Kraft sheet */
   --light-color-text: #2c1a72; /* violet — body text on paper */
   --light-color-background: #e9dfc8; /* kraft cream */
-  --light-color-surface: #f2ecdc; /* lighter sheet — cards read as paper laid on
-                                     the kraft, not as flat fenced-off regions */
   --light-color-background-ui: #e11b76; /* magenta — actions */
   --light-color-logo-primary: #b81261; /* the roller's deep magenta. Full-strength
                                           #e11b76 as text on kraft is 3.4:1 and
@@ -29,7 +27,6 @@
      #d2c9b2 / #9c9179 at 9.8:1 — softer, but the wall starts reading grey.) */
   --dark-color-text: #ddd4bd; /* cream, one stop off full strength */
   --dark-color-background: #1e1640; /* wall-2 */
-  --dark-color-surface: #2a2060; /* the sheet, lifted to match */
   --dark-color-background-ui: #e11b76; /* magenta — actions */
   --dark-color-logo-primary: #ff2f88; /* brighter magenta — accent text needs it
                                          to clear the wall (4.8:1) */
@@ -58,7 +55,6 @@
      below, or is forced by `data-theme` (see App.css). */
   --color-text: var(--light-color-text);
   --color-background: var(--light-color-background);
-  --color-surface: var(--light-color-surface);
   --color-background-ui: var(--light-color-background-ui);
   --color-logo-primary: var(--light-color-logo-primary);
   --color-mid-gray: var(--light-color-mid-gray);
@@ -69,7 +65,6 @@
   :root {
     --color-text: var(--dark-color-text);
     --color-background: var(--dark-color-background);
-    --color-surface: var(--dark-color-surface);
     --color-background-ui: var(--dark-color-background-ui);
     --color-logo-primary: var(--dark-color-logo-primary);
     --color-mid-gray: var(--dark-color-mid-gray);
