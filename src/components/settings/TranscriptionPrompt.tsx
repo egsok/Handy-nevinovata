@@ -216,7 +216,7 @@ export const TranscriptionPrompt: React.FC<TranscriptionPromptProps> =
             disabled={isUpdating("transcription_prompt")}
           />
           <div className="flex items-start justify-between gap-2 text-xs">
-            <div className="flex flex-col gap-0.5 text-yellow-500">
+            <div className="flex flex-col gap-0.5 text-logo-primary">
               {!isWhisper && (
                 <span>
                   {t("settings.advanced.transcriptionPrompt.whisperOnly")}
@@ -235,7 +235,7 @@ export const TranscriptionPrompt: React.FC<TranscriptionPromptProps> =
                     percentage >= 95
                       ? "bg-red-400"
                       : percentage >= 80
-                        ? "bg-yellow-400"
+                        ? "bg-logo-primary"
                         : "bg-mid-gray/50"
                   }`}
                   style={{ width: `${percentage}%` }}

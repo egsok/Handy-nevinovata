@@ -25,18 +25,20 @@ const ModelStatusButton: React.FC<ModelStatusButtonProps> = ({
   onClick,
   className = "",
 }) => {
+  // Two inks: settled states carry the violet, work-in-progress pulses magenta.
+  // Green/yellow/orange were a traffic light borrowed from outside the brand.
   const getStatusColor = (status: ModelStatus): string => {
     switch (status) {
       case "ready":
-        return "bg-green-400";
+        return "bg-state";
       case "loading":
-        return "bg-yellow-400 animate-pulse";
+        return "bg-logo-primary animate-pulse";
       case "downloading":
         return "bg-logo-primary animate-pulse";
       case "verifying":
-        return "bg-orange-400 animate-pulse";
+        return "bg-logo-primary animate-pulse";
       case "extracting":
-        return "bg-orange-400 animate-pulse";
+        return "bg-logo-primary animate-pulse";
       case "error":
         return "bg-red-400";
       case "unloaded":
