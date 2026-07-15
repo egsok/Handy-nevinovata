@@ -113,10 +113,10 @@ const ModelCard: React.FC<ModelCardProps> = ({
     // Which model is active is state, not an action — it gets the second ink, so
     // a list of models doesn't read as a row of buttons shouting to be pressed.
     if (status === "active") {
-      return "border-2 border-state/50 bg-state/10";
+      return "border-2 border-state-soft/60 bg-state-soft/10";
     }
     if (isFeatured) {
-      return "border-2 border-state/25 bg-state/5";
+      return "border-2 border-state-soft/30 bg-state-soft/5";
     }
     return "border-2 border-mid-gray/20";
   };
@@ -202,7 +202,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
                 </p>
                 <div className="w-16 h-1.5 bg-mid-gray/20 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-state rounded-full"
+                    className="h-full bg-state-soft rounded-full"
                     style={{ width: `${model.accuracy_score * 100}%` }}
                   />
                 </div>
@@ -213,7 +213,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
                 </p>
                 <div className="w-16 h-1.5 bg-mid-gray/20 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-state rounded-full"
+                    className="h-full bg-state-soft rounded-full"
                     style={{ width: `${model.speed_score * 100}%` }}
                   />
                 </div>

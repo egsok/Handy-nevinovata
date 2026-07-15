@@ -16,6 +16,7 @@ pub mod portable;
 mod settings;
 mod shortcut;
 mod signal_handle;
+mod titlebar;
 mod transcription_coordinator;
 mod tray;
 mod tray_i18n;
@@ -532,6 +533,7 @@ pub fn run(cli_args: CliArgs) {
 
     let specta_builder = Builder::<tauri::Wry>::new()
         .commands(collect_commands![
+            titlebar::set_titlebar_theme,
             shortcut::change_binding,
             shortcut::reset_binding,
             shortcut::change_ptt_setting,

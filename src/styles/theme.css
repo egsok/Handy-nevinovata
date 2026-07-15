@@ -28,13 +28,24 @@
                                          to clear the wall (5.3:1 vs 4.1:1) */
   --dark-color-mid-gray: #c8bda1; /* cream-mut — captions, hairlines */
 
-  /* Tokens that do not change between light and dark */
-  /* Second ink. Marks state ("where I am") — the active section, the active
-     model — while magenta marks action ("what will happen"). Same value on both
-     grounds because an ink is an ink: it is only ever laid down as a solid fill
-     with light type on top (7.6:1 on the wall, 9.8:1 on kraft), never used as
-     text itself — as text on the wall it would sit at 1.9:1. */
+  /* Second ink, in two roles.
+
+     `--color-state` is the ink laid down SOLID, with light type on top: the
+     active section, the active badge. Same on both grounds (7.6:1 on the wall,
+     9.8:1 on kraft) because a solid fill carries its own contrast.
+
+     `--color-state-soft` is the same ink used as a MARK on the ground — meter
+     bars, status dots, hairlines, playheads. A mark has only the ground to
+     contrast against, so it must flip: #452ba6 on kraft (7.4:1), but on the
+     wall it would sit at 1.9:1 and vanish, so the wall gets the brand's
+     light violet instead (12.1:1) — the same ink, thinned for dark stock. */
   --color-state: #452ba6;
+  --light-color-state-soft: #452ba6;
+  --dark-color-state-soft: #d6ccf2;
+
+  /* Type printed over solid ink. Paper white, not screen white: #fff on the
+     violet buzzes, the kraft sheet's own cream sits on it (8.4:1). */
+  --color-on-ink: #f2ecdc;
 
   /* Active palette — defaults to light, follows the OS via the media query
      below, or is forced by `data-theme` (see App.css). */
@@ -44,6 +55,7 @@
   --color-background-ui: var(--light-color-background-ui);
   --color-logo-primary: var(--light-color-logo-primary);
   --color-mid-gray: var(--light-color-mid-gray);
+  --color-state-soft: var(--light-color-state-soft);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,5 +66,6 @@
     --color-background-ui: var(--dark-color-background-ui);
     --color-logo-primary: var(--dark-color-logo-primary);
     --color-mid-gray: var(--dark-color-mid-gray);
+    --color-state-soft: var(--dark-color-state-soft);
   }
 }

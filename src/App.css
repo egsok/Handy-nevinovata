@@ -1,5 +1,17 @@
 @import "tailwindcss";
 @import "./styles/theme.css";
+@import "./assets/fonts.css";
+
+/* Brand voice: IBM Plex Sans for reading, IBM Plex Mono for the utilitarian
+   register (labels, keys, versions — the workshop's stencilled markings), and
+   Unbounded reserved for display headings. Self-hosted, so no network at boot
+   and no silent fallback to a system face. */
+@theme {
+  --font-sans: "IBM Plex Sans", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono:
+    "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --font-display: "Unbounded", system-ui, sans-serif;
+}
 
 /* Register the shared color tokens (src/styles/theme.css) as Tailwind
    utilities */
@@ -11,10 +23,13 @@
   --color-logo-primary: var(--color-logo-primary);
   --color-mid-gray: var(--color-mid-gray);
   --color-state: var(--color-state);
+  --color-state-soft: var(--color-state-soft);
+  --color-on-ink: var(--color-on-ink);
 }
 
 :root {
   /* Typography */
+  font-family: var(--font-sans);
   font-size: 15px;
   line-height: 24px;
   font-weight: 400;
@@ -80,6 +95,7 @@
   --color-background-ui: var(--light-color-background-ui);
   --color-logo-primary: var(--light-color-logo-primary);
   --color-mid-gray: var(--light-color-mid-gray);
+  --color-state-soft: var(--light-color-state-soft);
 }
 
 :root[data-theme="dark"] {
@@ -91,6 +107,7 @@
   --color-background-ui: var(--dark-color-background-ui);
   --color-logo-primary: var(--dark-color-logo-primary);
   --color-mid-gray: var(--dark-color-mid-gray);
+  --color-state-soft: var(--dark-color-state-soft);
 }
 
 /* macOS - tint native overlay scrollbar thumb */
@@ -128,7 +145,8 @@
 
 /* Range inputs: the track is painted inline per component, but the thumb
    falls back to the webview's native rendering (blue in current Chromium)
-   unless explicitly restyled. */
+   unless explicitly restyled. A slider reports a value — playhead, volume —
+   so it carries the second ink, not the action magenta. */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -136,7 +154,7 @@ input[type="range"]::-webkit-slider-thumb {
   height: 14px;
   border-radius: 50%;
   border: none;
-  background: var(--color-background-ui);
+  background: var(--color-state-soft);
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -144,5 +162,5 @@ input[type="range"]::-moz-range-thumb {
   height: 14px;
   border-radius: 50%;
   border: none;
-  background: var(--color-background-ui);
+  background: var(--color-state-soft);
 }

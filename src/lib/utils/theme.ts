@@ -23,6 +23,24 @@ export const THEME_OPTIONS: Theme[] = ["system", "light", "dark"];
 const isTheme = (value: unknown): value is Theme =>
   value === "system" || value === "light" || value === "dark";
 
+/** Does this theme paint the ink wall right now? `system` asks the OS. */
+const resolvesDark = (theme: Theme): boolean =>
+  theme === "dark" ||
+  (theme === "system" &&
+    window.matchMedia?.("(prefers-color-scheme: dark)").matches === true);
+
+/**
+ * Tint the native window frame to match the palette. The frame is drawn by the
+ * OS outside the webview, so CSS cannot reach it — only the backend can, and
+ * only the webview knows what `system` currently resolves to. Windows 11 only;
+ * a no-op on every other platform.
+ */
+const applyTitlebar = (theme: Theme): void => {
+  void commands.setTitlebarTheme(resolvesDark(theme)).catch((e) => {
+    console.warn("Failed to tint the native title bar:", e);
+  });
+};
+
 /** Apply a theme to the document root and remember it for the next launch. */
 export const applyTheme = (theme: Theme): void => {
   const root = document.documentElement;
@@ -31,6 +49,7 @@ export const applyTheme = (theme: Theme): void => {
   } else {
     root.dataset.theme = theme;
   }
+  applyTitlebar(theme);
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch {
@@ -38,6 +57,14 @@ export const applyTheme = (theme: Theme): void => {
     // persists in AppSettings, so this only costs a one-frame flash on boot.
   }
 };
+
+// Under `system`, CSS re-paints itself when the OS flips, but the native frame
+// only changes if we tell the backend — so follow the OS here too.
+window
+  .matchMedia?.("(prefers-color-scheme: dark)")
+  .addEventListener("change", () => {
+    if (getStoredTheme() === "system") applyTitlebar("system");
+  });
 
 /** Read the last-applied theme for synchronous boot-time application. */
 export const getStoredTheme = (): Theme => {
