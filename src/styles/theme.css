@@ -1,21 +1,35 @@
-/* klava-nevinovata Colors */
+/* klava-nevinovata Colors — two-ink print palette ("Нейросеть не виновата").
+   Two inks only: magenta off the roller + deep violet on the second pass.
+   Dark = the workshop's ink wall; light = a sheet of kraft paper. There is no
+   third ink — grays are tints of the paper/wall, not neutrals. */
 
 :root {
   /* Palette source of truth. Each themed color is defined once as a
      light/dark pair; the active tokens below and the `data-theme` overrides
      in App.css reference these, so a hex value lives in exactly one place. */
-  --light-color-text: #2a2419;
-  --light-color-background: #f9f5eb;
-  --light-color-background-ui: #b9751c;
-  --light-color-logo-primary: #c4791b;
 
-  --dark-color-text: #ede4cf;
-  --dark-color-background: #262019;
-  --dark-color-background-ui: #c4791b;
-  --dark-color-logo-primary: #e3a33c;
+  /* Kraft sheet */
+  --light-color-text: #2c1a72; /* violet — body text on paper */
+  --light-color-background: #e9dfc8; /* kraft cream */
+  --light-color-background-ui: #e11b76; /* magenta — actions */
+  --light-color-logo-primary: #e11b76; /* magenta — accent text, links, focus */
+  --light-color-mid-gray: #3a2a7a; /* violet-ink — captions, hairlines */
+
+  /* Ink wall */
+  --dark-color-text: #ece3cd; /* cream on the wall */
+  --dark-color-background: #160f2c; /* wall */
+  --dark-color-background-ui: #e11b76; /* magenta — actions */
+  --dark-color-logo-primary: #ff2f88; /* brighter magenta — accent text needs it
+                                         to clear the wall (5.3:1 vs 4.1:1) */
+  --dark-color-mid-gray: #c8bda1; /* cream-mut — captions, hairlines */
 
   /* Tokens that do not change between light and dark */
-  --color-mid-gray: #8a7f6b;
+  /* Second ink. Marks state ("where I am") — the active section, the active
+     model — while magenta marks action ("what will happen"). Same value on both
+     grounds because an ink is an ink: it is only ever laid down as a solid fill
+     with light type on top (7.6:1 on the wall, 9.8:1 on kraft), never used as
+     text itself — as text on the wall it would sit at 1.9:1. */
+  --color-state: #452ba6;
 
   /* Active palette — defaults to light, follows the OS via the media query
      below, or is forced by `data-theme` (see App.css). */
@@ -23,6 +37,7 @@
   --color-background: var(--light-color-background);
   --color-background-ui: var(--light-color-background-ui);
   --color-logo-primary: var(--light-color-logo-primary);
+  --color-mid-gray: var(--light-color-mid-gray);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,5 +46,6 @@
     --color-background: var(--dark-color-background);
     --color-background-ui: var(--dark-color-background-ui);
     --color-logo-primary: var(--dark-color-logo-primary);
+    --color-mid-gray: var(--dark-color-mid-gray);
   }
 }

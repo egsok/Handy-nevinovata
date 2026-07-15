@@ -12,11 +12,11 @@
     var(--color-background-ui) 16%,
     transparent
   );
-  /* Neutrals. Hairlines reuse the app's mid-gray at low opacity — same vocabulary
-     as the app's border-mid-gray/* utilities. muted/faint are overlay-specific
-     secondary/tertiary text grays (no theme equivalent). */
-  --s-muted: #6e6e6e;
-  --s-faint: #9a9a9a;
+  /* Neutrals. There is no third ink: secondary text and hairlines are all the
+     app's mid-gray (cream-mut on the wall, violet-ink on kraft) at varying
+     strength, so they flip with the theme on their own — no dark override. */
+  --s-muted: var(--color-mid-gray);
+  --s-faint: color-mix(in srgb, var(--color-mid-gray) 70%, transparent);
   --s-border: color-mix(in srgb, var(--color-mid-gray) 22%, transparent);
   --s-hair: color-mix(in srgb, var(--color-mid-gray) 12%, transparent);
 
@@ -43,8 +43,6 @@
       var(--color-logo-primary) 20%,
       transparent
     );
-    --s-muted: #a3a09a;
-    --s-faint: #6f6c66;
     /* Hairlines flip to the near-white text token for contrast on dark. */
     --s-border: color-mix(in srgb, var(--color-text) 12%, transparent);
     --s-hair: color-mix(in srgb, var(--color-text) 8%, transparent);
