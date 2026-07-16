@@ -1,11 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 140" role="img" aria-label="klava-nevinovata">
+  <!-- Two-ink wordmark, kept in sync with src/components/icons/HandyTextLogo.tsx
+       (dark-wall ink values from src/styles/theme.css). textLength pins glyph
+       advances so fallback monospace fonts don't drift under the caret. -->
   <style>
     .caret { animation: blink 1.1s steps(1) infinite; }
     @keyframes blink { 50% { opacity: 0; } }
     @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
   </style>
-  <text x="0" y="102" font-family="Consolas, 'Cascadia Mono', 'DejaVu Sans Mono', ui-monospace, monospace" font-size="96">
-    <tspan font-weight="700" fill="#EDE4CF" textLength="264" lengthAdjust="spacingAndGlyphs">klava</tspan><tspan fill="#A2947A" x="264" textLength="581" lengthAdjust="spacingAndGlyphs">-nevinovata</tspan>
+  <text x="0" y="102" font-family="'IBM Plex Mono', Consolas, 'Cascadia Mono', 'DejaVu Sans Mono', ui-monospace, monospace" font-size="96">
+    <tspan font-weight="600" fill="#ff2f88" textLength="264" lengthAdjust="spacingAndGlyphs">klava</tspan><tspan font-weight="500" fill="#a99e83" x="264" textLength="581" lengthAdjust="spacingAndGlyphs">-nevinovata</tspan>
   </text>
-  <rect class="caret" x="858" y="26" width="24" height="88" fill="#E3A33C"/>
+  <rect class="caret" x="858" y="26" width="24" height="88" fill="#ff2f88"/>
 </svg>
