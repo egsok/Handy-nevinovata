@@ -45,6 +45,23 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const errorCountRef = useRef<number>(0);
   const MAX_POLLING_ERRORS = 3;
+  // macOS TCC quirk: for unsigned builds the Accessibility toggle can sit "on"
+  // while the OS still holds the grant for a previous binary — the poll then
+  // never turns green. After a while, surface the remove-and-re-add recipe.
+  const [showAccessibilityStuckHint, setShowAccessibilityStuckHint] =
+    useState(false);
+
+  useEffect(() => {
+    if (permissions.accessibility !== "waiting") {
+      setShowAccessibilityStuckHint(false);
+      return;
+    }
+    const hintTimer = setTimeout(
+      () => setShowAccessibilityStuckHint(true),
+      8000,
+    );
+    return () => clearTimeout(hintTimer);
+  }, [permissions.accessibility]);
 
   const isMacOS = permissionPlatform === "macos";
   const isWindows = permissionPlatform === "windows";
@@ -294,8 +311,8 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
   if (allGranted) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center gap-4">
-        <div className="p-4 rounded-full bg-emerald-500/20">
-          <Check className="w-12 h-12 text-emerald-400" />
+        <div className="p-4 rounded-full bg-state-soft/20">
+          <Check className="w-12 h-12 text-state-soft" />
         </div>
         <p className="text-lg font-medium text-text">
           {t("onboarding.permissions.allGranted")}
@@ -336,7 +353,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
                   {t("onboarding.permissions.microphone.description")}
                 </p>
                 {permissions.microphone === "granted" ? (
-                  <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                  <div className="flex items-center gap-2 text-state-soft text-sm">
                     <Check className="w-4 h-4" />
                     {t("onboarding.permissions.granted")}
                   </div>
@@ -375,14 +392,31 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
                   {t("onboarding.permissions.accessibility.description")}
                 </p>
                 {permissions.accessibility === "granted" ? (
-                  <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                  <div className="flex items-center gap-2 text-state-soft text-sm">
                     <Check className="w-4 h-4" />
                     {t("onboarding.permissions.granted")}
                   </div>
                 ) : permissions.accessibility === "waiting" ? (
-                  <div className="flex items-center gap-2 text-text/50 text-sm">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {t("onboarding.permissions.waiting")}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-text/50 text-sm">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {t("onboarding.permissions.waiting")}
+                    </div>
+                    {showAccessibilityStuckHint && (
+                      <>
+                        <p className="text-xs text-text/60">
+                          {t("onboarding.permissions.accessibility.stuckHint")}
+                        </p>
+                        <button
+                          onClick={handleGrantAccessibility}
+                          className="self-start text-xs text-logo-primary underline underline-offset-2 hover:opacity-80"
+                        >
+                          {t(
+                            "onboarding.permissions.accessibility.openSystemSettings",
+                          )}
+                        </button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <button

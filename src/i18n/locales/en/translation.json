@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Accessibility Access",
-        "description": "Required to type transcribed text into your applications."
+        "description": "Required to type transcribed text into your applications.",
+        "stuckHint": "Toggle already on, but nothing happens? In System Settings → Privacy & Security → Accessibility remove {{appName}} with the − button and add it back — after an update macOS can keep the permission tied to the previous version of the app. Restarting the app helps too.",
+        "openSystemSettings": "Reopen System Settings"
       },
       "grant": "Grant Permission",
       "granted": "Granted",

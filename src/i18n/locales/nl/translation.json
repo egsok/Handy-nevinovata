@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Toegankelijkheid",
-        "description": "Vereist om getranscribeerde tekst in je applicaties te kunnen typen."
+        "description": "Vereist om getranscribeerde tekst in je applicaties te kunnen typen.",
+        "stuckHint": "Schakelaar staat al aan maar er gebeurt niets? Verwijder {{appName}} in Systeeminstellingen → Privacy en beveiliging → Toegankelijkheid met de knop − en voeg het opnieuw toe — na een update kan macOS de toestemming aan de oude versie gekoppeld houden. De app herstarten helpt ook.",
+        "openSystemSettings": "Systeeminstellingen opnieuw openen"
       },
       "grant": "Machtiging verlenen",
       "granted": "Verleend",

@@ -369,6 +369,16 @@
     opacity: 0.22;
   }
 }
+/* The 4-dot loader is ~37px wide (incl. the row's 5px lead padding) but the
+   shared grid guarantees its side column only 22px — while the pill is still
+   widening (which on a short recording is the entire visible working phase,
+   and again on the way out) the dots ride over the label's first letters.
+   Working rows get side columns that actually hold the loader; the label
+   ellipsizes during the transition instead of colliding. */
+.scard.working .sbase,
+.scard.compact.cworking .sbase {
+  grid-template-columns: minmax(42px, 1fr) auto minmax(42px, 1fr);
+}
 .swork-label {
   font-family: var(--s-mono);
   font-weight: 500;

@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Přístup k usnadnění",
-        "description": "Potřebný pro psaní přepsaného textu do vašich aplikací."
+        "description": "Potřebný pro psaní přepsaného textu do vašich aplikací.",
+        "stuckHint": "Přepínač je už zapnutý, ale nic se neděje? V Nastavení systému → Soukromí a zabezpečení → Zpřístupnění odeberte {{appName}} tlačítkem − a přidejte znovu — po aktualizaci může macOS držet oprávnění u předchozí verze aplikace. Pomůže i restart aplikace.",
+        "openSystemSettings": "Znovu otevřít Nastavení systému"
       },
       "grant": "Udělit oprávnění",
       "granted": "Uděleno",

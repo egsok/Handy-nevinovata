@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Acceso de Accesibilidad",
-        "description": "Necesario para escribir el texto transcrito en tus aplicaciones."
+        "description": "Necesario para escribir el texto transcrito en tus aplicaciones.",
+        "stuckHint": "¿El interruptor ya está activado pero no pasa nada? En Ajustes del Sistema → Privacidad y seguridad → Accesibilidad elimina {{appName}} con el botón − y vuelve a añadirlo: tras una actualización, macOS puede mantener el permiso ligado a la versión anterior. Reiniciar la app también ayuda.",
+        "openSystemSettings": "Reabrir Ajustes del Sistema"
       },
       "grant": "Conceder Permiso",
       "granted": "Concedido",

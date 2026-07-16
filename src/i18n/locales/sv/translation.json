@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Hjälpmedelsåtkomst",
-        "description": "Krävs för att skriva transkriberad text i dina program."
+        "description": "Krävs för att skriva transkriberad text i dina program.",
+        "stuckHint": "Reglaget är redan på men inget händer? I Systeminställningar → Integritet och säkerhet → Hjälpmedel: ta bort {{appName}} med knappen − och lägg till den igen — efter en uppdatering kan macOS hålla behörigheten knuten till den gamla versionen. Att starta om appen hjälper också.",
+        "openSystemSettings": "Öppna Systeminställningar igen"
       },
       "grant": "Bevilja behörighet",
       "granted": "Beviljad",

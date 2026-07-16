@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "輔助使用存取",
-        "description": "需要將轉錄文字輸入到您的應用程式中"
+        "description": "需要將轉錄文字輸入到您的應用程式中",
+        "stuckHint": "開關已開啟卻沒有反應？請在系統設定 → 隱私權與安全性 → 輔助使用中，用 − 按鈕移除 {{appName}} 後重新加入——更新後 macOS 可能仍將權限綁定在舊版本上。重新啟動 App 也有幫助。",
+        "openSystemSettings": "重新開啟系統設定"
       },
       "grant": "授予權限",
       "granted": "已授予",

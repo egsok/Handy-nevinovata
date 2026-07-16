@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Dostęp do dostępności",
-        "description": "Wymagany do wpisywania transkrybowanego tekstu w Twoich aplikacjach."
+        "description": "Wymagany do wpisywania transkrybowanego tekstu w Twoich aplikacjach.",
+        "stuckHint": "Przełącznik już włączony, ale nic się nie dzieje? W Ustawieniach systemowych → Prywatność i ochrona → Dostępność usuń {{appName}} przyciskiem − i dodaj ponownie — po aktualizacji macOS może trzymać uprawnienie przy starej wersji aplikacji. Pomaga też restart aplikacji.",
+        "openSystemSettings": "Otwórz ponownie Ustawienia systemowe"
       },
       "grant": "Przyznaj uprawnienie",
       "granted": "Przyznano",

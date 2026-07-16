@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Accès à l'accessibilité",
-        "description": "Nécessaire pour taper le texte transcrit dans vos applications."
+        "description": "Nécessaire pour taper le texte transcrit dans vos applications.",
+        "stuckHint": "L'interrupteur est déjà activé mais rien ne se passe ? Dans Réglages Système → Confidentialité et sécurité → Accessibilité, supprimez {{appName}} avec le bouton − puis rajoutez-le — après une mise à jour, macOS peut garder l'autorisation liée à l'ancienne version. Redémarrer l'app aide aussi.",
+        "openSystemSettings": "Rouvrir les Réglages Système"
       },
       "grant": "Accorder l'autorisation",
       "granted": "Accordé",

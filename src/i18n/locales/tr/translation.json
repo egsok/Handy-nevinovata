@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Erişilebilirlik Erişimi",
-        "description": "Transkribe edilen metni uygulamalarınıza yazabilmek için gereklidir."
+        "description": "Transkribe edilen metni uygulamalarınıza yazabilmek için gereklidir.",
+        "stuckHint": "Anahtar açık ama bir şey olmuyor mu? Sistem Ayarları → Gizlilik ve Güvenlik → Erişilebilirlik bölümünde {{appName}} uygulamasını − düğmesiyle kaldırıp yeniden ekleyin — güncellemeden sonra macOS izni eski sürüme bağlı tutabilir. Uygulamayı yeniden başlatmak da yardımcı olur.",
+        "openSystemSettings": "Sistem Ayarlarını yeniden aç"
       },
       "grant": "İzin Ver",
       "granted": "Verildi",

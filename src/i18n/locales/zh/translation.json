@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "辅助功能访问",
-        "description": "需要将转录文本输入到您的应用程序中。"
+        "description": "需要将转录文本输入到您的应用程序中。",
+        "stuckHint": "开关已打开却没有反应？在系统设置 → 隐私与安全性 → 辅助功能中，用 − 按钮移除 {{appName}} 后重新添加——更新后 macOS 可能仍将权限绑定在旧版本上。重启应用也有帮助。",
+        "openSystemSettings": "重新打开系统设置"
       },
       "grant": "授予权限",
       "granted": "已授予",

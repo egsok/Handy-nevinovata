@@ -418,7 +418,7 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
             ? ""
             : hasTranscription
               ? "text-text/90 select-text cursor-text whitespace-pre-wrap break-words"
-              : "text-text/40"
+              : "text-text/60"
         }`}
         style={
           retrying

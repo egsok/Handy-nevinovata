@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Accesso all'Accessibilità",
-        "description": "Necessario per digitare il testo trascritto nelle tue applicazioni."
+        "description": "Necessario per digitare il testo trascritto nelle tue applicazioni.",
+        "stuckHint": "L'interruttore è già attivo ma non succede nulla? In Impostazioni di Sistema → Privacy e sicurezza → Accessibilità rimuovi {{appName}} con il pulsante − e aggiungilo di nuovo: dopo un aggiornamento macOS può mantenere il permesso legato alla versione precedente. Anche riavviare l'app aiuta.",
+        "openSystemSettings": "Riapri Impostazioni di Sistema"
       },
       "grant": "Concedi Permesso",
       "granted": "Concesso",

@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Acesso à Acessibilidade",
-        "description": "Necessário para digitar o texto transcrito em seus aplicativos."
+        "description": "Necessário para digitar o texto transcrito em seus aplicativos.",
+        "stuckHint": "O interruptor já está ligado mas nada acontece? Em Ajustes do Sistema → Privacidade e Segurança → Acessibilidade remova {{appName}} com o botão − e adicione novamente — após uma atualização o macOS pode manter a permissão presa à versão anterior. Reiniciar o app também ajuda.",
+        "openSystemSettings": "Reabrir Ajustes do Sistema"
       },
       "grant": "Conceder Permissão",
       "granted": "Concedido",

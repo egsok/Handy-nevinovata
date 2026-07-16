@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Quyền truy cập Trợ năng",
-        "description": "Cần thiết để nhập văn bản đã chuyển đổi vào các ứng dụng của bạn."
+        "description": "Cần thiết để nhập văn bản đã chuyển đổi vào các ứng dụng của bạn.",
+        "stuckHint": "Công tắc đã bật mà không có gì xảy ra? Trong Cài đặt Hệ thống → Quyền riêng tư & Bảo mật → Trợ năng, xóa {{appName}} bằng nút − rồi thêm lại — sau khi cập nhật, macOS có thể giữ quyền gắn với phiên bản cũ. Khởi động lại ứng dụng cũng có ích.",
+        "openSystemSettings": "Mở lại Cài đặt Hệ thống"
       },
       "grant": "Cấp quyền",
       "granted": "Đã cấp",

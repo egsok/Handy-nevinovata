@@ -107,7 +107,9 @@
       },
       "accessibility": {
         "title": "Bedienungshilfen-Zugriff",
-        "description": "Erforderlich, um transkribierten Text in deine Anwendungen einzugeben."
+        "description": "Erforderlich, um transkribierten Text in deine Anwendungen einzugeben.",
+        "stuckHint": "Schalter ist schon an, aber nichts passiert? Entferne {{appName}} in Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen mit der Taste − und füge es erneut hinzu — nach einem Update kann macOS die Berechtigung an die alte App-Version binden. Ein Neustart der App hilft ebenfalls.",
+        "openSystemSettings": "Systemeinstellungen erneut öffnen"
       },
       "grant": "Berechtigung erteilen",
       "granted": "Erteilt",
