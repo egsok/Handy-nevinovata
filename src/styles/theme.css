@@ -41,11 +41,13 @@
      `--color-state-soft` is the same ink used as a MARK on the ground — meter
      bars, status dots, hairlines, playheads. A mark has only the ground to
      contrast against, so it must flip: #452ba6 on kraft (7.4:1), but on the
-     wall it would sit at 1.9:1 and vanish, so the wall gets the brand's
-     light violet instead (12.1:1) — the same ink, thinned for dark stock. */
+     wall it would sit at 1.9:1 and vanish, so the wall gets a light violet
+     instead — the same ink, thinned for dark stock. Chroma is kept high
+     (#ab97ef, 6.5:1): the poster's #d6ccf2 ran 12:1 but so desaturated that
+     an 8px dot read as grey, not as the second ink. */
   --color-state: #452ba6;
   --light-color-state-soft: #452ba6;
-  --dark-color-state-soft: #d6ccf2;
+  --dark-color-state-soft: #ab97ef;
 
   /* Type printed over solid ink. Paper white, not screen white: #fff on the
      violet buzzes, the kraft sheet's own cream sits on it (8.4:1). */
