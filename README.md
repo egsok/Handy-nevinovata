@@ -48,6 +48,8 @@ Pre-built installers are published to [Releases](https://github.com/egsok/klava-
 
   (If that errors with permission, try `sudo xattr -cr /Applications/klava-nevinovata.app`.) After this the app launches normally. The right-click → Open workaround that older guides mention no longer works on macOS 15+ for unsigned apps. Please report any post-launch issues in [issues](https://github.com/egsok/klava-nevinovata/issues).
 
+  **Permissions on macOS.** On first launch the app asks for two permissions: Microphone (to hear you) and Accessibility (to type the transcript into other apps). The permissions screen only shows on launch — if you closed it, restart the app, or grant manually: **System Settings → Privacy & Security → Accessibility** → enable klava-nevinovata (Microphone lives in the same Privacy & Security list). If the Accessibility toggle is already on but the app still says it's waiting: select klava-nevinovata in that list, remove it with the **−** button, then re-add it with **+** — macOS sometimes keeps the permission tied to a previous version of an unsigned app after an update. Restarting the app after granting also helps.
+
 ## Build
 
 If you want the bleeding edge, a platform not covered by releases, or want to audit the build yourself, build locally. (Otherwise grab a pre-built installer from [Download](#download) above.)
