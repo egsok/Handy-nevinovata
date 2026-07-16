@@ -195,12 +195,17 @@ const RecordingOverlay: React.FC = () => {
     </div>
   );
 
-  // spinner (left) | label (center) | cancel (right) — same 3-zone grid as the
+  // loader (left) | label (center) | cancel (right) — same 3-zone grid as the
   // listening row, so the label is centered.
   const workingRow = (label: string, showCancel: boolean) => (
     <div className="sbase">
       <div className="sbase-l">
-        <span className="sspinner" />
+        <span className="sload">
+          <b />
+          <b />
+          <b />
+          <b />
+        </span>
       </div>
       <span className="swork-label">{label}</span>
       <div className="sbase-r">{showCancel && cancelBtn}</div>
