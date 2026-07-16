@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 140">
-  <text x="0" y="102" font-family="Consolas, 'Cascadia Mono', 'DejaVu Sans Mono', monospace" font-size="96" letter-spacing="0">
-    <tspan font-weight="700" fill="#2A2419">klava</tspan><tspan fill="#6E6350">-nevinovata</tspan>
+  <text x="0" y="102" font-family="'IBM Plex Mono', Consolas, 'Cascadia Mono', 'DejaVu Sans Mono', monospace" font-size="96" letter-spacing="0">
+    <tspan font-weight="600" fill="#b81261" textLength="264" lengthAdjust="spacingAndGlyphs">klava</tspan><tspan font-weight="500" fill="#3a2a7a" x="264" textLength="581" lengthAdjust="spacingAndGlyphs">-nevinovata</tspan>
   </text>
-  <rect x="858" y="26" width="24" height="88" fill="#E3A33C"/>
+  <rect x="858" y="26" width="24" height="88" fill="#b81261"/>
 </svg>

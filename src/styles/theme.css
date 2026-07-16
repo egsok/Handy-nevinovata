@@ -1,21 +1,57 @@
-/* klava-nevinovata Colors */
+/* klava-nevinovata Colors — two-ink print palette ("Нейросеть не виновата").
+   Two inks only: magenta off the roller + deep violet on the second pass.
+   Dark = the workshop's ink wall; light = a sheet of kraft paper. There is no
+   third ink — grays are tints of the paper/wall, not neutrals. */
 
 :root {
   /* Palette source of truth. Each themed color is defined once as a
      light/dark pair; the active tokens below and the `data-theme` overrides
      in App.css reference these, so a hex value lives in exactly one place. */
-  --light-color-text: #2a2419;
-  --light-color-background: #f9f5eb;
-  --light-color-background-ui: #b9751c;
-  --light-color-logo-primary: #c4791b;
 
-  --dark-color-text: #ede4cf;
-  --dark-color-background: #262019;
-  --dark-color-background-ui: #c4791b;
-  --dark-color-logo-primary: #e3a33c;
+  /* Kraft sheet */
+  --light-color-text: #2c1a72; /* violet — body text on paper */
+  --light-color-background: #e9dfc8; /* kraft cream */
+  --light-color-background-ui: #e11b76; /* magenta — actions */
+  --light-color-logo-primary: #b81261; /* the roller's deep magenta. Full-strength
+                                          #e11b76 as text on kraft is 3.4:1 and
+                                          shouts; this reads at 4.8:1 and sits. */
+  --light-color-mid-gray: #3a2a7a; /* violet-ink — captions, hairlines */
 
-  /* Tokens that do not change between light and dark */
-  --color-mid-gray: #8a7f6b;
+  /* Ink wall.
+
+     Printed a stop lighter than the poster palette: cream on #160f2c runs at
+     14.4:1, which is right for a cover and glares in a window full of rows.
+     The wall moves to the brand's second-pass tone and the impression eases to
+     11.4:1 — comfortable, still unmistakably an ink wall.
+     (If it still tires the eye, the next stop down is #211a44 / #2d2464 /
+     #d2c9b2 / #9c9179 at 9.8:1 — softer, but the wall starts reading grey.) */
+  --dark-color-text: #ddd4bd; /* cream, one stop off full strength */
+  --dark-color-background: #1e1640; /* wall-2 */
+  --dark-color-background-ui: #e11b76; /* magenta — actions */
+  --dark-color-logo-primary: #ff2f88; /* brighter magenta — accent text needs it
+                                         to clear the wall (4.8:1) */
+  --dark-color-mid-gray: #a99e83; /* cream-mut, eased with the text */
+
+  /* Second ink, in two roles.
+
+     `--color-state` is the ink laid down SOLID, with light type on top: the
+     active section, the active badge. Same on both grounds (7.6:1 on the wall,
+     9.8:1 on kraft) because a solid fill carries its own contrast.
+
+     `--color-state-soft` is the same ink used as a MARK on the ground — meter
+     bars, status dots, hairlines, playheads. A mark has only the ground to
+     contrast against, so it must flip: #452ba6 on kraft (7.4:1), but on the
+     wall it would sit at 1.9:1 and vanish, so the wall gets a light violet
+     instead — the same ink, thinned for dark stock. Chroma is kept high
+     (#ab97ef, 6.5:1): the poster's #d6ccf2 ran 12:1 but so desaturated that
+     an 8px dot read as grey, not as the second ink. */
+  --color-state: #452ba6;
+  --light-color-state-soft: #452ba6;
+  --dark-color-state-soft: #ab97ef;
+
+  /* Type printed over solid ink. Paper white, not screen white: #fff on the
+     violet buzzes, the kraft sheet's own cream sits on it (8.4:1). */
+  --color-on-ink: #f2ecdc;
 
   /* Active palette — defaults to light, follows the OS via the media query
      below, or is forced by `data-theme` (see App.css). */
@@ -23,6 +59,8 @@
   --color-background: var(--light-color-background);
   --color-background-ui: var(--light-color-background-ui);
   --color-logo-primary: var(--light-color-logo-primary);
+  --color-mid-gray: var(--light-color-mid-gray);
+  --color-state-soft: var(--light-color-state-soft);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,5 +69,7 @@
     --color-background: var(--dark-color-background);
     --color-background-ui: var(--dark-color-background-ui);
     --color-logo-primary: var(--dark-color-logo-primary);
+    --color-mid-gray: var(--dark-color-mid-gray);
+    --color-state-soft: var(--dark-color-state-soft);
   }
 }

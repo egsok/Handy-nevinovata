@@ -115,11 +115,13 @@ const ModelCard: React.FC<ModelCardProps> = ({
     "flex flex-col rounded-xl px-4 py-3 gap-2 text-left transition-all duration-200";
 
   const getVariantClasses = () => {
+    // Which model is active is state, not an action — it gets the second ink, so
+    // a list of models doesn't read as a row of buttons shouting to be pressed.
     if (status === "active") {
-      return "border-2 border-logo-primary/50 bg-logo-primary/10";
+      return "border-2 border-state-soft/60 bg-state-soft/10";
     }
     if (isFeatured) {
-      return "border-2 border-logo-primary/25 bg-logo-primary/5";
+      return "border-2 border-state-soft/30 bg-state-soft/5";
     }
     return "border-2 border-mid-gray/20";
   };
@@ -174,7 +176,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
               <Badge variant="primary">{t("onboarding.recommended")}</Badge>
             )}
             {status === "active" && (
-              <Badge variant="primary">
+              <Badge variant="state">
                 <Check className="w-3 h-3 mr-1" />
                 {t("modelSelector.active")}
               </Badge>
@@ -192,7 +194,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
               </Badge>
             )}
           </div>
-          <p className="text-text/60 text-sm leading-relaxed">
+          <p className="text-mid-gray text-sm leading-relaxed">
             {displayDescription}
           </p>
         </div>
@@ -200,23 +202,23 @@ const ModelCard: React.FC<ModelCardProps> = ({
           <div className="hidden sm:flex items-center ms-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <p className="text-xs text-text/60 w-24 text-end">
+                <p className="text-[13px] font-medium text-mid-gray w-24 text-end">
                   {t("onboarding.modelCard.accuracy")}
                 </p>
                 <div className="w-16 h-1.5 bg-mid-gray/20 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-logo-primary rounded-full"
+                    className="h-full bg-state-soft rounded-full"
                     style={{ width: `${model.accuracy_score * 100}%` }}
                   />
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <p className="text-xs text-text/60 w-24 text-end">
+                <p className="text-[13px] font-medium text-mid-gray w-24 text-end">
                   {t("onboarding.modelCard.speed")}
                 </p>
                 <div className="w-16 h-1.5 bg-mid-gray/20 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-logo-primary rounded-full"
+                    className="h-full bg-state-soft rounded-full"
                     style={{ width: `${model.speed_score * 100}%` }}
                   />
                 </div>
@@ -232,7 +234,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
       <div className="flex items-center gap-3 w-full -mb-0.5 mt-0.5 h-5">
         {capabilityLanguages.length > 0 && (
           <div
-            className="flex items-center gap-1 text-xs text-text/50"
+            className="flex items-center gap-1 text-[13px] font-medium text-mid-gray"
             title={
               capabilityLanguages.length === 1
                 ? t("modelSelector.capabilities.singleLanguage")
@@ -245,7 +247,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
         )}
         {model.supports_translation && (
           <div
-            className="flex items-center gap-1 text-xs text-text/50"
+            className="flex items-center gap-1 text-[13px] font-medium text-mid-gray"
             title={t("modelSelector.capabilities.translation")}
           >
             <Languages className="w-3.5 h-3.5" />
@@ -254,7 +256,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
         )}
         {model.supports_streaming && (
           <div
-            className="flex items-center gap-1 text-xs text-text/50"
+            className="flex items-center gap-1 text-[13px] font-medium text-mid-gray"
             title={t("modelSelector.capabilities.streaming")}
           >
             <AudioLines className="w-3.5 h-3.5" />
@@ -262,7 +264,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
           </div>
         )}
         {showModelSize && (
-          <span className="flex items-center gap-1.5 ms-auto text-xs text-text/50">
+          <span className="flex items-center gap-1.5 ms-auto text-[13px] font-medium text-mid-gray">
             {status === "downloadable" ? (
               <Download className="w-3.5 h-3.5" />
             ) : (
