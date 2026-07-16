@@ -1,5 +1,6 @@
 use crate::audio_toolkit::{
     apply_custom_words, filter_transcription_output, fix_word_boundary_glue,
+    remove_hallucinated_sentences, remove_repeated_sentences,
 };
 use crate::managers::audio::AudioRecordingManager;
 use crate::managers::model::{EngineType, ModelManager};
@@ -1070,7 +1071,9 @@ impl TranscriptionManager {
         let settings = get_settings(&self.app_handle);
         // Streaming models do not receive a decode prompt, so custom words
         // always go through the shared fuzzy post-correction path.
-        let filtered = post_process_transcription_text(raw, &settings, false);
+        // Streaming engines are non-whisper (Moonshine), so no whisper
+        // hallucination cleanup either.
+        let filtered = post_process_transcription_text(raw, &settings, false, false);
 
         self.maybe_unload_immediately("streaming transcription");
         Ok(Some(filtered))
@@ -1273,6 +1276,14 @@ impl TranscriptionManager {
                         // temperature (>= 0.5) disables the carry for the next
                         // chunk, and compression_ratio/logprob thresholds stay
                         // at their defaults.
+                        //
+                        // max_prev_context_tokens=128 (engine default: half the
+                        // decoder window, 223) shortens the carried context the
+                        // same way the 0.8.3 line's n_max_text_ctx=128 did:
+                        // enough tokens to sustain punctuation style, less
+                        // material for a repetition loop to feed on. The
+                        // remaining loop/phrase artifacts are cleaned up
+                        // deterministically in post_process_transcription_text.
                         let has_initial_prompt = initial_prompt.is_some();
                         let family = if !model_is_whisper {
                             None
@@ -1280,6 +1291,7 @@ impl TranscriptionManager {
                             Some(RunExtension::Whisper(WhisperRunOptions {
                                 initial_prompt,
                                 condition_on_prev_tokens: Some(true),
+                                max_prev_context_tokens: Some(128),
                                 ..Default::default()
                             }))
                         };
@@ -1441,7 +1453,8 @@ impl TranscriptionManager {
         // family). We don't pass a prompt to non-whisper models (it requires the
         // whisper-kind run extension), so they still get fuzzy correction here,
         // same as the ONNX engines.
-        let filtered_result = post_process_transcription_text(result, &settings, model_is_whisper);
+        let filtered_result =
+            post_process_transcription_text(result, &settings, model_is_whisper, model_is_whisper);
 
         let et = std::time::Instant::now();
         let translation_note = if settings.translate_to_english {
@@ -1652,6 +1665,7 @@ fn post_process_transcription_text(
     raw: String,
     settings: &AppSettings,
     custom_words_already_prompted: bool,
+    whisper_hallucination_cleanup: bool,
 ) -> String {
     let corrected = if !settings.custom_words.is_empty() && !custom_words_already_prompted {
         apply_custom_words(
@@ -1675,11 +1689,23 @@ fn post_process_transcription_text(
         corrected
     };
 
-    filter_transcription_output(
+    let filtered = filter_transcription_output(
         &unglued,
         &settings.app_language,
         &settings.custom_filler_words,
-    )
+    );
+
+    // Whisper-family models hallucinate on silence/noise: repetition loops
+    // ("Покажу. Покажу. Покажу.") and memorized subtitle-training phrases
+    // ("Продолжение следует...", credits). Both cleanups are sentence-level
+    // and deterministic; they complement max_prev_context_tokens, which only
+    // bounds the loop length inside the engine. Non-whisper engines don't
+    // produce these artifacts, so they skip the pass.
+    if whisper_hallucination_cleanup {
+        remove_hallucinated_sentences(&remove_repeated_sentences(&filtered))
+    } else {
+        filtered
+    }
 }
 
 /// Decide a transcribe-cpp run's task + translation target from settings.

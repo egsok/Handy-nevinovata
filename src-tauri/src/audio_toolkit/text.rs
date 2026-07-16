@@ -408,9 +408,207 @@ pub fn filter_transcription_output(
     filtered.trim().to_string()
 }
 
+/// Splits text into sentence segments. Each segment is a raw slice of the
+/// input (leading whitespace and the full run of trailing sentence-ending
+/// punctuation included), so `segments.concat() == text`.
+fn split_sentences(text: &str) -> Vec<&str> {
+    const ENDERS: [char; 7] = ['.', '!', '?', '…', '。', '！', '？'];
+    let mut segments = Vec::new();
+    let mut last = 0;
+    let mut in_ender_run = false;
+    // Previous two chars, to spot initials ("А.Синецкая", "J.Doe"): a period
+    // after a single uppercase letter is an abbreviation dot, not a sentence
+    // boundary.
+    let mut prev: Option<char> = None;
+    let mut prev2: Option<char> = None;
+    for (i, c) in text.char_indices() {
+        let after_initial = c == '.'
+            && prev.is_some_and(|p| p.is_alphabetic() && p.is_uppercase())
+            && !prev2.is_some_and(|p| p.is_alphanumeric());
+        prev2 = prev;
+        prev = Some(c);
+        if after_initial {
+            continue;
+        }
+        if ENDERS.contains(&c) {
+            in_ender_run = true;
+        } else if in_ender_run {
+            // First char after a punctuation run: close the segment there.
+            if !text[last..i].trim().is_empty() {
+                segments.push(&text[last..i]);
+            }
+            last = i;
+            in_ender_run = false;
+        }
+    }
+    if last < text.len() && !text[last..].trim().is_empty() {
+        segments.push(&text[last..]);
+    }
+    segments
+}
+
+/// Normalizes a sentence for duplicate/blocklist comparison: trims, strips
+/// leading/trailing punctuation (brackets kept — they are meaningful for
+/// non-speech annotations), lowercases.
+fn normalize_sentence(seg: &str) -> String {
+    seg.trim()
+        .trim_matches(|c: char| {
+            matches!(
+                c,
+                '.' | '!' | '?' | '…' | '。' | '！' | '？' | ',' | '"' | '«' | '»' | '\''
+            )
+        })
+        .trim()
+        .to_lowercase()
+}
+
+/// Collapses whisper repetition-loop hallucinations: runs of identical
+/// consecutive sentences. A run of 3+ collapses at any length (nobody dictates
+/// the same sentence three times in a row); a run of exactly 2 collapses only
+/// for long sentences (>= 12 chars normalized), so deliberate short doubles
+/// like "Да. Да." survive.
+pub fn remove_repeated_sentences(text: &str) -> String {
+    let segments = split_sentences(text);
+    if segments.len() < 2 {
+        return text.to_string();
+    }
+
+    let normalized: Vec<String> = segments.iter().map(|s| normalize_sentence(s)).collect();
+    let mut kept: Vec<&str> = Vec::with_capacity(segments.len());
+    let mut i = 0;
+    while i < segments.len() {
+        let mut run = 1;
+        while i + run < segments.len()
+            && !normalized[i].is_empty()
+            && normalized[i + run] == normalized[i]
+        {
+            run += 1;
+        }
+        let collapse = run >= 3 || (run == 2 && normalized[i].chars().count() >= 12);
+        if collapse {
+            kept.push(segments[i]);
+            i += run;
+        } else {
+            for seg in &segments[i..i + run] {
+                kept.push(seg);
+            }
+            i += run;
+        }
+    }
+    kept.concat().trim().to_string()
+}
+
+// Known whisper hallucinations emitted on silence/noise — phrases the model
+// memorized from its subtitle-heavy training data (large-v3 / turbo are the
+// worst offenders in Russian). Matched against a full normalized sentence,
+// never a substring, so real speech containing these words is safe.
+static HALLUCINATED_SENTENCES: Lazy<Vec<Regex>> = Lazy::new(|| {
+    [
+        r"^продолжение следует$",
+        r"^субтитры (сделал|делал|создал|создавал|сделаны|подготовил|подготовила) .{0,50}$",
+        r"^редактор субтитров .{0,60}$",
+        r"^корректор [а-яё]\.? ?[а-яё]{1,20}$",
+        r"^спасибо за просмотр$",
+        r"^thanks for watching$",
+        r"^subtitles by .{0,50}$",
+        // Bracketed non-speech annotations: "[музыка]", "(смех)", "[applause]".
+        r"^[\[(].{0,30}[\])]$",
+    ]
+    .iter()
+    .map(|p| Regex::new(p).unwrap())
+    .collect()
+});
+
+/// Drops sentences that are known whisper silence-hallucinations
+/// ("Продолжение следует...", subtitle credits, bracketed non-speech tags).
+/// Whole-sentence match only.
+pub fn remove_hallucinated_sentences(text: &str) -> String {
+    let segments = split_sentences(text);
+    if segments.is_empty() {
+        return text.to_string();
+    }
+    let kept: Vec<&str> = segments
+        .iter()
+        .filter(|seg| {
+            let norm = normalize_sentence(seg);
+            norm.is_empty() || !HALLUCINATED_SENTENCES.iter().any(|re| re.is_match(&norm))
+        })
+        .copied()
+        .collect();
+    if kept.len() == segments.len() {
+        return text.to_string();
+    }
+    kept.concat().trim().to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_repeated_sentences_loop_collapses() {
+        // Classic turbo repetition loop, short sentence, many repeats.
+        let text = "Покажу. Покажу. Покажу. Покажу. Покажу.";
+        assert_eq!(remove_repeated_sentences(text), "Покажу.");
+    }
+
+    #[test]
+    fn test_repeated_sentences_long_pair_collapses() {
+        let text = "Если нужно, сделаем. Если нужно, сделаем.";
+        assert_eq!(remove_repeated_sentences(text), "Если нужно, сделаем.");
+    }
+
+    #[test]
+    fn test_repeated_sentences_short_double_survives() {
+        // Deliberate short double must NOT be collapsed.
+        let text = "Да. Да.";
+        assert_eq!(remove_repeated_sentences(text), "Да. Да.");
+    }
+
+    #[test]
+    fn test_repeated_sentences_normal_text_untouched() {
+        let text = "Первое предложение. Второе предложение. Третье.";
+        assert_eq!(remove_repeated_sentences(text), text);
+    }
+
+    #[test]
+    fn test_repeated_sentences_loop_mid_text() {
+        let text = "Начало диктовки. Так. Так. Так. Так. И конец.";
+        assert_eq!(
+            remove_repeated_sentences(text),
+            "Начало диктовки. Так. И конец."
+        );
+    }
+
+    #[test]
+    fn test_hallucinated_prodolzhenie_sleduet() {
+        let text = "Это реальный текст. Продолжение следует...";
+        assert_eq!(remove_hallucinated_sentences(text), "Это реальный текст.");
+    }
+
+    #[test]
+    fn test_hallucinated_subtitle_credits() {
+        let text = "Субтитры сделал DimaTorzok. Редактор субтитров А.Синецкая Корректор А.Егорова.";
+        assert_eq!(remove_hallucinated_sentences(text), "");
+    }
+
+    #[test]
+    fn test_hallucinated_only_full_sentence_matches() {
+        // The phrase inside a longer real sentence must survive.
+        let text = "Я думаю, что продолжение следует выпустить в марте.";
+        assert_eq!(remove_hallucinated_sentences(text), text);
+    }
+
+    #[test]
+    fn test_hallucinated_bracketed_annotation() {
+        let text = "Реальная речь. [музыка]";
+        assert_eq!(remove_hallucinated_sentences(text), "Реальная речь.");
+    }
+
+    #[test]
+    fn test_hallucinated_pure_silence_transcript() {
+        assert_eq!(remove_hallucinated_sentences("Спасибо за просмотр!"), "");
+    }
 
     #[test]
     fn test_apply_custom_words_exact_match() {
