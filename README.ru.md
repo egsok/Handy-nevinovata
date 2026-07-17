@@ -70,7 +70,11 @@
 
 Telegram-канал про AI-инструменты: [@neiroset_ne_vinovata](https://t.me/neiroset_ne_vinovata).
 
-Другие открытые эксперименты: [plan-tango](https://github.com/egsok/plan-tango) — Claude ↔ Codex ревью-цикл для планов в Claude Code.
+Другие открытые эксперименты:
+
+- [plan-tango](https://github.com/egsok/plan-tango) — Claude ↔ Codex ревью-цикл для планов в Claude Code.
+- [press-1](https://github.com/egsok/press-1) — отвечать на permission-промпты Claude Code одной клавишей из любого окна.
+- [napotom](https://github.com/egsok/napotom) — десктопный загрузчик видео с очередью, дружелюбная обёртка над yt-dlp.
 
 ## Лицензия
 

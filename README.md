@@ -70,7 +70,11 @@ Built by [Egor Sokolov](https://egorsokolov.ru/) — 10 years in product (Sberba
 
 Telegram channel about AI tooling: [@neiroset_ne_vinovata](https://t.me/neiroset_ne_vinovata).
 
-Other open experiments: [plan-tango](https://github.com/egsok/plan-tango) — a Claude ↔ Codex review loop for plans in Claude Code.
+Other open experiments:
+
+- [plan-tango](https://github.com/egsok/plan-tango) — a Claude ↔ Codex review loop for plans in Claude Code.
+- [press-1](https://github.com/egsok/press-1) — answer Claude Code's permission prompts with a single keypress, from any window.
+- [napotom](https://github.com/egsok/napotom) — a desktop video downloader with a queue, a friendly GUI over yt-dlp.
 
 ## License
 
