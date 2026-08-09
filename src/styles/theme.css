@@ -53,6 +53,12 @@
      violet buzzes, the kraft sheet's own cream sits on it (8.4:1). */
   --color-on-ink: #f2ecdc;
 
+  /* Semantic status roles stay inside the two-ink palette. */
+  --light-color-warning: var(--light-color-logo-primary);
+  --light-color-error: var(--light-color-logo-primary);
+  --dark-color-warning: var(--dark-color-logo-primary);
+  --dark-color-error: var(--dark-color-logo-primary);
+
   /* Active palette — defaults to light, follows the OS via the media query
      below, or is forced by `data-theme` (see App.css). */
   --color-text: var(--light-color-text);
@@ -61,6 +67,8 @@
   --color-logo-primary: var(--light-color-logo-primary);
   --color-mid-gray: var(--light-color-mid-gray);
   --color-state-soft: var(--light-color-state-soft);
+  --color-warning: var(--light-color-warning);
+  --color-error: var(--light-color-error);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -71,5 +79,7 @@
     --color-logo-primary: var(--dark-color-logo-primary);
     --color-mid-gray: var(--dark-color-mid-gray);
     --color-state-soft: var(--dark-color-state-soft);
+    --color-warning: var(--dark-color-warning);
+    --color-error: var(--dark-color-error);
   }
 }

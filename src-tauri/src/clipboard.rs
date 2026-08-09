@@ -27,6 +27,7 @@ enum SavedClipboard {
     },
     Text(String),
     Empty,
+    Unavailable,
 }
 
 /// Reads one clipboard format, logging a warning when the read is slow.
@@ -49,7 +50,7 @@ fn timed_read<T>(format: &'static str, read: impl FnOnce() -> T) -> T {
 
 fn save_clipboard() -> SavedClipboard {
     let Ok(mut clipboard) = ArboardClipboard::new() else {
-        return SavedClipboard::Empty;
+        return SavedClipboard::Unavailable;
     };
 
     if let Ok(files) = timed_read("file_list", || clipboard.get().file_list()) {
@@ -102,14 +103,19 @@ fn save_clipboard_with_timeout() -> SavedClipboard {
                  (previous clipboard content will be replaced by the transcription)",
                 SAVE_CLIPBOARD_TIMEOUT
             );
-            SavedClipboard::Empty
+            SavedClipboard::Unavailable
         }
     }
 }
 
 fn restore_clipboard(saved: SavedClipboard) {
     match saved {
-        SavedClipboard::Empty => {}
+        SavedClipboard::Unavailable => {}
+        SavedClipboard::Empty => {
+            if let Ok(mut clipboard) = ArboardClipboard::new() {
+                let _ = clipboard.clear();
+            }
+        }
         SavedClipboard::Text(text) => {
             #[cfg(target_os = "linux")]
             if is_wayland() && is_wl_copy_available() {
@@ -163,7 +169,7 @@ fn paste_via_clipboard(
     let saved = if restore {
         save_clipboard_with_timeout()
     } else {
-        SavedClipboard::Empty
+        SavedClipboard::Unavailable
     };
 
     // Write text to clipboard first
@@ -197,14 +203,16 @@ fn paste_via_clipboard(
     // Fall back to enigo if no native tool handled it
     if !key_combo_sent {
         match paste_method {
-            PasteMethod::CtrlV => input::send_paste_ctrl_v(enigo)?,
-            PasteMethod::CtrlShiftV => input::send_paste_ctrl_shift_v(enigo)?,
-            PasteMethod::ShiftInsert => input::send_paste_shift_insert(enigo)?,
+            // The legacy path cannot detect a mistimed chord, so it keeps the
+            // conservative 100ms modifier hold.
+            PasteMethod::CtrlV => input::send_paste_ctrl_v(enigo, 100)?,
+            PasteMethod::CtrlShiftV => input::send_paste_ctrl_shift_v(enigo, 100)?,
+            PasteMethod::ShiftInsert => input::send_paste_shift_insert(enigo, 100)?,
             _ => return Err("Invalid paste method for clipboard paste".into()),
         }
     }
 
-    if matches!(saved, SavedClipboard::Empty) {
+    if matches!(saved, SavedClipboard::Unavailable) {
         return Ok(());
     }
 
@@ -552,9 +560,11 @@ fn write_clipboard_via_wl_copy(text: &str) -> Result<(), String> {
 #[cfg(target_os = "linux")]
 fn send_key_combo_via_wtype(paste_method: &PasteMethod) -> Result<(), String> {
     let args: Vec<&str> = match paste_method {
-        PasteMethod::CtrlV => vec!["-M", "ctrl", "-k", "v"],
-        PasteMethod::ShiftInsert => vec!["-M", "shift", "-k", "Insert"],
-        PasteMethod::CtrlShiftV => vec!["-M", "ctrl", "-M", "shift", "-k", "v"],
+        PasteMethod::CtrlV => vec!["-M", "ctrl", "-k", "v", "-m", "ctrl"],
+        PasteMethod::ShiftInsert => vec!["-M", "shift", "-k", "Insert", "-m", "shift"],
+        PasteMethod::CtrlShiftV => vec![
+            "-M", "ctrl", "-M", "shift", "-k", "v", "-m", "shift", "-m", "ctrl",
+        ],
         _ => return Err("Unsupported paste method".into()),
     };
 
@@ -688,7 +698,7 @@ fn paste_direct(
     input::paste_text_direct(enigo, text)
 }
 
-fn send_return_key(enigo: &mut Enigo, key_type: AutoSubmitKey) -> Result<(), String> {
+pub(crate) fn send_return_key(enigo: &mut Enigo, key_type: AutoSubmitKey) -> Result<(), String> {
     match key_type {
         AutoSubmitKey::Enter => {
             enigo
@@ -776,6 +786,28 @@ pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {
             )?;
         }
         PasteMethod::CtrlV | PasteMethod::CtrlShiftV | PasteMethod::ShiftInsert => {
+            // Debug-gated receipt-sequenced paste (#502): restore the clipboard
+            // after the target actually reads the transcript, not on a timer.
+            // On success it fully handles the paste (including auto-submit and
+            // clipboard handling) asynchronously; on failure fall through to
+            // the legacy path untouched.
+            #[cfg(any(target_os = "macos", target_os = "windows"))]
+            if settings.reliable_paste {
+                match crate::paste_tx::try_reliable_paste(
+                    &text,
+                    &app_handle,
+                    &paste_method,
+                    &mut enigo,
+                    settings.auto_submit,
+                    settings.auto_submit_key,
+                    settings.clipboard_handling,
+                ) {
+                    Ok(()) => return Ok(()),
+                    Err(e) => {
+                        log::warn!("Reliable paste unavailable ({e}); falling back to legacy paste")
+                    }
+                }
+            }
             let restore = settings.clipboard_handling != ClipboardHandling::CopyToClipboard;
             paste_via_clipboard(
                 &mut enigo,

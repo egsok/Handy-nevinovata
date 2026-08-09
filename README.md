@@ -8,75 +8,77 @@
   </picture>
 </p>
 
-> Personal fork of [cjpais/Handy](https://github.com/cjpais/Handy) with Russian-language transcription tweaks.
-> Pre-built installers (unsigned) on [Releases](https://github.com/egsok/klava-nevinovata/releases). Build from source for everything else.
+> Personal fork of [cjpais/Handy](https://github.com/cjpais/Handy), tuned for Russian-language transcription.
+> Unsigned installers are available on [Releases](https://github.com/egsok/klava-nevinovata/releases).
 > [English] · [Русский](README.ru.md)
 
-This is my personal daily-driver fork of [Handy](https://github.com/cjpais/Handy), the offline speech-to-text Tauri app. I use it for Russian transcription on Windows. The fork stays close to upstream — I cherry-pick fixes and add small features that solve concrete problems I hit. Nothing here is meant to replace upstream Handy; if you don't have the same Russian-specific pain points, just use the original.
+`klava-nevinovata` is my daily-driver fork of Handy, the offline speech-to-text desktop app. It stays close to upstream while adding fixes for recognition quality and reliability issues I encounter in everyday Russian dictation on Windows.
 
-Fork is based on upstream `v0.9.3`.
+Current fork release: `0.9.5-1`, based on upstream `v0.9.5`.
 
 ## What's different from upstream
 
-- **Two-ink design.** The fork wears its own visual identity — the two-ink print-workshop language of the [«Нейросеть не виновата»](https://t.me/neiroset_ne_vinovata) channel: magenta + deep violet inks on kraft paper (light) and ink wall (dark), IBM Plex type, a mic-with-halo mark where the inks deliberately don't register, and a recording overlay restyled as a printed sheet. Upstream's layout is untouched — only the paint.
-- **Anti-hallucination defenses for Whisper models.** On silence and trailing pauses Whisper (large-v3-turbo especially) emits repetition loops and phrases memorized from its subtitle-heavy training data — "Продолжение следует...", subtitle credits, `[музыка]` tags. The fork caps the decoder's carried context (`max_prev_context_tokens=128`) and cleans the transcript afterwards: collapses runs of identical sentences and drops known hallucinated phrases on whole-sentence match only, so real speech containing the same words survives.
-- **Custom transcription prompt with Russian primers.** Per-language initial prompt field in Settings → Advanced for Whisper models, shipped with primers tuned for Russian. Useful for forcing recognition of names, jargon and stylistic preferences.
-- **Long-dictation punctuation fix.** whisper.cpp processes audio in 30-second windows; upstream resets decoder context between them, which drops punctuation after the first window on long dictations. This fork sets `condition_on_prev_tokens=true` so decoded context carries across windows.
-- **Cyrillic word-boundary fixes for Breeze ASR.** Five regex passes unglue words that the Mandarin-trained Breeze model joins together (`cyr.cyr`, `lat.cyr`, `cyrCYR`, `latCYR`, single-letter variants, uppercase Latin acronyms). Applies to both the legacy and the GGUF-catalog Breeze models, pure post-process in `src-tauri/src/audio_toolkit/text.rs`.
-- **Multi-format clipboard preservation.** Paste-and-restore preserves Files / Image / HTML / Text — not just the plain-text payload. Lets you keep a clipboard you copied earlier even if klava-nevinovata hijacks the buffer to inject the transcript.
-- **Hotkey reliability on Windows.** [handy-keys fork](https://github.com/egsok/handy-keys-fork) reads live modifier state (`GetAsyncKeyState`) instead of incremental tracking — fixes transient "hotkey deafness" and phantom stuck modifiers — plus a watchdog that detects pipeline stalls.
-- **Clipboard hang fix.** A hung clipboard owner can no longer freeze the main thread during paste.
-- **Atomic settings updates.** All settings writes are serialized under a mutex; the upstream read-modify-write race could silently reset settings (e.g. history retention) and destroy data.
+### Recognition quality
+
+- **Anti-hallucination defenses for Whisper.** The decoder carries at most 128 previous-context tokens, repeated sentences are collapsed, and known subtitle-style hallucinations such as “Продолжение следует...” are removed only when a whole sentence matches. Real speech containing the same words is preserved.
+- **Custom transcription prompt with Russian primers.** Settings → Advanced includes a per-language initial prompt for Whisper models, with Russian defaults for names, terminology, and punctuation style.
+- **Punctuation across long dictations.** `condition_on_prev_tokens=true` keeps decoder context between whisper.cpp's 30-second windows instead of losing punctuation after the first window.
+- **Cyrillic word-boundary repair for Breeze ASR.** Deterministic post-processing separates Cyrillic/Cyrillic and Cyrillic/Latin words that Breeze can glue together, while preserving common abbreviations such as `.NET` and `PDF`.
+
+### Reliability and quality of life
+
+- **Full clipboard preservation in the standard paste path.** Files, images, HTML, and text are restored after the transcript is pasted. Upstream PR [#1231](https://github.com/cjpais/Handy/pull/1231) improved the legacy path, but it still snapshots only text or an image there; the fork keeps the broader implementation. Upstream's newer debug-gated reliable-paste path remains available as well.
+- **Clipboard timeout protection.** A slow or suspended clipboard owner cannot block the app's main thread indefinitely. If the snapshot times out, the transcript is still pasted and the unavailable old clipboard is not mistaken for an intentionally empty one.
+- **Hotkey watchdog and high-priority Windows hook.** The fork tracks modifier resyncs, monitors the hotkey pipeline for stalls, and runs the low-level keyboard hook at time-critical priority. Official `handy-keys` 0.3.3 already includes the live modifier-state correction; our fork now carries only these additional diagnostics and scheduling safeguards.
+- **Atomic settings updates.** Read-modify-write operations are serialized, preventing concurrent changes from silently resetting settings such as history retention.
+
+### Visual identity
+
+- **Two-ink design.** The interface uses the print-workshop language of the [«Нейросеть не виновата»](https://t.me/neiroset_ne_vinovata) channel: magenta and deep violet ink on kraft paper in the light theme, an ink wall in the dark theme, IBM Plex typography, and a matching recording overlay. The upstream information architecture remains intact.
 
 ## Download
 
-Pre-built installers are published to [Releases](https://github.com/egsok/klava-nevinovata/releases). The releases page also carries the older `0.8.3-N` stable line as a fallback.
+Pre-built unsigned installers are published on [Releases](https://github.com/egsok/klava-nevinovata/releases). The older `0.8.3-N` stable line remains there as a fallback.
 
-- **Windows:** download `klava-nevinovata_0.9.3-N_x64-setup.exe` (NSIS) or `.msi` (N is the fork release number — 1, 2, ...). On first launch Windows SmartScreen will show "Windows protected your PC" — click **More info** → **Run anyway**. The binary is unsigned (see Build below).
-- **Linux:** download `klava-nevinovata_..._amd64.deb` / `.AppImage` / `.rpm` for your distro.
-- **macOS:** two builds — pick by your Mac's chip:
-  - `klava-nevinovata_..._aarch64.dmg` — **Apple Silicon** Mac (M1 / M2 / M3 / M4, models from late 2020 onwards)
-  - `klava-nevinovata_..._x64.dmg` — **Intel** Mac (older models, ~2006–2020)
+- **Windows:** download `klava-nevinovata_0.9.5-1_x64-setup.exe` (NSIS) or the `.msi`. If SmartScreen shows “Windows protected your PC”, select **More info → Run anyway**.
+- **Linux:** download the `.deb`, `.AppImage`, or `.rpm` build for your distribution.
+- **macOS:** use `aarch64.dmg` for Apple Silicon or `x64.dmg` for Intel Macs, then drag `klava-nevinovata.app` to `/Applications`.
 
-  Not sure which? Click → **About This Mac**. If it lists a "Chip" like "Apple M1" → `aarch64`. If it lists a "Processor" like "Intel Core i7" → `x64`.
+Because the macOS build is unsigned, the first launch may incorrectly say the app is damaged. Remove the quarantine attribute in Terminal:
 
-  Drag `klava-nevinovata.app` to `/Applications`. On first launch macOS will show **"klava-nevinovata is damaged and can't be opened, you should move it to the Bin"** — this is misleading; the app is not damaged, it's just unsigned and quarantined. Fix by removing the quarantine attribute in Terminal:
+```bash
+xattr -d com.apple.quarantine /Applications/klava-nevinovata.app
+```
 
-  ```bash
-  xattr -d com.apple.quarantine /Applications/klava-nevinovata.app
-  ```
-
-  (If that errors with permission, try `sudo xattr -cr /Applications/klava-nevinovata.app`.) After this the app launches normally. The right-click → Open workaround that older guides mention no longer works on macOS 15+ for unsigned apps. Please report any post-launch issues in [issues](https://github.com/egsok/klava-nevinovata/issues).
-
-  **Permissions on macOS.** On first launch the app asks for two permissions: Microphone (to hear you) and Accessibility (to type the transcript into other apps). The permissions screen only shows on launch — if you closed it, restart the app, or grant manually: **System Settings → Privacy & Security → Accessibility** → enable klava-nevinovata (Microphone lives in the same Privacy & Security list). If the Accessibility toggle is already on but the app still says it's waiting: select klava-nevinovata in that list, remove it with the **−** button, then re-add it with **+** — macOS sometimes keeps the permission tied to a previous version of an unsigned app after an update. Restarting the app after granting also helps.
+If needed, use `sudo xattr -cr /Applications/klava-nevinovata.app`. The app also needs Microphone and Accessibility permissions under **System Settings → Privacy & Security**. If Accessibility remains stuck after an update, remove the old entry, add the app again, and restart it.
 
 ## Build
 
-If you want the bleeding edge, a platform not covered by releases, or want to audit the build yourself, build locally. (Otherwise grab a pre-built installer from [Download](#download) above.)
+For platform prerequisites and packaging details, see [BUILD.md](BUILD.md). The short version is:
 
-1. Follow upstream's [BUILD.md](BUILD.md) for platform prerequisites.
-2. On Windows, set `CARGO_TARGET_DIR` to a short path (e.g. `d:/t/handy9`) — the generated Vulkan shader sources overflow MAX_PATH otherwise — and limit parallelism with `CARGO_BUILD_JOBS=8`, or MSVC runs out of heap compiling the shader-embed translation units.
-3. `bun install && bun run tauri build`.
+```bash
+bun install
+bun run tauri build
+```
+
+On Windows, if MSVC runs out of heap while compiling generated shader sources, retry with `CARGO_BUILD_JOBS=8`. A custom short `CARGO_TARGET_DIR` is no longer required by default.
 
 ## Upstream
 
-This fork tracks [cjpais/Handy](https://github.com/cjpais/Handy). For everything not listed above — installation, troubleshooting, platform-specific notes, model management, signal handling, CLI flags — see the [upstream README](https://github.com/cjpais/Handy/blob/main/README.md). I don't duplicate that here so it doesn't go stale relative to upstream.
+This fork tracks [cjpais/Handy](https://github.com/cjpais/Handy). For general usage, model management, troubleshooting, platform notes, and CLI flags, see the [upstream README](https://github.com/cjpais/Handy/blob/main/README.md).
 
-If you want the official, supported app: get it from [handy.computer](https://handy.computer) or [cjpais/Handy/releases](https://github.com/cjpais/Handy/releases).
+For the official supported app, use [handy.computer](https://handy.computer) or [upstream releases](https://github.com/cjpais/Handy/releases).
 
 ## Author
 
-Built by [Egor Sokolov](https://egorsokolov.ru/) — 10 years in product (Sberbank, Rolf, Claustrophobia). Writing and experimenting with AI tooling — mostly Claude Code, Codex, and dev workflow tooling. I use klava-nevinovata daily for Russian voice notes; this fork is what fell out of that.
-
-Telegram channel about AI tooling: [@neiroset_ne_vinovata](https://t.me/neiroset_ne_vinovata).
+Built by [Egor Sokolov](https://egorsokolov.ru/). I write about practical AI tooling in the Telegram channel [«Нейросеть не виновата»](https://t.me/neiroset_ne_vinovata).
 
 Other open experiments:
 
-- [plan-tango](https://github.com/egsok/plan-tango) — a Claude ↔ Codex review loop for plans in Claude Code.
-- [press-1](https://github.com/egsok/press-1) — answer Claude Code's permission prompts with a single keypress, from any window.
-- [napotom](https://github.com/egsok/napotom) — a desktop video downloader with a queue, a friendly GUI over yt-dlp.
+- [plan-tango](https://github.com/egsok/plan-tango) — a Claude ↔ Codex review loop for plans.
+- [press-1](https://github.com/egsok/press-1) — answer Claude Code permission prompts with one keypress from any window.
+- [napotom](https://github.com/egsok/napotom) — a desktop video downloader and friendly GUI for yt-dlp.
 
 ## License
 
-MIT, inherited from cjpais/Handy — see [LICENSE](LICENSE).
-Original work © cjpais and contributors. Fork changes © 2026 Egor Sokolov.
+MIT, inherited from cjpais/Handy — see [LICENSE](LICENSE). Original work © cjpais and contributors. Fork changes © 2026 Egor Sokolov.

@@ -39,6 +39,16 @@ use transcribe_rs::{
 const STREAM_PERF_LOG_INTERVAL: Duration = Duration::from_secs(5);
 const STREAM_FINALIZE_REPLY_TIMEOUT: Duration = Duration::from_secs(30);
 
+fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
+    if let Some(message) = payload.downcast_ref::<&str>() {
+        (*message).to_string()
+    } else if let Some(message) = payload.downcast_ref::<String>() {
+        message.clone()
+    } else {
+        "unknown panic".to_string()
+    }
+}
+
 #[derive(Clone, Debug, Serialize)]
 pub struct ModelStateEvent {
     pub event_type: String,
@@ -976,7 +986,7 @@ impl TranscriptionManager {
                                     update.audio_committed_ms,
                                     update.buffered_ms,
                                 );
-                                Some(stream.text().display())
+                                Some(stream.text().full)
                             }
                             Err(e) => {
                                 perf.record_compute(finalize_start.elapsed());
@@ -1183,7 +1193,6 @@ impl TranscriptionManager {
         // run extension and the fuzzy-correction skip are gated on
         // `model_is_whisper` instead, since non-whisper archs can advertise
         // the feature while rejecting the whisper-kind extension.
-        let mut model_takes_initial_prompt = false;
         // Whether the loaded model is actually whisper-family (arch string).
         // Non-whisper archs (e.g. Voxtral Small) can advertise
         // Feature::InitialPrompt yet reject the whisper-kind run extension
@@ -1222,7 +1231,7 @@ impl TranscriptionManager {
             if let LoadedEngine::TranscribeCpp(session) = &engine {
                 let model = session.model();
                 let caps = model.capabilities();
-                model_takes_initial_prompt = model.supports(Feature::InitialPrompt);
+                let model_takes_initial_prompt = model.supports(Feature::InitialPrompt);
                 model_is_whisper = model.arch() == "whisper";
                 model_supports_translate = caps.supports_translate;
                 model_languages = caps.languages;
@@ -1409,13 +1418,7 @@ impl TranscriptionManager {
                 Err(panic_payload) => {
                     // Engine panicked — do NOT put it back (it's in an unknown state).
                     // The engine is dropped here, effectively unloading it.
-                    let panic_msg = if let Some(s) = panic_payload.downcast_ref::<&str>() {
-                        s.to_string()
-                    } else if let Some(s) = panic_payload.downcast_ref::<String>() {
-                        s.clone()
-                    } else {
-                        "unknown panic".to_string()
-                    };
+                    let panic_msg = panic_payload_message(panic_payload.as_ref());
                     error!(
                         "Transcription engine panicked: {}. Model has been unloaded.",
                         panic_msg
@@ -1667,44 +1670,58 @@ fn post_process_transcription_text(
     custom_words_already_prompted: bool,
     whisper_hallucination_cleanup: bool,
 ) -> String {
-    let corrected = if !settings.custom_words.is_empty() && !custom_words_already_prompted {
-        apply_custom_words(
-            &raw,
-            &settings.custom_words,
-            settings.word_correction_threshold,
-        )
-    } else {
-        raw
-    };
+    fail_open_text_transform(raw, |raw| {
+        let corrected = if !settings.custom_words.is_empty() && !custom_words_already_prompted {
+            apply_custom_words(
+                &raw,
+                &settings.custom_words,
+                settings.word_correction_threshold,
+            )
+        } else {
+            raw
+        };
 
-    // Breeze ASR's Mandarin code-switch training glues sentence boundaries
-    // on Cyrillic and Cyrillic↔Latin output. Run unglue BEFORE filler
-    // filtering so word-boundary regexes inside filter_transcription_output
-    // match correctly on what would otherwise be a single token. The gate
-    // matches both the legacy predefined id ("breeze-asr") and the catalog
-    // GGUF id ("handy-computer/Breeze-ASR-25-gguf/…").
-    let unglued = if settings.selected_model.to_lowercase().contains("breeze") {
-        fix_word_boundary_glue(&corrected)
-    } else {
-        corrected
-    };
+        // Breeze ASR's Mandarin code-switch training glues sentence boundaries
+        // on Cyrillic and Cyrillic↔Latin output. Run unglue before filler filtering.
+        let unglued = if settings.selected_model.to_lowercase().contains("breeze") {
+            fix_word_boundary_glue(&corrected)
+        } else {
+            corrected
+        };
 
-    let filtered = filter_transcription_output(
-        &unglued,
-        &settings.app_language,
-        &settings.custom_filler_words,
-    );
+        let filtered = filter_transcription_output(
+            &unglued,
+            &settings.app_language,
+            &settings.custom_filler_words,
+        );
 
-    // Whisper-family models hallucinate on silence/noise: repetition loops
-    // ("Покажу. Покажу. Покажу.") and memorized subtitle-training phrases
-    // ("Продолжение следует...", credits). Both cleanups are sentence-level
-    // and deterministic; they complement max_prev_context_tokens, which only
-    // bounds the loop length inside the engine. Non-whisper engines don't
-    // produce these artifacts, so they skip the pass.
-    if whisper_hallucination_cleanup {
-        remove_hallucinated_sentences(&remove_repeated_sentences(&filtered))
-    } else {
-        filtered
+        // Whisper-family models hallucinate on silence/noise. These deterministic
+        // cleanups complement the bounded previous-token context in the engine.
+        if whisper_hallucination_cleanup {
+            remove_hallucinated_sentences(&remove_repeated_sentences(&filtered))
+        } else {
+            filtered
+        }
+    })
+}
+
+/// Optional text cleanup must never discard a successful model result. The
+/// transform is pure and owns its input, so recovering the untouched text is
+/// safe even if a bug in custom-word or filler filtering unwinds.
+fn fail_open_text_transform<F>(raw: String, transform: F) -> String
+where
+    F: FnOnce(String) -> String,
+{
+    let fallback = raw.clone();
+    match catch_unwind(AssertUnwindSafe(|| transform(raw))) {
+        Ok(processed) => processed,
+        Err(payload) => {
+            error!(
+                "Optional transcription text post-processing panicked: {}; using the raw transcription",
+                panic_payload_message(payload.as_ref())
+            );
+            fallback
+        }
     }
 }
 
@@ -1759,7 +1776,13 @@ pub fn init_transcribe_backend() {
     transcribe_cpp::init_logging();
     match transcribe_cpp::init_backends_default() {
         Ok(()) => {
-            let devices = transcribe_cpp::devices();
+            if transcribe_gpu_disabled_for_host() {
+                warn!(
+                    "Windows x64 build is running under emulation on an ARM64 host; \
+                     disabling transcribe.cpp GPU acceleration and using CPU"
+                );
+            }
+            let devices = transcribe_compute_devices();
             info!(
                 "transcribe-cpp initialized with {} compute device(s): [{}]",
                 devices.len(),
@@ -1779,7 +1802,7 @@ pub fn init_transcribe_backend() {
 /// value to pass to `--device-index`. Backends must be initialized first
 /// (see [`init_transcribe_backend`]).
 pub fn describe_compute_devices() -> Vec<String> {
-    transcribe_cpp::devices()
+    transcribe_compute_devices()
         .into_iter()
         .map(|d| {
             let idx = d
@@ -1805,7 +1828,7 @@ pub fn describe_compute_devices() -> Vec<String> {
 /// backend is set explicitly from the device's kind, so there's no "index 0 =
 /// auto" ambiguity. Errors if the index isn't a registered, loadable device.
 fn resolve_device_index(index: usize) -> Result<(Backend, i32)> {
-    let device = transcribe_cpp::devices()
+    let device = transcribe_compute_devices()
         .into_iter()
         .find(|d| d.index == Some(index))
         .ok_or_else(|| {
@@ -1836,9 +1859,10 @@ fn resolve_device_index(index: usize) -> Result<(Backend, i32)> {
 /// `Auto` lets the library pick the best device (with CPU fallback). `Cpu` forces
 /// strict CPU. `Gpu` requests the platform GPU backend, but only if a device for
 /// it is actually registered — otherwise it falls back to `Auto` so the load
-/// never fails outright on a machine without that GPU backend.
+/// never fails outright on a machine without that GPU backend. An emulated x64
+/// process on Windows ARM64 forces strict CPU for every setting.
 fn select_transcribe_backend(setting: TranscribeAcceleratorSetting) -> Backend {
-    match setting {
+    match effective_transcribe_accelerator(setting, transcribe_gpu_disabled_for_host()) {
         TranscribeAcceleratorSetting::Cpu => Backend::Cpu,
         TranscribeAcceleratorSetting::Auto => Backend::Auto,
         TranscribeAcceleratorSetting::Gpu => {
@@ -1853,7 +1877,19 @@ fn select_transcribe_backend(setting: TranscribeAcceleratorSetting) -> Backend {
             {
                 Some(b) => b,
                 None => {
-                    warn!("No GPU backend available for transcribe.cpp; falling back to Auto");
+                    #[cfg(target_os = "linux")]
+                    warn!(
+                        "GPU acceleration was requested, but no transcribe.cpp GPU backend is \
+                         registered; falling back to Auto (usually CPU). Run with \
+                         --list-devices to inspect detected devices; VK_LOADER_DEBUG=error can \
+                         reveal Vulkan loader or driver failures"
+                    );
+                    #[cfg(not(target_os = "linux"))]
+                    warn!(
+                        "GPU acceleration was requested, but no transcribe.cpp GPU backend is \
+                         registered; falling back to Auto (usually CPU). Run with \
+                         --list-devices to inspect detected devices"
+                    );
                     Backend::Auto
                 }
             }
@@ -1871,12 +1907,15 @@ fn select_transcribe_backend(setting: TranscribeAcceleratorSetting) -> Backend {
 /// resolves to a registered GPU device — otherwise fall back to `0` so a stale
 /// selection can never fail the load.
 fn resolve_gpu_device(setting: TranscribeAcceleratorSetting, gpu_device: i32) -> i32 {
-    if setting != TranscribeAcceleratorSetting::Gpu || gpu_device <= 0 {
+    if transcribe_gpu_disabled_for_host()
+        || setting != TranscribeAcceleratorSetting::Gpu
+        || gpu_device <= 0
+    {
         return 0;
     }
-    let still_valid = transcribe_cpp::devices()
+    let still_valid = transcribe_compute_devices()
         .iter()
-        .any(|d| d.index == Some(gpu_device as usize) && d.kind != "cpu" && d.kind != "accel");
+        .any(|d| d.index == Some(gpu_device as usize) && is_transcribe_gpu_device(d));
     if still_valid {
         gpu_device
     } else {
@@ -1924,6 +1963,50 @@ pub struct GpuDeviceOption {
 
 static GPU_DEVICES: OnceLock<Vec<GpuDeviceOption>> = OnceLock::new();
 
+fn transcribe_gpu_disabled_for_host() -> bool {
+    crate::utils::is_windows_x64_emulated_on_arm64()
+}
+
+fn effective_transcribe_accelerator(
+    setting: TranscribeAcceleratorSetting,
+    gpu_disabled: bool,
+) -> TranscribeAcceleratorSetting {
+    if gpu_disabled {
+        TranscribeAcceleratorSetting::Cpu
+    } else {
+        setting
+    }
+}
+
+fn is_transcribe_gpu_device(device: &transcribe_cpp::Device) -> bool {
+    device.kind != "cpu" && device.kind != "accel"
+}
+
+fn transcribe_device_allowed(kind: &str, gpu_disabled: bool) -> bool {
+    !gpu_disabled || matches!(kind, "cpu" | "accel")
+}
+
+fn transcribe_compute_devices() -> Vec<transcribe_cpp::Device> {
+    let devices = transcribe_cpp::devices();
+    let gpu_disabled = transcribe_gpu_disabled_for_host();
+    if !gpu_disabled {
+        return devices;
+    }
+
+    devices
+        .into_iter()
+        .filter(|device| transcribe_device_allowed(&device.kind, gpu_disabled))
+        .collect()
+}
+
+fn available_transcribe_accelerators(gpu_disabled: bool) -> Vec<String> {
+    if gpu_disabled {
+        vec!["cpu".to_string()]
+    } else {
+        vec!["auto".to_string(), "cpu".to_string(), "gpu".to_string()]
+    }
+}
+
 fn cached_gpu_devices() -> &'static [GpuDeviceOption] {
     // GPU compute devices transcribe-cpp registered at startup. `id` is the
     // device's registry index (`Device::index`, not a re-counted position) so it
@@ -1931,9 +2014,9 @@ fn cached_gpu_devices() -> &'static [GpuDeviceOption] {
     // `total_vram_mb` is the backend-reported capacity, 0 when unreported (some
     // Metal/Vulkan drivers).
     GPU_DEVICES.get_or_init(|| {
-        transcribe_cpp::devices()
+        transcribe_compute_devices()
             .into_iter()
-            .filter(|d| d.kind != "cpu" && d.kind != "accel")
+            .filter(is_transcribe_gpu_device)
             .map(|d| GpuDeviceOption {
                 id: d.index.unwrap_or(0) as i32,
                 name: if d.description.is_empty() {
@@ -1954,7 +2037,7 @@ pub struct AvailableAccelerators {
     pub gpu_devices: Vec<GpuDeviceOption>,
 }
 
-/// Return which accelerators are compiled into this build.
+/// Return the accelerators available to this process on its current host.
 pub fn get_available_accelerators() -> AvailableAccelerators {
     use transcribe_rs::accel::OrtAccelerator;
 
@@ -1963,7 +2046,7 @@ pub fn get_available_accelerators() -> AvailableAccelerators {
         .map(|a| a.to_string())
         .collect();
 
-    let transcribe_options = vec!["auto".to_string(), "cpu".to_string(), "gpu".to_string()];
+    let transcribe_options = available_transcribe_accelerators(transcribe_gpu_disabled_for_host());
 
     AvailableAccelerators {
         transcribe: transcribe_options,
@@ -1978,6 +2061,54 @@ mod tests {
 
     fn languages(codes: &[&str]) -> Vec<String> {
         codes.iter().map(|code| (*code).to_string()).collect()
+    }
+
+    #[test]
+    fn normal_hosts_preserve_every_transcribe_accelerator_setting() {
+        for setting in [
+            TranscribeAcceleratorSetting::Auto,
+            TranscribeAcceleratorSetting::Cpu,
+            TranscribeAcceleratorSetting::Gpu,
+        ] {
+            assert_eq!(effective_transcribe_accelerator(setting, false), setting);
+        }
+        assert_eq!(
+            available_transcribe_accelerators(false),
+            ["auto", "cpu", "gpu"]
+        );
+        for kind in ["cpu", "accel", "metal", "cuda", "vulkan", "gpu"] {
+            assert!(transcribe_device_allowed(kind, false));
+        }
+    }
+
+    #[test]
+    fn emulated_x64_on_arm64_forces_every_transcribe_setting_to_cpu() {
+        for setting in [
+            TranscribeAcceleratorSetting::Auto,
+            TranscribeAcceleratorSetting::Cpu,
+            TranscribeAcceleratorSetting::Gpu,
+        ] {
+            assert_eq!(
+                effective_transcribe_accelerator(setting, true),
+                TranscribeAcceleratorSetting::Cpu
+            );
+        }
+        assert_eq!(available_transcribe_accelerators(true), ["cpu"]);
+        assert!(transcribe_device_allowed("cpu", true));
+        assert!(transcribe_device_allowed("accel", true));
+        for kind in ["metal", "cuda", "vulkan", "gpu", "unknown"] {
+            assert!(!transcribe_device_allowed(kind, true));
+        }
+    }
+
+    #[test]
+    fn optional_text_transform_falls_back_to_raw_text_after_panic() {
+        let raw = "原始轉錄。".to_string();
+        let result = fail_open_text_transform(raw.clone(), |_| {
+            panic!("simulated optional cleanup failure")
+        });
+
+        assert_eq!(result, raw);
     }
 
     #[test]

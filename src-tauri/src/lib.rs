@@ -3,6 +3,7 @@ mod actions;
 mod apple_intelligence;
 mod audio_feedback;
 pub mod audio_toolkit;
+mod autostart;
 mod catalog;
 pub mod cli;
 mod clipboard;
@@ -11,8 +12,11 @@ mod helpers;
 mod input;
 mod llm_client;
 mod managers;
+mod memory;
 mod overlay;
+mod paste_tx;
 pub mod portable;
+mod secure_input;
 mod settings;
 mod shortcut;
 mod signal_handle;
@@ -33,10 +37,6 @@ use managers::audio::AudioRecordingManager;
 use managers::history::HistoryManager;
 use managers::model::ModelManager;
 use managers::transcription::TranscriptionManager;
-#[cfg(unix)]
-use signal_hook::consts::{SIGUSR1, SIGUSR2};
-#[cfg(unix)]
-use signal_hook::iterator::Signals;
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::Arc;
 use tauri::image::Image;
@@ -44,7 +44,7 @@ pub use transcription_coordinator::TranscriptionCoordinator;
 
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Listener, Manager};
-use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
+use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKind};
 
 use crate::settings::get_settings;
@@ -194,11 +194,11 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     // after permissions are confirmed (on macOS) or after onboarding completes.
     // This matches the pattern used for Enigo initialization.
 
+    // Set up signal handlers for toggling transcription. On Linux, SIGUSR1 is
+    // deliberately not handled — it belongs to WebKitGTK's garbage collector
+    // (#1660) — see signal_handle.rs.
     #[cfg(unix)]
-    let signals = Signals::new([SIGUSR1, SIGUSR2]).unwrap();
-    // Set up signal handlers for toggling transcription
-    #[cfg(unix)]
-    signal_handle::setup_signal_handler(app_handle.clone(), signals);
+    signal_handle::setup_signal_handler(app_handle.clone());
 
     // Apply macOS Accessory policy if starting hidden and tray is available.
     // If the tray icon is disabled, keep the dock icon so the user can reopen.
@@ -213,9 +213,9 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     let initial_theme = tray::get_current_theme(app_handle);
 
     // Choose the appropriate initial icon based on theme
-    let initial_icon_path = tray::get_icon_path(initial_theme, tray::TrayIconState::Idle);
+    let initial_icon_path = tray::get_icon_path(initial_theme, tray::TrayIconState::Idle, false);
 
-    let tray = TrayIconBuilder::new()
+    let mut tray_builder = TrayIconBuilder::new()
         .icon(
             Image::from_path(
                 app_handle
@@ -226,11 +226,52 @@ fn initialize_core_logic(app_handle: &AppHandle) {
             .unwrap(),
         )
         .tooltip(tray::tray_tooltip())
-        .show_menu_on_left_click(true)
-        .icon_as_template(true)
+        .icon_as_template(true);
+
+    // Windows notification-area convention: left click opens the app, right click
+    // shows the menu. Elsewhere (macOS menu bar, Linux) the menu stays on left click.
+    #[cfg(target_os = "windows")]
+    {
+        tray_builder = tray_builder
+            .show_menu_on_left_click(false)
+            .on_tray_icon_event(|tray, event| {
+                use tauri::tray::{MouseButton, MouseButtonState, TrayIconEvent};
+                let opens_window = matches!(
+                    event,
+                    TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } | TrayIconEvent::DoubleClick {
+                        button: MouseButton::Left,
+                        ..
+                    }
+                );
+                if opens_window {
+                    show_main_window(tray.app_handle());
+                }
+            });
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        tray_builder = tray_builder.show_menu_on_left_click(true);
+    }
+
+    let tray = tray_builder
         .on_menu_event(|app, event| match event.id.as_ref() {
             "settings" => {
                 show_main_window(app);
+            }
+            "secure_input_warning" => {
+                // Full explanation lives in the settings-window banner
+                show_main_window(app);
+            }
+            "check_updates" => {
+                let settings = settings::get_settings(app);
+                if settings.update_checks_enabled {
+                    show_main_window(app);
+                    let _ = app.emit("check-for-updates", ());
+                }
             }
             "copy_last_transcript" => {
                 tray::copy_last_transcript(app);
@@ -295,17 +336,9 @@ fn initialize_core_logic(app_handle: &AppHandle) {
         tray::update_tray_menu(&app_handle_for_listener, None);
     });
 
-    // Get the autostart manager and configure based on user setting
-    let autostart_manager = app_handle.autolaunch();
-    let settings = settings::get_settings(app_handle);
-
-    if settings.autostart_enabled {
-        // Enable autostart if user has opted in
-        let _ = autostart_manager.enable();
-    } else {
-        // Disable autostart if user has opted out
-        let _ = autostart_manager.disable();
-    }
+    // Apply the autostart preference (SMAppService login item on macOS 13+,
+    // tauri-plugin-autostart elsewhere)
+    autostart::apply_autostart(app_handle, settings.autostart_enabled);
 
     // Create the recording overlay window (hidden by default)
     utils::create_recording_overlay(app_handle);
@@ -328,6 +361,44 @@ fn trigger_update_check(app: AppHandle) -> Result<(), String> {
 fn show_main_window_command(app: AppHandle) -> Result<(), String> {
     show_main_window(&app);
     Ok(())
+}
+
+/// Convert an unexpected panic on the headless worker into a normal CLI
+/// failure. Without this guard the Tauri event loop remains alive after the
+/// worker exits, leaving `--transcribe-file` hung indefinitely.
+fn run_headless_guarded<F>(operation: F) -> i32
+where
+    F: FnOnce() -> i32,
+{
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(operation)) {
+        Ok(code) => code,
+        Err(payload) => {
+            let message = if let Some(message) = payload.downcast_ref::<&str>() {
+                (*message).to_string()
+            } else if let Some(message) = payload.downcast_ref::<String>() {
+                message.clone()
+            } else {
+                "unknown panic".to_string()
+            };
+            eprintln!("error: headless transcription panicked: {message}");
+            1
+        }
+    }
+}
+
+#[cfg(test)]
+mod headless_guard_tests {
+    use super::run_headless_guarded;
+
+    #[test]
+    fn preserves_normal_exit_codes() {
+        assert_eq!(run_headless_guarded(|| 2), 2);
+    }
+
+    #[test]
+    fn converts_worker_panics_to_runtime_failures() {
+        assert_eq!(run_headless_guarded(|| panic!("simulated failure")), 1);
+    }
 }
 
 /// Headless one-shot transcription for the `--transcribe-file` / `--list-devices`
@@ -524,6 +595,11 @@ fn run_headless_transcription(app: &AppHandle, args: &CliArgs) -> i32 {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run(cli_args: CliArgs) {
+    // Pin glibc's dynamic mmap threshold before the first large allocation,
+    // so per-dictation transient buffers are returned to the OS on free
+    // instead of accumulating in malloc arenas (#1792). No-op off Linux/glibc.
+    memory::init_allocator();
+
     // Detect portable mode before anything else
     portable::init();
 
@@ -552,6 +628,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_extra_recording_buffer_setting,
             shortcut::change_paste_delay_ms_setting,
             shortcut::change_paste_delay_after_ms_setting,
+            shortcut::change_reliable_paste_setting,
             shortcut::change_paste_method_setting,
             shortcut::get_available_typing_tools,
             shortcut::change_typing_tool_setting,
@@ -572,8 +649,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::set_post_process_selected_prompt,
             shortcut::update_custom_words,
             shortcut::update_transcription_prompt,
-            shortcut::suspend_binding,
-            shortcut::resume_binding,
+            shortcut::suspend_all_bindings,
+            shortcut::resume_all_bindings,
             shortcut::change_mute_while_recording_setting,
             shortcut::change_append_trailing_space_setting,
             shortcut::change_lazy_stream_close_setting,
@@ -591,6 +668,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::get_available_accelerators,
             shortcut::handy_keys::start_handy_keys_recording,
             shortcut::handy_keys::stop_handy_keys_recording,
+            secure_input::get_secure_input_status,
+            secure_input::run_keyboard_diagnostic,
             trigger_update_check,
             show_main_window_command,
             commands::cancel_operation,
@@ -631,6 +710,8 @@ pub fn run(cli_args: CliArgs) {
             commands::audio::set_clamshell_microphone,
             commands::audio::get_clamshell_microphone,
             commands::audio::is_recording,
+            commands::audio::get_microphone_channels,
+            commands::audio::set_selected_channel,
             commands::transcription::set_model_unload_timeout,
             commands::transcription::get_model_load_status,
             commands::transcription::unload_model_manually,
@@ -781,7 +862,7 @@ pub fn run(cli_args: CliArgs) {
                 let handle = app_handle.clone();
                 let args = cli_args.clone();
                 std::thread::spawn(move || {
-                    let code = run_headless_transcription(&handle, &args);
+                    let code = run_headless_guarded(|| run_headless_transcription(&handle, &args));
                     // Drop the loaded engine before teardown: ggml-metal's global
                     // device free asserts (SIGABRT) if a model's Metal resources
                     // are still alive at C++ static-destructor time.
@@ -807,7 +888,7 @@ pub fn run(cli_args: CliArgs) {
                     .inner_size(680.0, 570.0)
                     .min_inner_size(680.0, 570.0)
                     .resizable(true)
-                    .maximizable(false)
+                    .maximizable(true)
                     .visible(false);
 
             if let Some(data_dir) = portable::data_dir() {
@@ -848,6 +929,11 @@ pub fn run(cli_args: CliArgs) {
             // intermittent "hotkey deafness" bug) and auto-recover the
             // keyboard hook when its manager thread stops responding.
             watchdog::start(app_handle.clone());
+
+            // Secure Input monitor (macOS): detects stuck secure input that
+            // silently blocks keyed shortcuts, warns the user, and activates
+            // the Carbon fallback. See secure_input.rs and issue #1578.
+            secure_input::init(&app_handle);
 
             // Populate the overlay-enabled cache from initial settings so the
             // audio path (overlay::emit_levels, called ~24 Hz during recording)
