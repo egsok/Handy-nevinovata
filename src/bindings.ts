@@ -918,7 +918,7 @@ async isLaptop() : Promise<Result<boolean, string>> {
 export const events = __makeEvents__<{
 historyUpdatePayload: HistoryUpdatePayload,
 streamPhaseEvent: StreamPhaseEvent,
-streamTextEvent: StreamTextEven
+streamTextEvent: StreamTextEvent
 }>({
 historyUpdatePayload: "history-update-payload",
 streamPhaseEvent: "stream-phase-event",
