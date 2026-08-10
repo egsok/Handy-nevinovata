@@ -27,11 +27,18 @@ Every change in this section directly improves the transcription itself by fixin
 - **Punctuation that survives long dictations.** `condition_on_prev_tokens=true` keeps decoder context between whisper.cpp's 30-second windows, so punctuation and sentence continuity do not fall apart after the first window.
 - **Readable Cyrillic output from Breeze ASR.** Deterministic post-processing restores spaces between Cyrillic/Cyrillic and Cyrillic/Latin words that Breeze can glue together, while preserving common abbreviations such as `.NET` and `PDF`.
 
+#### Measured impact
+
+The [Russian IT-speech benchmark](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/) compares raw models with their best tuned configurations. On its test corpus, original Whisper Turbo rose from `83.5` to `89.6` Q (`+6.2`), while weaker Turbo RU variants gained up to `+19.2`. The chart measures the complete tuning stack — prompt, anti-hallucination defenses, and capglue — rather than the prompt in isolation. The article contains the full methodology and results in Russian.
+
+[![Q-score improvement from tuning across Whisper and Breeze ASR models](.github/assets/benchmark-tuning-en-light.png#gh-light-mode-only)](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/)
+[![Q-score improvement from tuning across Whisper and Breeze ASR models](.github/assets/benchmark-tuning-en-dark.png#gh-dark-mode-only)](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/)
+
 ### Reliability and quality of life
 
 - **Full clipboard preservation in the standard paste path.** Files, images, HTML, and text are restored after the transcript is pasted. Upstream PR [#1231](https://github.com/cjpais/Handy/pull/1231) improved the legacy path, but it still snapshots only text or an image there; the fork keeps the broader implementation. Upstream's newer debug-gated reliable-paste path remains available as well.
 - **Clipboard timeout protection.** A slow or suspended clipboard owner cannot block the app's main thread indefinitely. If the snapshot times out, the transcript is still pasted and the unavailable old clipboard is not mistaken for an intentionally empty one.
-- **Hotkey watchdog and high-priority Windows hook.** The fork tracks modifier resyncs, monitors the hotkey pipeline for stalls, and runs the low-level keyboard hook at time-critical priority. Official `handy-keys` 0.3.3 already includes the live modifier-state correction; our fork now carries only these additional diagnostics and scheduling safeguards.
+- **Hotkey watchdog and high-priority Windows hook.** The fork tracks modifier resyncs, monitors the hotkey pipeline for stalls, and runs the low-level keyboard hook at time-critical priority. Official `handy-keys` 0.3.3 already includes the live modifier-state correction; the bundled fork carries the additional diagnostics and scheduling safeguards.
 - **Atomic settings updates.** Read-modify-write operations are serialized, preventing concurrent changes from silently resetting settings such as history retention.
 
 ### Visual identity
