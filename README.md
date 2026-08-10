@@ -20,10 +20,10 @@ Current fork release: `0.9.5-1`, based on upstream `v0.9.5`.
 
 ### Recognition quality
 
-Every change in this section directly improves the transcription itself by fixing a recurring failure mode in a specific model.
+Every change in this section directly improves the transcription itself by fixing recurring recognition failures.
 
 - **Fewer Whisper hallucinations.** Silence and uncertain audio are much less likely to turn into repeated sentences or subtitle-like phrases such as “Продолжение следует...”. The decoder carries at most 128 previous-context tokens, collapses repeated sentences, and removes known hallucinations only when a whole sentence matches, preserving real speech that happens to contain the same words.
-- **Custom transcription prompt restores punctuation in Whisper Turbo.** Turbo often turns Russian dictation into an almost punctuation-free wall of text. The default Russian prompt fixes this behavior and restores sentence boundaries and punctuation. You can also customize it in Settings → Advanced to improve recognition of your names and terminology.
+- **Custom transcription prompt improves Whisper recognition and controls punctuation style.** A per-language prompt helps Whisper models recognize names and specialized terminology, improves punctuation, and lets you specify how that punctuation should look. Whisper Turbo makes the effect especially visible: without a prompt, it often turns Russian dictation into an almost punctuation-free wall of text. The default Russian prompt fixes this behavior, and you can customize it in Settings → Advanced.
 - **Punctuation that survives long dictations.** `condition_on_prev_tokens=true` keeps decoder context between whisper.cpp's 30-second windows, so punctuation and sentence continuity do not fall apart after the first window.
 - **Readable Cyrillic output from Breeze ASR.** Deterministic post-processing restores spaces between Cyrillic/Cyrillic and Cyrillic/Latin words that Breeze can glue together, while preserving common abbreviations such as `.NET` and `PDF`.
 
