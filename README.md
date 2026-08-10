@@ -31,8 +31,7 @@ Every change in this section directly improves the transcription itself by fixin
 
 The [Russian IT-speech benchmark](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/) compares raw models with their best tuned configurations. On its test corpus, original Whisper Turbo rose from `83.5` to `89.6` Q (`+6.2`), while weaker Turbo RU variants gained up to `+19.2`. The chart measures the complete tuning stack — prompt, anti-hallucination defenses, and capglue — rather than the prompt in isolation. The article contains the full methodology and results in Russian.
 
-[![Q-score improvement from tuning across Whisper and Breeze ASR models](.github/assets/benchmark-tuning-en-light.png#gh-light-mode-only)](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/)
-[![Q-score improvement from tuning across Whisper and Breeze ASR models](.github/assets/benchmark-tuning-en-dark.png#gh-dark-mode-only)](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/)
+[![Q-score improvement from tuning across Whisper and Breeze ASR models](.github/assets/benchmark-tuning-en.png)](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/)
 
 ### Reliability and quality of life
 

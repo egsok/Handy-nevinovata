@@ -31,8 +31,7 @@
 
 [Бенчмарк русской IT-речи](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/) сравнивает модели без доработок с их лучшими настроенными конфигурациями. На тестовом корпусе исходный Whisper Turbo вырос с `83,5` до `89,6` Q (`+6,2`), а более слабые варианты Turbo RU прибавили до `+19,2`. График показывает эффект всего tuning-стека: prompt, защиты от галлюцинаций и capglue. Изолированный вклад одного prompt в этом сравнении не измерялся. В статье есть полная методология и все результаты.
 
-[![Прирост Q после настройки моделей Whisper и Breeze ASR](.github/assets/benchmark-tuning-ru-light.png#gh-light-mode-only)](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/)
-[![Прирост Q после настройки моделей Whisper и Breeze ASR](.github/assets/benchmark-tuning-ru-dark.png#gh-dark-mode-only)](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/)
+[![Прирост Q после настройки моделей Whisper и Breeze ASR](.github/assets/benchmark-tuning-ru.png)](https://egorsokolov.ru/ai/whisper-asr-benchmark-russian-it/)
 
 ### Надёжность и удобство
 
