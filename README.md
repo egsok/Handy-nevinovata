@@ -20,10 +20,12 @@ Current fork release: `0.9.5-1`, based on upstream `v0.9.5`.
 
 ### Recognition quality
 
-- **Anti-hallucination defenses for Whisper.** The decoder carries at most 128 previous-context tokens, repeated sentences are collapsed, and known subtitle-style hallucinations such as “Продолжение следует...” are removed only when a whole sentence matches. Real speech containing the same words is preserved.
-- **Custom transcription prompt with Russian primers.** Settings → Advanced includes a per-language initial prompt for Whisper models, with Russian defaults for names, terminology, and punctuation style.
-- **Punctuation across long dictations.** `condition_on_prev_tokens=true` keeps decoder context between whisper.cpp's 30-second windows instead of losing punctuation after the first window.
-- **Cyrillic word-boundary repair for Breeze ASR.** Deterministic post-processing separates Cyrillic/Cyrillic and Cyrillic/Latin words that Breeze can glue together, while preserving common abbreviations such as `.NET` and `PDF`.
+Every change in this section directly improves the transcription itself by fixing a recurring failure mode in a specific model.
+
+- **Fewer Whisper hallucinations.** Silence and uncertain audio are much less likely to turn into repeated sentences or subtitle-like phrases such as “Продолжение следует...”. The decoder carries at most 128 previous-context tokens, collapses repeated sentences, and removes known hallucinations only when a whole sentence matches, preserving real speech that happens to contain the same words.
+- **Custom transcription prompt restores punctuation in Whisper Turbo.** Turbo often turns Russian dictation into an almost punctuation-free wall of text. The default Russian prompt fixes this behavior and restores sentence boundaries and punctuation. You can also customize it in Settings → Advanced to improve recognition of your names and terminology.
+- **Punctuation that survives long dictations.** `condition_on_prev_tokens=true` keeps decoder context between whisper.cpp's 30-second windows, so punctuation and sentence continuity do not fall apart after the first window.
+- **Readable Cyrillic output from Breeze ASR.** Deterministic post-processing restores spaces between Cyrillic/Cyrillic and Cyrillic/Latin words that Breeze can glue together, while preserving common abbreviations such as `.NET` and `PDF`.
 
 ### Reliability and quality of life
 
