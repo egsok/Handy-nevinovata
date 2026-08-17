@@ -44,7 +44,25 @@ Pre-built installers are published to [Releases](https://github.com/egsok/klava-
   xattr -d com.apple.quarantine /Applications/klava-nevinovata.app
   ```
 
-  (If that errors with permission, try `sudo xattr -cr /Applications/klava-nevinovata.app`.) After this the app launches normally. The right-click → Open workaround that older guides mention no longer works on macOS 15+ for unsigned apps. Please report any post-launch issues in [issues](https://github.com/egsok/klava-nevinovata/issues).
+  (If that errors with permission, try `sudo xattr -cr /Applications/klava-nevinovata.app`.) After this the app launches normally. The right-click → Open workaround that older guides mention no longer works on macOS 15+ for unsigned apps. If the Accessibility permission won't stick after launch, see [Troubleshooting](#troubleshooting). Please report any post-launch issues in [issues](https://github.com/egsok/klava-nevinovata/issues).
+
+## Troubleshooting
+
+**macOS: the Accessibility checkbox won't stick / the app keeps asking for access.** macOS ties this permission to the app's identity, and a stale entry — left by the original Handy app or by an older version of this app — blocks the new one. Fix:
+
+1. Open **System Settings → Privacy & Security → Accessibility** and remove any Handy / klava-nevinovata entries with the **−** button.
+2. If the original Handy (or an old version of this app) is still in `/Applications` and you don't use it, delete it.
+3. Reset the stored permission in Terminal (the onboarding screen has a "Reset permission" button that runs this first command for you):
+
+   ```bash
+   tccutil reset Accessibility ru.egorsokolov.klava-nevinovata
+   ```
+
+   If the original Handy or any earlier klava-nevinovata release was ever installed (they used the old identifier), also run `tccutil reset Accessibility com.pais.handy` (note: this resets the permission for the original Handy too, if you use it).
+
+4. Relaunch the app and grant the permission again.
+
+**macOS: permissions are asked again after an update.** Expected for now: the builds are not signed with an Apple Developer certificate, so macOS treats every updated binary as a new applicant. Re-grant and continue.
 
 ## Build
 
