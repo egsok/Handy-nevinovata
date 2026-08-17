@@ -3,7 +3,7 @@
   "productName": "klava-nevinovata",
   "mainBinaryName": "handy",
   "version": "0.8.3-5",
-  "identifier": "com.pais.handy",
+  "identifier": "ru.egorsokolov.klava-nevinovata",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -28,6 +28,7 @@
     "active": true,
     "createUpdaterArtifacts": false,
     "targets": "all",
+    "publisher": "Egor Sokolov",
     "resources": ["resources/**/*"],
     "license": "MIT",
     "icon": [

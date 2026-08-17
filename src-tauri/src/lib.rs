@@ -10,6 +10,7 @@ mod helpers;
 mod input;
 mod llm_client;
 mod managers;
+mod migration;
 mod overlay;
 pub mod portable;
 mod settings;
@@ -388,6 +389,7 @@ pub fn run(cli_args: CliArgs) {
             commands::open_log_dir,
             commands::open_app_data_dir,
             commands::check_apple_intelligence_available,
+            commands::reset_accessibility_permission,
             commands::initialize_enigo,
             commands::initialize_shortcuts,
             commands::models::get_available_models,
@@ -507,6 +509,11 @@ pub fn run(cli_args: CliArgs) {
         .manage(cli_args.clone())
         .setup(move |app| {
             specta_builder.mount_events(app);
+
+            // One-time migration from the legacy com.pais.handy data dir;
+            // must run before anything (settings store, models, history,
+            // webview) touches the app data dir
+            migration::migrate_legacy_data(app.handle());
 
             // Create main window programmatically so we can set data_directory
             // for portable mode (redirects WebView2 cache to portable Data dir)

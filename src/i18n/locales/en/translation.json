@@ -113,6 +113,14 @@
       "granted": "Granted",
       "waiting": "Waiting...",
       "allGranted": "All set!",
+      "troubleshoot": {
+        "link": "Having trouble granting access?",
+        "description": "If Handy or an older version of this app was installed before, remove their entries from the Accessibility list using the \"−\" button and delete the old app. Then reset the permission below and grant it again.",
+        "resetButton": "Reset permission",
+        "restartButton": "Restart app",
+        "resetSuccess": "Permission reset. Click Grant Permission to add the app again.",
+        "resetFailed": "Automatic reset failed. Run this in Terminal: {{command}}"
+      },
       "errors": {
         "checkFailed": "Failed to check permissions. Please try again.",
         "requestFailed": "Failed to request permission. Please try again."

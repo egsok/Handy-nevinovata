@@ -33,6 +33,12 @@ static MIGRATIONS: &[M] = &[
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_requested BOOLEAN NOT NULL DEFAULT 0;"),
 ];
 
+/// The `user_version` a fully migrated database reports. Used by the data-dir
+/// migration to refuse history databases created by newer builds.
+pub(crate) fn schema_version() -> i32 {
+    MIGRATIONS.len() as i32
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
 pub struct PaginatedHistory {
     pub entries: Vec<HistoryEntry>,

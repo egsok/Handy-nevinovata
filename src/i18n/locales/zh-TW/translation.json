@@ -113,6 +113,14 @@
       "granted": "已授予",
       "waiting": "等待中...",
       "allGranted": "全部完成！",
+      "troubleshoot": {
+        "link": "授予權限時遇到問題？",
+        "description": "如果之前安裝過 Handy 或本應用程式的舊版本，請在「輔助使用」列表中用「−」按鈕移除它們的項目，並刪除舊的應用程式。然後在下方重設權限並重新授予。",
+        "resetButton": "重設權限",
+        "restartButton": "重新啟動應用程式",
+        "resetSuccess": "權限已重設。點擊「授予權限」重新加入本應用程式。",
+        "resetFailed": "自動重設失敗。請在終端機中執行：{{command}}"
+      },
       "errors": {
         "checkFailed": "檢查權限失敗，請重試",
         "requestFailed": "請求權限失敗，請重試"

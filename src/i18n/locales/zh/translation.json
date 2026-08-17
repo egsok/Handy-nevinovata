@@ -113,6 +113,14 @@
       "granted": "已授予",
       "waiting": "等待中...",
       "allGranted": "全部完成！",
+      "troubleshoot": {
+        "link": "授予权限时遇到问题？",
+        "description": "如果之前安装过 Handy 或本应用的旧版本，请在“辅助功能”列表中用“−”按钮移除它们的条目，并删除旧应用。然后在下方重置权限并重新授予。",
+        "resetButton": "重置权限",
+        "restartButton": "重启应用",
+        "resetSuccess": "权限已重置。点击“授予权限”重新添加本应用。",
+        "resetFailed": "自动重置失败。请在终端中运行：{{command}}"
+      },
       "errors": {
         "checkFailed": "检查权限失败。请重试。",
         "requestFailed": "请求权限失败。请重试。"

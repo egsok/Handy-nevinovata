@@ -125,6 +125,44 @@ pub fn check_apple_intelligence_available() -> bool {
     }
 }
 
+/// Reset this app's Accessibility entry in the macOS TCC database so the
+/// permission can be granted afresh. Used by the onboarding troubleshooting
+/// flow when a stale entry (e.g. from a previous build) blocks the grant.
+#[specta::specta]
+#[tauri::command]
+pub fn reset_accessibility_permission(app: AppHandle) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        use std::process::Command;
+        let identifier = app.config().identifier.clone();
+        let output = Command::new("tccutil")
+            .args(["reset", "Accessibility", &identifier])
+            .output()
+            .map_err(|e| format!("Failed to run tccutil: {}", e))?;
+        if output.status.success() {
+            log::info!("Reset Accessibility TCC entry for {}", identifier);
+            Ok(())
+        } else {
+            // tccutil writes some diagnostics to stdout rather than stderr
+            let mut detail = String::from_utf8_lossy(&output.stderr).trim().to_string();
+            if detail.is_empty() {
+                detail = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            }
+            Err(format!(
+                "tccutil failed (status {:?}): {}",
+                output.status.code(),
+                detail
+            ))
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app;
+        Err("Resetting accessibility permission is only supported on macOS".to_string())
+    }
+}
+
 /// Try to initialize Enigo (keyboard/mouse simulation).
 /// On macOS, this will return an error if accessibility permissions are not granted.
 #[specta::specta]

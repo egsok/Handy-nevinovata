@@ -113,6 +113,14 @@
       "granted": "Verildi",
       "waiting": "Bekleniyor...",
       "allGranted": "Her şey hazır!",
+      "troubleshoot": {
+        "link": "İzin vermede sorun mu yaşıyorsunuz?",
+        "description": "Handy veya bu uygulamanın eski bir sürümü daha önce kuruluysa, Erişilebilirlik listesindeki kayıtlarını “−” düğmesiyle kaldırın ve eski uygulamayı silin. Ardından aşağıdan izni sıfırlayıp yeniden verin.",
+        "resetButton": "İzni sıfırla",
+        "restartButton": "Uygulamayı yeniden başlat",
+        "resetSuccess": "İzin sıfırlandı. Uygulamayı yeniden eklemek için “İzin Ver”e tıklayın.",
+        "resetFailed": "Otomatik sıfırlama başarısız oldu. Bunu Terminal'de çalıştırın: {{command}}"
+      },
       "errors": {
         "checkFailed": "İzinler kontrol edilemedi. Lütfen tekrar deneyin.",
         "requestFailed": "İzin isteği başarısız oldu. Lütfen tekrar deneyin."

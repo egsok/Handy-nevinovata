@@ -113,6 +113,14 @@
       "granted": "Accordé",
       "waiting": "En attente...",
       "allGranted": "Tout est prêt !",
+      "troubleshoot": {
+        "link": "Des difficultés à accorder l'accès ?",
+        "description": "Si Handy ou une ancienne version de cette app a déjà été installée, supprimez leurs entrées de la liste Accessibilité avec le bouton « − » et supprimez l'ancienne app. Réinitialisez ensuite l'autorisation ci-dessous et accordez-la à nouveau.",
+        "resetButton": "Réinitialiser l'autorisation",
+        "restartButton": "Redémarrer l'app",
+        "resetSuccess": "Autorisation réinitialisée. Cliquez sur « Accorder l'autorisation » pour ajouter à nouveau l'app.",
+        "resetFailed": "La réinitialisation automatique a échoué. Exécutez ceci dans le Terminal : {{command}}"
+      },
       "errors": {
         "checkFailed": "Échec de la vérification des autorisations. Veuillez réessayer.",
         "requestFailed": "Échec de la demande d'autorisation. Veuillez réessayer."
