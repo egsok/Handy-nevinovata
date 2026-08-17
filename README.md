@@ -58,7 +58,25 @@ Because the macOS build is unsigned, the first launch may incorrectly say the ap
 xattr -d com.apple.quarantine /Applications/klava-nevinovata.app
 ```
 
-If needed, use `sudo xattr -cr /Applications/klava-nevinovata.app`. The app also needs Microphone and Accessibility permissions under **System Settings → Privacy & Security**. If Accessibility remains stuck after an update, remove the old entry, add the app again, and restart it.
+If needed, use `sudo xattr -cr /Applications/klava-nevinovata.app`. The app also needs Microphone and Accessibility permissions under **System Settings → Privacy & Security**. If the Accessibility permission won't stick, see [Troubleshooting](#troubleshooting).
+
+## Troubleshooting
+
+**macOS: the Accessibility checkbox won't stick / the app keeps asking for access.** macOS ties this permission to the app's identity, and a stale entry — left by the original Handy app or by an older version of this app — blocks the new one. Fix:
+
+1. Open **System Settings → Privacy & Security → Accessibility** and remove any Handy / klava-nevinovata entries with the **−** button.
+2. If the original Handy (or an old version of this app) is still in `/Applications` and you don't use it, delete it.
+3. Reset the stored permission in Terminal (the onboarding screen has a "Reset permission" button that runs this first command for you):
+
+   ```bash
+   tccutil reset Accessibility ru.egorsokolov.klava-nevinovata
+   ```
+
+   If the original Handy or any earlier klava-nevinovata release was ever installed (they used the old identifier), also run `tccutil reset Accessibility com.pais.handy` (note: this resets the permission for the original Handy too, if you use it).
+
+4. Relaunch the app and grant the permission again.
+
+**macOS: permissions are asked again after an update.** Expected for now: the builds are not signed with an Apple Developer certificate, so macOS treats every updated binary as a new applicant. Re-grant and continue.
 
 ## Build
 
