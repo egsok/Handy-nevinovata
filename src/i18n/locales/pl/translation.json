@@ -116,6 +116,14 @@
       "granted": "Przyznano",
       "waiting": "Oczekiwanie...",
       "allGranted": "Wszystko gotowe!",
+      "troubleshoot": {
+        "link": "Masz problem z przyznaniem dostępu?",
+        "description": "Jeśli Handy lub starsza wersja tej aplikacji były wcześniej zainstalowane, usuń ich wpisy z listy Dostępność przyciskiem „−” i skasuj starą aplikację. Następnie zresetuj uprawnienie poniżej i przyznaj je ponownie.",
+        "resetButton": "Zresetuj uprawnienie",
+        "restartButton": "Uruchom ponownie aplikację",
+        "resetSuccess": "Uprawnienie zostało zresetowane. Kliknij „Przyznaj uprawnienie”, aby ponownie dodać aplikację.",
+        "resetFailed": "Automatyczny reset się nie udał. Wykonaj w Terminalu: {{command}}"
+      },
       "errors": {
         "checkFailed": "Nie udało się sprawdzić uprawnień. Spróbuj ponownie.",
         "requestFailed": "Nie udało się poprosić o uprawnienie. Spróbuj ponownie."

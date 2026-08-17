@@ -260,7 +260,11 @@ Function PageReinstall
     IntOp $0 $0 + 1
     ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" "DisplayName"
     ReadRegStr $R1 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" "Publisher"
-    StrCmp "$R0$R1" "${PRODUCTNAME}${MANUFACTURER}" 0 wix_loop
+    ; MSI builds from before the publisher change carry Publisher "pais"
+    ; (manufacturer was derived from the old com.pais.handy identifier)
+    StrCmp "$R0$R1" "${PRODUCTNAME}${MANUFACTURER}" wix_match 0
+    StrCmp "$R0$R1" "${PRODUCTNAME}pais" wix_match wix_loop
+  wix_match:
     ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" "UninstallString"
     ${StrCase} $R1 $R0 "L"
     ${StrLoc} $R0 $R1 "msiexec" ">"
@@ -559,6 +563,28 @@ Function .onInit
 
   !insertmacro SetContext
 
+  ; --- REBRAND MIGRATION --- Before the publisher change the manufacturer was
+  ; "pais" (derived from the old com.pais.handy identifier), and previous fork
+  ; builds stored their install location under Software\pais. Move that key to
+  ; the new manufacturer once, so every reader of ${MANUPRODUCTKEY} (reinstall
+  ; page uninstall path, RestorePreviousInstallLocation) keeps working and no
+  ; stale key is left behind.
+  ${If} $PortableMode <> 1
+    ReadRegStr $4 SHCTX "${MANUPRODUCTKEY}" ""
+    ${If} $4 == ""
+      ReadRegStr $4 SHCTX "Software\pais\${PRODUCTNAME}" ""
+      ${If} $4 != ""
+        WriteRegStr SHCTX "${MANUPRODUCTKEY}" "" $4
+        ReadRegStr $5 SHCTX "Software\pais\${PRODUCTNAME}" "Installer Language"
+        ${If} $5 != ""
+          WriteRegStr SHCTX "${MANUPRODUCTKEY}" "Installer Language" $5
+        ${EndIf}
+        DeleteRegKey SHCTX "Software\pais\${PRODUCTNAME}"
+        DeleteRegKey /ifempty SHCTX "Software\pais"
+      ${EndIf}
+    ${EndIf}
+  ${EndIf}
+
   ${If} $INSTDIR == "${PLACEHOLDER_INSTALL_DIR}"
     ; Set default install location
     !if "${INSTALLMODE}" == "perMachine"
@@ -735,13 +761,14 @@ Section Install
   ; product name). The reinstall detection is keyed on ${UNINSTKEY}, which now
   ; contains the new product name, so an existing "Handy" install would survive
   ; as a parallel copy: its autostart Run entry keeps launching the old build,
-  ; and (the bundle identifier being unchanged) the old instance would win the
-  ; single-instance mutex over the freshly installed one.
+  ; which would run alongside the new one and fight over the global hotkey.
+  ; Legacy installs were made when the manufacturer was "pais" (derived from
+  ; the old com.pais.handy identifier), hence the hardcoded registry paths.
   ${If} $PortableMode <> 1
     ReadRegStr $R1 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\Handy" "UninstallString"
     ${If} $R1 != ""
       DetailPrint "Removing previous Handy installation"
-      ReadRegStr $R2 SHCTX "Software\${MANUFACTURER}\Handy" ""
+      ReadRegStr $R2 SHCTX "Software\pais\Handy" ""
       ${IfThen} $R2 == "" ${|} StrCpy $R2 "$LOCALAPPDATA\Handy" ${|}
       ClearErrors
       ExecWait '$R1 /P _?=$R2' $0
@@ -753,8 +780,8 @@ Section Install
       DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Handy"
       ; The legacy uninstaller keeps its manufacturer key (install location,
       ; installer language) unless the delete-app-data box was ticked
-      DeleteRegKey SHCTX "Software\${MANUFACTURER}\Handy"
-      DeleteRegKey /ifempty SHCTX "Software\${MANUFACTURER}"
+      DeleteRegKey SHCTX "Software\pais\Handy"
+      DeleteRegKey /ifempty SHCTX "Software\pais"
     ${EndIf}
   ${EndIf}
 
@@ -1024,6 +1051,8 @@ Section Uninstall
 SectionEnd
 
 Function RestorePreviousInstallLocation
+  ; Legacy "Software\pais" locations are migrated to ${MANUPRODUCTKEY} in
+  ; .onInit before this runs
   ReadRegStr $4 SHCTX "${MANUPRODUCTKEY}" ""
   StrCmp $4 "" +2 0
     StrCpy $INSTDIR $4

@@ -116,6 +116,14 @@
       "granted": "Concedido",
       "waiting": "Aguardando...",
       "allGranted": "Tudo pronto!",
+      "troubleshoot": {
+        "link": "Está com dificuldade para conceder o acesso?",
+        "description": "Se o Handy ou uma versão antiga deste app já estiveram instalados, remova as entradas deles da lista de Acessibilidade com o botão “−” e exclua o app antigo. Depois, redefina a permissão abaixo e conceda-a novamente.",
+        "resetButton": "Redefinir permissão",
+        "restartButton": "Reiniciar o app",
+        "resetSuccess": "Permissão redefinida. Clique em “Conceder Permissão” para adicionar o app novamente.",
+        "resetFailed": "A redefinição automática falhou. Execute isto no Terminal: {{command}}"
+      },
       "errors": {
         "checkFailed": "Erro ao verificar permissões. Por favor, tente novamente.",
         "requestFailed": "Erro ao solicitar permissão. Por favor, tente novamente."

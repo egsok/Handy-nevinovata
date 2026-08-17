@@ -116,6 +116,14 @@
       "granted": "Erteilt",
       "waiting": "Warten...",
       "allGranted": "Alles bereit!",
+      "troubleshoot": {
+        "link": "Probleme beim Erteilen des Zugriffs?",
+        "description": "Wenn Handy oder eine ältere Version dieser App früher installiert war, entferne deren Einträge mit der Taste „−“ aus der Liste „Bedienungshilfen“ und lösche die alte App. Setze anschließend die Berechtigung unten zurück und erteile sie erneut.",
+        "resetButton": "Berechtigung zurücksetzen",
+        "restartButton": "App neu starten",
+        "resetSuccess": "Berechtigung zurückgesetzt. Klicke auf „Berechtigung erteilen“, um die App erneut hinzuzufügen.",
+        "resetFailed": "Automatisches Zurücksetzen fehlgeschlagen. Führe dies im Terminal aus: {{command}}"
+      },
       "errors": {
         "checkFailed": "Berechtigungsprüfung fehlgeschlagen. Bitte erneut versuchen.",
         "requestFailed": "Berechtigungsanfrage fehlgeschlagen. Bitte erneut versuchen."

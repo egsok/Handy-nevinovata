@@ -116,6 +116,14 @@
       "granted": "Đã cấp",
       "waiting": "Đang chờ...",
       "allGranted": "Hoàn tất!",
+      "troubleshoot": {
+        "link": "Gặp khó khăn khi cấp quyền?",
+        "description": "Nếu Handy hoặc một phiên bản cũ của ứng dụng này từng được cài đặt, hãy xóa các mục của chúng khỏi danh sách Trợ năng bằng nút “−” và xóa ứng dụng cũ. Sau đó đặt lại quyền bên dưới và cấp lại.",
+        "resetButton": "Đặt lại quyền",
+        "restartButton": "Khởi động lại ứng dụng",
+        "resetSuccess": "Đã đặt lại quyền. Nhấn “Cấp quyền” để thêm lại ứng dụng.",
+        "resetFailed": "Đặt lại tự động không thành công. Hãy chạy lệnh này trong Terminal: {{command}}"
+      },
       "errors": {
         "checkFailed": "Không thể kiểm tra quyền. Vui lòng thử lại.",
         "requestFailed": "Không thể yêu cầu quyền. Vui lòng thử lại."

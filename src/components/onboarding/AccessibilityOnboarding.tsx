@@ -7,6 +7,7 @@ import {
   checkMicrophonePermission,
   requestMicrophonePermission,
 } from "tauri-plugin-macos-permissions-api";
+import { relaunch } from "@tauri-apps/plugin-process";
 import { toast } from "sonner";
 import { commands } from "@/bindings";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -25,10 +26,16 @@ interface PermissionsState {
   microphone: PermissionStatus;
 }
 
+// Shown to the user when the automatic TCC reset fails; keep in sync with
+// tauri.conf.json's identifier
+const TCC_RESET_COMMAND =
+  "tccutil reset Accessibility ru.egorsokolov.klava-nevinovata";
+
 const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
   onComplete,
 }) => {
   const { t } = useTranslation();
+  const [showTroubleshoot, setShowTroubleshoot] = useState(false);
   const refreshAudioDevices = useSettingsStore(
     (state) => state.refreshAudioDevices,
   );
@@ -43,6 +50,10 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
   });
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Bumped by the TCC reset so poll results that started before the reset
+  // cannot promote state (and complete onboarding) with stale data
+  const pollGenerationRef = useRef<number>(0);
+  const initialCheckRanRef = useRef(false);
   const errorCountRef = useRef<number>(0);
   const MAX_POLLING_ERRORS = 3;
   // macOS TCC quirk: for unsigned builds the Accessibility toggle can sit "on"
@@ -76,7 +87,11 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
       : true;
 
   const completeOnboarding = useCallback(async () => {
+    const generation = pollGenerationRef.current;
     await Promise.all([refreshAudioDevices(), refreshOutputDevices()]);
+    // A TCC reset may have landed while the device refresh was in flight;
+    // don't arm the completion timeout on top of a reset
+    if (generation !== pollGenerationRef.current) return;
     timeoutRef.current = setTimeout(() => onComplete(), 300);
   }, [onComplete, refreshAudioDevices, refreshOutputDevices]);
 
@@ -93,6 +108,12 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
 
   // Check platform and permission status on mount
   useEffect(() => {
+    // Strictly once: the deps (onComplete via App's render) change identity on
+    // every parent re-render, and a re-run would overwrite permission state
+    // with a fresh OS read — undoing a just-performed TCC reset
+    if (initialCheckRanRef.current) return;
+    initialCheckRanRef.current = true;
+
     const currentPlatform = platform();
     const nextPlatform: PermissionPlatform =
       currentPlatform === "macos"
@@ -180,9 +201,11 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
     if (pollingRef.current || permissionPlatform === null) return;
 
     pollingRef.current = setInterval(async () => {
+      const generation = pollGenerationRef.current;
       try {
         if (permissionPlatform === "windows") {
           const microphoneGranted = await hasWindowsMicrophoneAccess();
+          if (generation !== pollGenerationRef.current) return;
 
           if (microphoneGranted) {
             setPermissions((prev) => ({ ...prev, microphone: "granted" }));
@@ -203,6 +226,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
           checkAccessibilityPermission(),
           checkMicrophonePermission(),
         ]);
+        if (generation !== pollGenerationRef.current) return;
 
         setPermissions((prev) => {
           const newState = { ...prev };
@@ -272,6 +296,47 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
     } catch (error) {
       console.error("Failed to request accessibility permission:", error);
       toast.error(t("onboarding.permissions.errors.requestFailed"));
+    }
+  };
+
+  const handleResetAccessibility = async () => {
+    try {
+      const result = await commands.resetAccessibilityPermission();
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+      // Invalidate in-flight polls and any queued completion: a check that
+      // started before the reset may still report the pre-reset "granted".
+      // Stop polling too — the OS may keep reporting stale "granted" for a
+      // while; the Grant button restarts polling when the user re-requests.
+      pollGenerationRef.current += 1;
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      // Demote local state: polling only ever promotes needed -> granted, so
+      // without this the screen would keep showing a stale "granted"
+      setPermissions((prev) => ({ ...prev, accessibility: "needed" }));
+      toast.success(t("onboarding.permissions.troubleshoot.resetSuccess"));
+    } catch (error) {
+      console.error("Failed to reset accessibility permission:", error);
+      toast.error(
+        t("onboarding.permissions.troubleshoot.resetFailed", {
+          command: TCC_RESET_COMMAND,
+        }),
+      );
+    }
+  };
+
+  const handleRestartApp = async () => {
+    try {
+      await relaunch();
+    } catch (error) {
+      console.error("Failed to relaunch app:", error);
     }
   };
 
@@ -430,6 +495,40 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
             </div>
           </div>
         )}
+
+        {/* Troubleshooting for stale TCC entries (old Handy / old builds) */}
+        {showAccessibilityPermission &&
+          permissions.accessibility !== "granted" && (
+            <div className="w-full flex flex-col items-center">
+              <button
+                onClick={() => setShowTroubleshoot((prev) => !prev)}
+                className="text-sm text-text/50 hover:text-text/80 underline transition-colors cursor-pointer"
+              >
+                {t("onboarding.permissions.troubleshoot.link")}
+              </button>
+              {showTroubleshoot && (
+                <div className="w-full mt-2 p-4 rounded-lg bg-white/5 border border-mid-gray/20 flex flex-col gap-3">
+                  <p className="text-sm text-text/60">
+                    {t("onboarding.permissions.troubleshoot.description")}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={handleResetAccessibility}
+                      className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-text text-sm font-medium transition-colors"
+                    >
+                      {t("onboarding.permissions.troubleshoot.resetButton")}
+                    </button>
+                    <button
+                      onClick={handleRestartApp}
+                      className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-text text-sm font-medium transition-colors"
+                    >
+                      {t("onboarding.permissions.troubleshoot.restartButton")}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
       </div>
     </div>
   );

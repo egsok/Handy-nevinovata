@@ -116,6 +116,14 @@
       "granted": "Concedido",
       "waiting": "Esperando...",
       "allGranted": "¡Todo listo!",
+      "troubleshoot": {
+        "link": "¿Tienes problemas para conceder el acceso?",
+        "description": "Si Handy o una versión anterior de esta app estuvieron instalados, elimina sus entradas de la lista de Accesibilidad con el botón «−» y borra la app antigua. Después, restablece el permiso a continuación y concédelo de nuevo.",
+        "resetButton": "Restablecer permiso",
+        "restartButton": "Reiniciar la app",
+        "resetSuccess": "Permiso restablecido. Haz clic en «Conceder Permiso» para añadir la app otra vez.",
+        "resetFailed": "El restablecimiento automático falló. Ejecuta esto en Terminal: {{command}}"
+      },
       "errors": {
         "checkFailed": "Error al verificar permisos. Por favor, inténtalo de nuevo.",
         "requestFailed": "Error al solicitar permiso. Por favor, inténtalo de nuevo."

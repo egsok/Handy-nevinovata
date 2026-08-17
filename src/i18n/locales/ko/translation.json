@@ -116,6 +116,14 @@
       "granted": "승인됨",
       "waiting": "대기 중...",
       "allGranted": "모두 설정 완료!",
+      "troubleshoot": {
+        "link": "권한 부여가 잘 안 되나요?",
+        "description": "이전에 Handy 또는 이 앱의 구버전이 설치된 적이 있다면 손쉬운 사용 목록에서 '−' 버튼으로 해당 항목을 제거하고 옛 앱을 삭제하세요. 그런 다음 아래에서 권한을 초기화하고 다시 부여하세요.",
+        "resetButton": "권한 초기화",
+        "restartButton": "앱 재시작",
+        "resetSuccess": "권한이 초기화되었습니다. '권한 부여'를 클릭해 앱을 다시 추가하세요.",
+        "resetFailed": "자동 초기화에 실패했습니다. 터미널에서 다음을 실행하세요: {{command}}"
+      },
       "errors": {
         "checkFailed": "권한 확인에 실패했습니다. 다시 시도해주세요.",
         "requestFailed": "권한 요청에 실패했습니다. 다시 시도해주세요."

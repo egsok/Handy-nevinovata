@@ -116,6 +116,14 @@
       "granted": "Concesso",
       "waiting": "In attesa...",
       "allGranted": "Tutto pronto!",
+      "troubleshoot": {
+        "link": "Problemi a concedere l'accesso?",
+        "description": "Se Handy o una versione precedente di questa app erano già installati, rimuovi le loro voci dall'elenco Accessibilità con il pulsante «−» ed elimina la vecchia app. Poi reimposta il permesso qui sotto e concedilo di nuovo.",
+        "resetButton": "Reimposta permesso",
+        "restartButton": "Riavvia l'app",
+        "resetSuccess": "Permesso reimpostato. Fai clic su «Concedi Permesso» per aggiungere di nuovo l'app.",
+        "resetFailed": "La reimpostazione automatica è fallita. Esegui questo comando nel Terminale: {{command}}"
+      },
       "errors": {
         "checkFailed": "Impossibile verificare i permessi. Riprova.",
         "requestFailed": "Impossibile richiedere il permesso. Riprova."

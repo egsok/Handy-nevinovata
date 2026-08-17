@@ -116,6 +116,14 @@
       "granted": "Beviljad",
       "waiting": "Väntar...",
       "allGranted": "Allt klart!",
+      "troubleshoot": {
+        "link": "Har du problem med att bevilja åtkomst?",
+        "description": "Om Handy eller en äldre version av den här appen har varit installerad tidigare tar du bort deras poster från listan Hjälpmedel med knappen ”−” och raderar den gamla appen. Återställ sedan behörigheten nedan och bevilja den igen.",
+        "resetButton": "Återställ behörighet",
+        "restartButton": "Starta om appen",
+        "resetSuccess": "Behörigheten är återställd. Klicka på ”Bevilja behörighet” för att lägga till appen igen.",
+        "resetFailed": "Automatisk återställning misslyckades. Kör detta i Terminal: {{command}}"
+      },
       "errors": {
         "checkFailed": "Misslyckades med att kontrollera behörigheter. Försök igen.",
         "requestFailed": "Misslyckades med att begära behörighet. Försök igen."
