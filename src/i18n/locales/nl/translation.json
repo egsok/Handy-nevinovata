@@ -116,6 +116,14 @@
       "granted": "Verleend",
       "waiting": "Wachten...",
       "allGranted": "Alles ingesteld!",
+      "troubleshoot": {
+        "link": "Lukt het niet om toegang te verlenen?",
+        "description": "Als Handy of een oudere versie van deze app eerder was geïnstalleerd, verwijder dan hun vermeldingen uit de lijst Toegankelijkheid met de knop “−” en verwijder de oude app. Reset daarna hieronder de machtiging en verleen deze opnieuw.",
+        "resetButton": "Machtiging resetten",
+        "restartButton": "App herstarten",
+        "resetSuccess": "Machtiging gereset. Klik op “Machtiging verlenen” om de app opnieuw toe te voegen.",
+        "resetFailed": "Automatisch resetten mislukt. Voer dit uit in Terminal: {{command}}"
+      },
       "errors": {
         "checkFailed": "Machtigingen controleren mislukt. Probeer het opnieuw.",
         "requestFailed": "Machtiging aanvragen mislukt. Probeer het opnieuw."

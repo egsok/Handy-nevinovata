@@ -1,4 +1,4 @@
-# v0.8.3-6 — новая идентичность приложения и починка «Универсального доступа» на macOS
+# v0.9.5-2 — новая идентичность приложения и починка «Универсального доступа» на macOS
 
 > Черновик для описания GitHub-релиза. English version below.
 
@@ -32,7 +32,7 @@
 
 ---
 
-# v0.8.3-6 — new app identity, macOS Accessibility fix (English)
+# v0.9.5-2 — new app identity, macOS Accessibility fix (English)
 
 The app's bundle identifier changed from `com.pais.handy` (inherited from the original Handy) to `ru.egorsokolov.klava-nevinovata`. This permanently fixes the macOS issue where the Accessibility checkbox wouldn't stick when the original Handy was (or had been) installed — macOS was conflating the two apps. Both apps can now coexist.
 

@@ -116,6 +116,14 @@
       "granted": "Givet",
       "waiting": "Venter...",
       "allGranted": "Alt er klar!",
+      "troubleshoot": {
+        "link": "Problemer med at give adgang?",
+        "description": "Hvis Handy eller en ældre version af denne app tidligere var installeret, skal du fjerne deres poster fra listen Tilgængelighed med knappen ”−” og slette den gamle app. Nulstil derefter tilladelsen nedenfor, og giv den igen.",
+        "resetButton": "Nulstil tilladelse",
+        "restartButton": "Genstart appen",
+        "resetSuccess": "Tilladelsen er nulstillet. Klik på ”Giv tilladelse” for at tilføje appen igen.",
+        "resetFailed": "Automatisk nulstilling mislykkedes. Kør dette i Terminal: {{command}}"
+      },
       "errors": {
         "checkFailed": "Kunne ikke tjekke tilladelser. Prøv igen.",
         "requestFailed": "Kunne ikke anmode om tilladelse. Prøv igen."
