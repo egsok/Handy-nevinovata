@@ -757,6 +757,28 @@ Section Install
 
   !insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
 
+  ; The updater races the exiting app: the old exe can stay write-locked for a
+  ; moment after its process is gone (slow teardown, AV scanning the freshly
+  ; closed binary), and NSIS then fails with "Error opening file for writing".
+  ; Wait up to 10s for the lock to clear; on timeout fall through and let the
+  ; stock Retry dialog handle it, same as before.
+  StrCpy $R9 0
+  app_lock_wait:
+    IfFileExists "$INSTDIR\${MAINBINARYNAME}.exe" 0 app_lock_free
+    ClearErrors
+    FileOpen $R8 "$INSTDIR\${MAINBINARYNAME}.exe" a
+    ${If} ${Errors}
+      IntOp $R9 $R9 + 1
+      ${If} $R9 < 40
+        Sleep 250
+        Goto app_lock_wait
+      ${EndIf}
+      DetailPrint "Old ${MAINBINARYNAME}.exe is still locked; proceeding anyway"
+    ${Else}
+      FileClose $R8
+    ${EndIf}
+  app_lock_free:
+
   ; --- REBRAND MIGRATION --- Uninstall the legacy "Handy" install (pre-rebrand
   ; product name). The reinstall detection is keyed on ${UNINSTKEY}, which now
   ; contains the new product name, so an existing "Handy" install would survive
