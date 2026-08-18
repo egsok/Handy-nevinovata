@@ -31,8 +31,10 @@ const Footer: React.FC = () => {
     <div className="w-full border-t border-mid-gray/20 pt-3">
       {/* Colophon grid: the press (model) on the left, the publisher (channel)
           standing alone in the center, the run number (version) quiet in the
-          corner. Equal 1fr sides keep the link truly centered. */}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center font-mono text-[12px] font-medium px-4 pb-3 text-text/80">
+          corner. Equal 1fr sides keep the link truly centered; the column gap
+          keeps a long update status from gluing itself to the channel link
+          (the status text truncates, the link never moves). */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-x-4 items-center font-mono text-[12px] font-medium px-4 pb-3 text-text/80">
         <div className="flex items-center gap-4 justify-self-start">
           <ModelSelector />
         </div>

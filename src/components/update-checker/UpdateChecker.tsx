@@ -280,6 +280,7 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
               },
             ]}
             size="large"
+            className="shrink-0"
           />
         )}
         {/* Separator lives here so it disappears together with the checker;
