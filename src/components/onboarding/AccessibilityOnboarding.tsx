@@ -237,10 +237,18 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
         ]);
         if (generation !== pollGenerationRef.current) return;
 
+        // After a successful TCC reset this process may keep reporting a
+        // stale accessibility "granted" until the restart the flow asks for
+        // — never promote it (or complete onboarding from it). Without this,
+        // the microphone card's Grant button restarts polling and sneaks
+        // onboarding past the disabled accessibility Grant.
+        const accessibilityTrusted =
+          accessibilityGranted && !resetEverSucceededRef.current;
+
         setPermissions((prev) => {
           const newState = { ...prev };
 
-          if (accessibilityGranted && prev.accessibility !== "granted") {
+          if (accessibilityTrusted && prev.accessibility !== "granted") {
             newState.accessibility = "granted";
             // Initialize Enigo and shortcuts when accessibility is granted
             Promise.all([
@@ -259,7 +267,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
         });
 
         // If both granted, stop polling, refresh audio devices, and proceed
-        if (accessibilityGranted && microphoneGranted) {
+        if (accessibilityTrusted && microphoneGranted) {
           if (pollingRef.current) {
             clearInterval(pollingRef.current);
             pollingRef.current = null;
