@@ -646,7 +646,6 @@
     "checkingUpdates": "Проверка обновлений...",
     "updateAvailableShort": "Доступно обновление",
     "upToDate": "Обновлений нет",
-    "updateCheckingDisabled": "Проверка обновлений отключена",
     "downloading": "Загрузка... {{progress}} %",
     "installing": "Установка...",
     "preparing": "Подготовка...",

@@ -646,7 +646,6 @@
     "checkingUpdates": "Tjekker for opdateringer...",
     "updateAvailableShort": "Opdatering tilgængelig",
     "upToDate": "Opdateret",
-    "updateCheckingDisabled": "Tjek for opdateringer deaktiveret",
     "downloading": "Downloader... {{progress}}%",
     "installing": "Installerer...",
     "preparing": "Forbereder...",

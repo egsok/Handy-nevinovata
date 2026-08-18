@@ -646,7 +646,6 @@
     "checkingUpdates": "檢查更新中...",
     "updateAvailableShort": "有可用更新",
     "upToDate": "已是最新版本",
-    "updateCheckingDisabled": "更新檢查已停用",
     "downloading": "下載中... {{progress}}%",
     "installing": "安裝中...",
     "preparing": "準備中...",

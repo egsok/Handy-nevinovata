@@ -646,7 +646,6 @@
     "checkingUpdates": "...جاري التحقق من وجود تحديثات",
     "updateAvailableShort": "تحديث متاح",
     "upToDate": "محدث",
-    "updateCheckingDisabled": "تم تعطيل التحقق من التحديث",
     "downloading": "...جاري التنزيل {{progress}}%",
     "installing": "...جاري التثبيت",
     "preparing": "...جاري التحضير",

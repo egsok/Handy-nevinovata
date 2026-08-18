@@ -646,7 +646,6 @@
     "checkingUpdates": "Đang kiểm tra cập nhật...",
     "updateAvailableShort": "Có bản cập nhật",
     "upToDate": "Đã cập nhật",
-    "updateCheckingDisabled": "Đã tắt kiểm tra cập nhật",
     "downloading": "Đang tải... {{progress}}%",
     "installing": "Đang cài đặt...",
     "preparing": "Đang chuẩn bị...",

@@ -646,7 +646,6 @@
     "checkingUpdates": "アップデートを確認中…",
     "updateAvailableShort": "アップデートあり",
     "upToDate": "最新です",
-    "updateCheckingDisabled": "アップデート確認無効",
     "downloading": "ダウンロード中… {{progress}}%",
     "installing": "インストール中…",
     "preparing": "準備中…",

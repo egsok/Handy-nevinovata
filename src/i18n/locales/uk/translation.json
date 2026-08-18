@@ -646,7 +646,6 @@
     "checkingUpdates": "Перевірка оновлень...",
     "updateAvailableShort": "Доступне оновлення",
     "upToDate": "Актуальна версія",
-    "updateCheckingDisabled": "Перевірка оновлень вимкнена",
     "downloading": "Завантаження... {{progress}}%",
     "installing": "Встановлення...",
     "preparing": "Підготовка...",

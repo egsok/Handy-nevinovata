@@ -646,7 +646,6 @@
     "checkingUpdates": "Söker efter uppdateringar...",
     "updateAvailableShort": "Uppdatering tillgänglig",
     "upToDate": "Uppdaterad",
-    "updateCheckingDisabled": "Uppdateringskontroll inaktiverad",
     "downloading": "Laddar ner... {{progress}}%",
     "installing": "Installerar...",
     "preparing": "Förbereder...",

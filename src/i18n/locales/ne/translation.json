@@ -646,7 +646,6 @@
     "checkingUpdates": "अपडेटहरू जाँच गरिँदैछ...",
     "updateAvailableShort": "अपडेट उपलब्ध छ",
     "upToDate": "अद्यावधिक छ",
-    "updateCheckingDisabled": "अपडेट जाँच अफ छ",
     "downloading": "डाउनलोड गरिँदैछ... {{progress}}%",
     "installing": "इन्स्टल गरिँदैछ...",
     "preparing": "तयारी गरिँदैछ...",

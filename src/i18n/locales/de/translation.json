@@ -646,7 +646,6 @@
     "checkingUpdates": "Suche nach Updates...",
     "updateAvailableShort": "Update verfügbar",
     "upToDate": "Aktuell",
-    "updateCheckingDisabled": "Update-Prüfung deaktiviert",
     "downloading": "Wird heruntergeladen... {{progress}}%",
     "installing": "Wird installiert...",
     "preparing": "Wird vorbereitet...",

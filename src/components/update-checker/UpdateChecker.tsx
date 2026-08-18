@@ -39,9 +39,10 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
 
   const upToDateTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const isManualCheckRef = useRef(false);
-  // Ref, not state: the tray-event listener captures the mount-time render,
-  // so a state flag would never guard against a concurrent check
+  // Refs, not state: the tray-event listener captures the mount-time render,
+  // so a state flag would never guard against a concurrent check/install
   const isCheckingRef = useRef(false);
+  const isInstallingRef = useRef(false);
   const downloadedBytesRef = useRef(0);
   const contentLengthRef = useRef(0);
 
@@ -76,7 +77,7 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
 
   // Update checking functions
   const checkForUpdates = async () => {
-    if (!updateChecksEnabled || isCheckingRef.current) return;
+    if (isCheckingRef.current || isInstallingRef.current) return;
 
     try {
       isCheckingRef.current = true;
@@ -119,14 +120,11 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
   };
 
   const handleManualUpdateCheck = () => {
-    if (!updateChecksEnabled) return;
     isManualCheckRef.current = true;
     checkForUpdates();
   };
 
   const installUpdate = async () => {
-    if (!updateChecksEnabled) return;
-
     const portable = await commands.isPortable();
     if (portable) {
       setShowPortableUpdateDialog(true);
@@ -134,6 +132,7 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
     }
 
     try {
+      isInstallingRef.current = true;
       setIsInstalling(true);
       setDownloadProgress(0);
       downloadedBytesRef.current = 0;
@@ -172,6 +171,7 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
       console.error("Failed to install update:", error);
       toast.error(t("footer.updateInstallFailed"));
     } finally {
+      isInstallingRef.current = false;
       setIsInstalling(false);
       setDownloadProgress(0);
       downloadedBytesRef.current = 0;
@@ -197,14 +197,13 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
   };
 
   const getUpdateStatusAction = () => {
-    if (!updateChecksEnabled) return undefined;
     if (updateAvailable && !isInstalling) return installUpdate;
     if (!isChecking && !isInstalling && !updateAvailable)
       return handleManualUpdateCheck;
     return undefined;
   };
 
-  const isUpdateDisabled = !updateChecksEnabled || isChecking || isInstalling;
+  const isUpdateDisabled = isChecking || isInstalling;
   const isUpdateClickable =
     !isUpdateDisabled && (updateAvailable || (!isChecking && !showUpToDate));
 
@@ -212,9 +211,11 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
   // the releases index, so the dialog has to say "browse" rather than "download".
   const hasDirectInstaller = portableInstallerUrl !== PORTABLE_RELEASES_URL;
 
-  // Turned off means quiet: no permanent "checking disabled" label in the
-  // footer chrome (the tray item is greyed out by the same setting)
-  if (!updateChecksEnabled) return null;
+  // Nothing until settings arrive: rendering on the `?? true` fallback would
+  // flash the button for users who turned update checks off. Turned off means
+  // quiet: no permanent "checking disabled" label in the footer chrome (the
+  // tray item is greyed out by the same setting)
+  if (!settingsLoaded || !updateChecksEnabled) return null;
 
   return (
     <>

@@ -646,7 +646,6 @@
     "checkingUpdates": "Controleren op updates...",
     "updateAvailableShort": "Update beschikbaar",
     "upToDate": "Up-to-date",
-    "updateCheckingDisabled": "Updatecontrole uitgeschakeld",
     "downloading": "Downloaden... {{progress}}%",
     "installing": "Installeren...",
     "preparing": "Voorbereiden...",

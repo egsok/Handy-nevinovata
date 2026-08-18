@@ -646,7 +646,6 @@
     "checkingUpdates": "Kontroluji aktualizace...",
     "updateAvailableShort": "Dostupná aktualizace",
     "upToDate": "Vše aktuální",
-    "updateCheckingDisabled": "Kontrola aktualizací vypnuta",
     "downloading": "Stahování... {{progress}}%",
     "installing": "Instalace...",
     "preparing": "Příprava...",

@@ -646,7 +646,6 @@
     "checkingUpdates": "Güncellemeler kontrol ediliyor...",
     "updateAvailableShort": "Güncelleme mevcut",
     "upToDate": "Güncel",
-    "updateCheckingDisabled": "Güncelleme Kontrolü Devre Dışı",
     "downloading": "İndiriliyor... %{{progress}}",
     "installing": "Yükleniyor...",
     "preparing": "Hazırlanıyor...",

@@ -646,7 +646,6 @@
     "checkingUpdates": "בודק עדכונים...",
     "updateAvailableShort": "יש עדכון זמין",
     "upToDate": "מעודכן",
-    "updateCheckingDisabled": "בדיקת העדכונים כבויה",
     "downloading": "מוריד... {{progress}}%",
     "installing": "מתקין...",
     "preparing": "מכין...",

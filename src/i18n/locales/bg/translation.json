@@ -646,7 +646,6 @@
     "checkingUpdates": "Проверка за актуализации...",
     "updateAvailableShort": "Налична актуализация",
     "upToDate": "Актуална версия",
-    "updateCheckingDisabled": "Проверката за актуализации е изключена",
     "downloading": "Изтегля се... {{progress}}%",
     "installing": "Инсталиране...",
     "preparing": "Подготовка...",

@@ -646,7 +646,6 @@
     "checkingUpdates": "Verificando atualizações...",
     "updateAvailableShort": "Atualização disponível",
     "upToDate": "Atualizado",
-    "updateCheckingDisabled": "Verificação de Atualização Desabilitada",
     "downloading": "Baixando... {{progress}}%",
     "installing": "Instalando...",
     "preparing": "Preparando...",
