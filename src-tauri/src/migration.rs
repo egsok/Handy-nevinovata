@@ -3,11 +3,12 @@
 //!
 //! The legacy identifier was shared with the original upstream Handy app, so
 //! the legacy directory may still be in use by it: settings and history are
-//! copied, models and recordings are moved only when upstream Handy is not
-//! installed, and the legacy directory is never deleted. Nothing already
-//! present in the new directory is ever overwritten, so an accidental re-run
-//! (e.g. after the user deletes their settings file) cannot clobber data the
-//! new app has written since.
+//! copied, models and recordings are hard-linked (same-volume by construction,
+//! so this is instant and costs no disk; both apps can keep using the files),
+//! and the legacy directory is never deleted. Nothing already present in the
+//! new directory is ever overwritten, so an accidental re-run (e.g. after the
+//! user deletes their settings file) cannot clobber data the new app has
+//! written since.
 
 use std::fs;
 use std::path::Path;
@@ -51,12 +52,12 @@ pub fn migrate_legacy_data(app: &tauri::AppHandle) {
         return;
     }
 
-    migrate_between(&old_dir, &new_dir, original_handy_installed());
+    migrate_between(&old_dir, &new_dir);
 }
 
 /// Path-based core of the migration, separated from AppHandle resolution so
 /// the whole flow is unit-testable against temp directories.
-fn migrate_between(old_dir: &Path, new_dir: &Path, handy_installed: bool) {
+fn migrate_between(old_dir: &Path, new_dir: &Path) {
     log::info!(
         "migration: migrating legacy data from {} to {}",
         old_dir.display(),
@@ -69,16 +70,15 @@ fn migrate_between(old_dir: &Path, new_dir: &Path, handy_installed: bool) {
 
     let ok_history = copy_history_db(old_dir, new_dir);
 
-    // Recordings follow the same rule as models: moved (instant same-volume
-    // rename, no unbounded copy at startup) unless upstream Handy still needs
-    // them; its history references these files.
+    // Recordings and models are hard-linked, not moved or copied: instant,
+    // zero extra disk, and an upstream Handy still using the legacy dir keeps
+    // every file it references. Both apps only ever write these files once
+    // under unique names, so sharing the content is safe.
     let old_recordings = old_dir.join("recordings");
-    let ok_recordings = if !old_recordings.is_dir() {
-        true
-    } else if handy_installed {
-        copy_dir_recursive(&old_recordings, &new_dir.join("recordings"), 0)
+    let ok_recordings = if old_recordings.is_dir() {
+        link_dir_recursive(&old_recordings, &new_dir.join("recordings"), 0, &[])
     } else {
-        move_dir_entries(&old_recordings, &new_dir.join("recordings"), &[])
+        true
     };
 
     for sound in ["custom_start.wav", "custom_stop.wav"] {
@@ -87,17 +87,12 @@ fn migrate_between(old_dir: &Path, new_dir: &Path, handy_installed: bool) {
 
     let old_models = old_dir.join("models");
     if old_models.is_dir() {
-        if handy_installed {
-            log::info!(
-                "migration: original Handy detected; leaving models in place, they will be re-downloaded"
-            );
-        } else {
-            move_dir_entries(
-                &old_models,
-                &new_dir.join("models"),
-                &[".partial", ".extracting"],
-            );
-        }
+        link_dir_recursive(
+            &old_models,
+            &new_dir.join("models"),
+            0,
+            &[".partial", ".extracting"],
+        );
     }
 
     // Settings are copied last: the file is the skip-marker, so it only lands
@@ -153,8 +148,8 @@ fn copy_history_db(old_dir: &Path, new_dir: &Path) -> bool {
         return true;
     }
 
-    match legacy_schema_version(&src) {
-        Ok(version) if version > crate::managers::history::schema_version() => {
+    match check_legacy_schema(&src) {
+        SchemaCheck::Newer(version) => {
             log::warn!(
                 "migration: legacy history.db schema v{} is newer than supported v{}; skipping history (it stays in the legacy dir)",
                 version,
@@ -162,13 +157,23 @@ fn copy_history_db(old_dir: &Path, new_dir: &Path) -> bool {
             );
             return true;
         }
-        Ok(_) => {}
-        Err(e) => {
+        SchemaCheck::Supported => {}
+        SchemaCheck::NotADatabase(e) => {
             log::warn!(
-                "migration: legacy history.db is not a readable SQLite database ({}); skipping it",
+                "migration: legacy history.db is not a usable SQLite database ({}); skipping it",
                 e
             );
             return true;
+        }
+        SchemaCheck::Unreadable(e) => {
+            // Transient I/O failure (AV lock, permissions): a real database we
+            // simply could not read right now. Report failure so the settings
+            // marker is withheld rather than silently abandoning the history.
+            log::error!(
+                "migration: cannot open legacy history.db ({}); history not migrated",
+                e
+            );
+            return false;
         }
     }
 
@@ -188,6 +193,16 @@ fn copy_history_db(old_dir: &Path, new_dir: &Path) -> bool {
                     &old_dir.join("history.db-wal"),
                     &new_dir.join("history.db-wal"),
                 );
+                // A plain copy taken while the legacy app was writing can be
+                // torn; never hand HistoryManager a corrupt database
+                if !copied_db_is_sound(&dst) {
+                    log::error!(
+                        "migration: file copy of history.db is not consistent (legacy app still writing?); dropping it"
+                    );
+                    let _ = fs::remove_file(&dst);
+                    let _ = fs::remove_file(new_dir.join("history.db-wal"));
+                    return false;
+                }
             } else {
                 // Don't leave a partial database for HistoryManager to choke on
                 let _ = fs::remove_file(&dst);
@@ -197,21 +212,102 @@ fn copy_history_db(old_dir: &Path, new_dir: &Path) -> bool {
     }
 }
 
+enum SchemaCheck {
+    Supported,
+    Newer(i32),
+    /// Permanently unusable (not SQLite, or corrupt): skip it and migrate on
+    NotADatabase(String),
+    /// Could not be read right now (lock, permissions): treat as failure
+    Unreadable(String),
+}
+
+fn check_legacy_schema(src: &Path) -> SchemaCheck {
+    let mut last_err = String::new();
+    for attempt in 1..=3u32 {
+        match legacy_schema_version(src) {
+            Ok(v) if v > crate::managers::history::schema_version() => {
+                return SchemaCheck::Newer(v)
+            }
+            Ok(_) => return SchemaCheck::Supported,
+            Err(e) if is_permanently_unusable(&e) => {
+                return SchemaCheck::NotADatabase(e.to_string())
+            }
+            Err(e) => {
+                last_err = e.to_string();
+                if attempt < 3 {
+                    log::warn!(
+                        "migration: cannot open legacy history.db (attempt {}): {}",
+                        attempt,
+                        last_err
+                    );
+                    std::thread::sleep(std::time::Duration::from_millis(200));
+                }
+            }
+        }
+    }
+    SchemaCheck::Unreadable(last_err)
+}
+
+fn is_permanently_unusable(e: &rusqlite::Error) -> bool {
+    matches!(
+        e,
+        rusqlite::Error::SqliteFailure(err, _) if matches!(
+            err.code,
+            rusqlite::ErrorCode::NotADatabase | rusqlite::ErrorCode::DatabaseCorrupt
+        )
+    )
+}
+
 fn legacy_schema_version(src: &Path) -> Result<i32, rusqlite::Error> {
     use rusqlite::{Connection, OpenFlags};
     let conn = Connection::open_with_flags(src, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
     conn.pragma_query_value(None, "user_version", |row| row.get(0))
 }
 
-fn sqlite_backup(src: &Path, dst: &Path) -> Result<(), rusqlite::Error> {
-    use rusqlite::{backup::Backup, Connection, OpenFlags};
-    let src_conn = Connection::open_with_flags(src, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
-    let mut dst_conn = Connection::open(dst)?;
-    let backup = Backup::new(&src_conn, &mut dst_conn)?;
-    // No pause between steps: this is a one-shot local copy with no writer to
-    // be polite to, and rusqlite sleeps after every step, not just on Busy
-    backup.run_to_completion(1024, std::time::Duration::ZERO, None)?;
-    Ok(())
+fn sqlite_backup(src: &Path, dst: &Path) -> Result<(), String> {
+    use rusqlite::backup::{Backup, StepResult};
+    use rusqlite::{Connection, OpenFlags};
+    let src_conn = Connection::open_with_flags(src, OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+    let mut dst_conn = Connection::open(dst).map_err(|e| e.to_string())?;
+    let backup = Backup::new(&src_conn, &mut dst_conn).map_err(|e| e.to_string())?;
+    // Stepped manually instead of run_to_completion: with the legacy app still
+    // writing, run_to_completion retries Busy/Locked forever (and with a zero
+    // pause would spin at full CPU) right on the startup path. Bound it.
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    loop {
+        match backup.step(1024).map_err(|e| e.to_string())? {
+            StepResult::Done => return Ok(()),
+            StepResult::More => {}
+            // The enum is non_exhaustive; treat unknown results like Busy
+            StepResult::Busy | StepResult::Locked | _ => {
+                if std::time::Instant::now() >= deadline {
+                    return Err("timed out waiting for the legacy database lock".to_string());
+                }
+                std::thread::sleep(std::time::Duration::from_millis(50));
+            }
+        }
+    }
+}
+
+/// `PRAGMA quick_check` on a freshly copied database; anything but a clean
+/// "ok" means the copy must not be used.
+fn copied_db_is_sound(db: &Path) -> bool {
+    let result: Result<String, rusqlite::Error> = (|| {
+        let conn = rusqlite::Connection::open(db)?;
+        conn.query_row("PRAGMA quick_check", [], |row| row.get(0))
+    })();
+    match result {
+        Ok(ref verdict) if verdict == "ok" => true,
+        Ok(verdict) => {
+            log::warn!("migration: quick_check on copied history.db: {}", verdict);
+            false
+        }
+        Err(e) => {
+            log::warn!("migration: quick_check on copied history.db failed: {}", e);
+            false
+        }
+    }
 }
 
 /// Copy a single file with a few retries (transient AV/indexer locks).
@@ -256,11 +352,13 @@ fn copy_file_best_effort(src: &Path, dst: &Path) {
     }
 }
 
-/// Recursively copy a directory tree. Existing destination files are never
-/// overwritten; symlinks are skipped; individual file failures are logged and
-/// tolerated. Returns `false` only when the source exists but could not be
-/// copied at all.
-fn copy_dir_recursive(src: &Path, dst: &Path, depth: u32) -> bool {
+/// Recursively hard-link a directory tree into `dst` (falling back to a plain
+/// copy on filesystems without hard links). The legacy tree is left fully in
+/// place, so an upstream Handy still using it loses nothing, while the link
+/// itself is instant and costs no disk. Entries whose names end in one of
+/// `skip_suffixes`, existing destination files (re-run safety) and symlinks
+/// are left alone. Returns `false` when any file could not be brought across.
+fn link_dir_recursive(src: &Path, dst: &Path, depth: u32, skip_suffixes: &[&str]) -> bool {
     if !src.is_dir() {
         return true;
     }
@@ -279,108 +377,45 @@ fn copy_dir_recursive(src: &Path, dst: &Path, depth: u32) -> bool {
             return false;
         }
     };
+    let mut ok = true;
     for entry in entries.flatten() {
         let src_path = entry.path();
-        let dst_path = dst.join(entry.file_name());
+        let name = entry.file_name();
+        if skip_suffixes
+            .iter()
+            .any(|s| name.to_string_lossy().ends_with(s))
+        {
+            continue;
+        }
+        let dst_path = dst.join(&name);
         let meta = match fs::symlink_metadata(&src_path) {
             Ok(m) => m,
             Err(e) => {
                 log::warn!("migration: cannot stat {}: {}", src_path.display(), e);
+                ok = false;
                 continue;
             }
         };
         if meta.is_symlink() {
             log::warn!("migration: skipping symlink {}", src_path.display());
         } else if meta.is_dir() {
-            copy_dir_recursive(&src_path, &dst_path, depth + 1);
+            ok &= link_dir_recursive(&src_path, &dst_path, depth + 1, skip_suffixes);
         } else if dst_path.exists() {
             // Re-run safety: never clobber data the new app has written
-        } else if let Err(e) = fs::copy(&src_path, &dst_path) {
-            log::warn!("migration: failed to copy {}: {}", src_path.display(), e);
-        }
-    }
-    true
-}
-
-/// Move directory entries one by one (same-volume rename, no copying of
-/// gigabytes). One locked file then only costs one warning instead of failing
-/// the whole move. Entries whose names end in one of `skip_suffixes`, and
-/// entries already present in the destination, are left behind. Returns
-/// `false` only when the destination could not be created or the source could
-/// not be enumerated.
-fn move_dir_entries(old: &Path, new: &Path, skip_suffixes: &[&str]) -> bool {
-    if let Err(e) = fs::create_dir_all(new) {
-        log::error!("migration: cannot create {}: {}", new.display(), e);
-        return false;
-    }
-    let entries = match fs::read_dir(old) {
-        Ok(entries) => entries,
-        Err(e) => {
-            log::error!("migration: cannot read {}: {}", old.display(), e);
-            return false;
-        }
-    };
-    let mut moved = 0u32;
-    for entry in entries.flatten() {
-        let name = entry.file_name();
-        let name_str = name.to_string_lossy().to_string();
-        if skip_suffixes.iter().any(|s| name_str.ends_with(s)) {
-            continue;
-        }
-        let dst = new.join(&name);
-        if dst.exists() {
-            log::warn!(
-                "migration: {} already exists, leaving legacy copy in place",
-                dst.display()
-            );
-            continue;
-        }
-        match fs::rename(entry.path(), &dst) {
-            Ok(()) => moved += 1,
-            Err(e) => log::warn!(
-                "migration: could not move {} ({}); it stays in the legacy dir",
-                name_str,
-                e
-            ),
-        }
-    }
-    log::info!("migration: moved {} entries from {}", moved, old.display());
-    true
-}
-
-/// Detect an installed copy of the original upstream Handy, which shared the
-/// legacy data dir and must keep its models and recordings.
-fn original_handy_installed() -> bool {
-    #[cfg(target_os = "macos")]
-    {
-        if Path::new("/Applications/Handy.app").exists() {
-            return true;
-        }
-        if let Some(home) = std::env::var_os("HOME") {
-            if std::path::PathBuf::from(home)
-                .join("Applications/Handy.app")
-                .exists()
-            {
-                return true;
+        } else if let Err(link_err) = fs::hard_link(&src_path, &dst_path) {
+            // e.g. exFAT has no hard links; fall back to copying this file
+            if let Err(copy_err) = fs::copy(&src_path, &dst_path) {
+                log::warn!(
+                    "migration: failed to link ({}) or copy ({}) {}",
+                    link_err,
+                    copy_err,
+                    src_path.display()
+                );
+                ok = false;
             }
         }
     }
-    #[cfg(target_os = "windows")]
-    {
-        for (var, sub) in [
-            ("LOCALAPPDATA", "Handy\\handy.exe"),
-            ("ProgramFiles", "Handy\\handy.exe"),
-        ] {
-            if let Some(base) = std::env::var_os(var) {
-                if std::path::PathBuf::from(base).join(sub).exists() {
-                    return true;
-                }
-            }
-        }
-    }
-    // Linux (AppImage installs are undetectable): assume absent — a wrong
-    // guess only costs the other app a model re-download
-    false
+    ok
 }
 
 #[cfg(test)]
@@ -431,28 +466,29 @@ mod tests {
     }
 
     #[test]
-    fn test_copy_dir_recursive_copies_nested_tree() {
-        let root = temp_dir("copy_nested");
+    fn test_link_dir_recursive_links_nested_tree_and_keeps_source() {
+        let root = temp_dir("link_nested");
         let src = root.join("src");
         std::fs::create_dir_all(src.join("sub")).unwrap();
         write_file(&src.join("a.wav"), "aaa");
         write_file(&src.join("sub").join("b.wav"), "bbb");
 
         let dst = root.join("dst");
-        assert!(copy_dir_recursive(&src, &dst, 0));
+        assert!(link_dir_recursive(&src, &dst, 0, &[]));
         assert_eq!(std::fs::read_to_string(dst.join("a.wav")).unwrap(), "aaa");
         assert_eq!(
             std::fs::read_to_string(dst.join("sub").join("b.wav")).unwrap(),
             "bbb"
         );
-        // Source untouched
-        assert!(src.join("a.wav").exists());
+        // Source stays fully in place (legacy dir doubles as backup)
+        assert_eq!(std::fs::read_to_string(src.join("a.wav")).unwrap(), "aaa");
+        assert!(src.join("sub").join("b.wav").exists());
         std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
-    fn test_copy_dir_recursive_never_overwrites_existing_files() {
-        let root = temp_dir("copy_no_clobber");
+    fn test_link_dir_recursive_never_overwrites_existing_files() {
+        let root = temp_dir("link_no_clobber");
         let src = root.join("src");
         std::fs::create_dir_all(&src).unwrap();
         write_file(&src.join("a.wav"), "legacy");
@@ -461,7 +497,7 @@ mod tests {
         std::fs::create_dir_all(&dst).unwrap();
         write_file(&dst.join("a.wav"), "new-data");
 
-        assert!(copy_dir_recursive(&src, &dst, 0));
+        assert!(link_dir_recursive(&src, &dst, 0, &[]));
         assert_eq!(
             std::fs::read_to_string(dst.join("a.wav")).unwrap(),
             "new-data"
@@ -470,12 +506,13 @@ mod tests {
     }
 
     #[test]
-    fn test_copy_dir_recursive_missing_source_is_ok() {
-        let root = temp_dir("copy_missing");
-        assert!(copy_dir_recursive(
+    fn test_link_dir_recursive_missing_source_is_ok() {
+        let root = temp_dir("link_missing");
+        assert!(link_dir_recursive(
             &root.join("nonexistent"),
             &root.join("dst"),
-            0
+            0,
+            &[]
         ));
         assert!(!root.join("dst").exists());
         std::fs::remove_dir_all(root).unwrap();
@@ -483,23 +520,23 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
-    fn test_copy_dir_recursive_skips_symlinks() {
-        let root = temp_dir("copy_symlink");
+    fn test_link_dir_recursive_skips_symlinks() {
+        let root = temp_dir("link_symlink");
         let src = root.join("src");
         std::fs::create_dir_all(&src).unwrap();
         write_file(&src.join("real.wav"), "real");
         std::os::unix::fs::symlink(src.join("real.wav"), src.join("link.wav")).unwrap();
 
         let dst = root.join("dst");
-        assert!(copy_dir_recursive(&src, &dst, 0));
+        assert!(link_dir_recursive(&src, &dst, 0, &[]));
         assert!(dst.join("real.wav").exists());
         assert!(!dst.join("link.wav").exists());
         std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
-    fn test_move_dir_entries_skips_suffixes() {
-        let root = temp_dir("move_partial");
+    fn test_link_dir_recursive_skips_suffixes() {
+        let root = temp_dir("link_partial");
         let old = root.join("models");
         std::fs::create_dir_all(&old).unwrap();
         write_file(&old.join("ggml-small.bin"), "model");
@@ -507,20 +544,23 @@ mod tests {
         std::fs::create_dir_all(old.join("bar.extracting")).unwrap();
 
         let new = root.join("new_models");
-        assert!(move_dir_entries(&old, &new, &[".partial", ".extracting"]));
+        assert!(link_dir_recursive(
+            &old,
+            &new,
+            0,
+            &[".partial", ".extracting"]
+        ));
 
         assert!(new.join("ggml-small.bin").exists());
-        assert!(!old.join("ggml-small.bin").exists());
-        // Leftovers stay behind and are not moved
-        assert!(old.join("foo.bin.partial").exists());
-        assert!(old.join("bar.extracting").exists());
+        // Interrupted leftovers are not brought over
         assert!(!new.join("foo.bin.partial").exists());
+        assert!(!new.join("bar.extracting").exists());
         std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
-    fn test_move_dir_entries_merges_into_existing_destination() {
-        let root = temp_dir("move_merge");
+    fn test_link_dir_recursive_merges_into_existing_destination() {
+        let root = temp_dir("link_merge");
         let old = root.join("models");
         std::fs::create_dir_all(&old).unwrap();
         write_file(&old.join("existing.bin"), "old-version");
@@ -532,30 +572,28 @@ mod tests {
         std::fs::create_dir_all(&new).unwrap();
         write_file(&new.join("existing.bin"), "new-version");
 
-        assert!(move_dir_entries(&old, &new, &[]));
+        assert!(link_dir_recursive(&old, &new, 0, &[]));
 
-        // Existing destination entry wins, legacy copy stays put
+        // Existing destination entry wins
         assert_eq!(
             std::fs::read_to_string(new.join("existing.bin")).unwrap(),
             "new-version"
         );
         assert!(old.join("existing.bin").exists());
-        // Fresh entries (file and directory) are moved
+        // Fresh entries (file and nested directory) are linked across
         assert!(new.join("fresh.bin").exists());
-        assert!(!old.join("fresh.bin").exists());
         assert!(new.join("parakeet-dir").join("weights").exists());
-        assert!(!old.join("parakeet-dir").exists());
         std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
-    fn test_migrate_between_full_flow_moves_models_and_keeps_backup() {
+    fn test_migrate_between_full_flow_links_data_and_keeps_backup() {
         let root = temp_dir("full_flow");
         let old = root.join("com.pais.handy");
         let new = root.join("ru.egorsokolov.klava-nevinovata");
         seed_legacy_dir(&old);
 
-        migrate_between(&old, &new, false);
+        migrate_between(&old, &new);
 
         // Settings and history are copied, marker landed
         assert_eq!(
@@ -564,35 +602,17 @@ mod tests {
         );
         assert_eq!(read_sqlite_value(&new.join("history.db")), "legacy");
         assert!(new.join("custom_start.wav").exists());
-        // Recordings and models moved, leftovers stay behind
+        // Recordings and models are linked across; interrupted leftovers are not
         assert!(new.join("recordings").join("handy-123.wav").exists());
-        assert!(!old.join("recordings").join("handy-123.wav").exists());
         assert!(new.join("models").join("ggml-small.bin").exists());
-        assert!(!old.join("models").join("ggml-small.bin").exists());
-        assert!(old.join("models").join("foo.bin.partial").exists());
-        // Legacy settings and history stay behind as a backup
+        assert!(!new.join("models").join("foo.bin.partial").exists());
+        // The whole legacy dir stays fully in place as a backup (and for a
+        // still-installed upstream Handy)
         assert!(old.join("settings_store.json").exists());
-        assert_eq!(read_sqlite_value(&old.join("history.db")), "legacy");
-        std::fs::remove_dir_all(root).unwrap();
-    }
-
-    #[test]
-    fn test_migrate_between_leaves_models_and_recordings_when_handy_installed() {
-        let root = temp_dir("handy_installed");
-        let old = root.join("com.pais.handy");
-        let new = root.join("ru.egorsokolov.klava-nevinovata");
-        seed_legacy_dir(&old);
-
-        migrate_between(&old, &new, true);
-
-        // Models stay for Handy; recordings are copied, not moved
-        assert!(old.join("models").join("ggml-small.bin").exists());
-        assert!(!new.join("models").exists());
         assert!(old.join("recordings").join("handy-123.wav").exists());
-        assert!(new.join("recordings").join("handy-123.wav").exists());
-        // Small items still migrated
-        assert!(new.join("settings_store.json").exists());
-        assert!(new.join("history.db").exists());
+        assert!(old.join("models").join("ggml-small.bin").exists());
+        assert!(old.join("models").join("foo.bin.partial").exists());
+        assert_eq!(read_sqlite_value(&old.join("history.db")), "legacy");
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -603,15 +623,19 @@ mod tests {
         let new = root.join("ru.egorsokolov.klava-nevinovata");
         seed_legacy_dir(&old);
 
-        migrate_between(&old, &new, true);
+        migrate_between(&old, &new);
 
-        // The new app worked for a while: fresh history and a new recording
+        // The new app worked for a while: fresh history and a replaced
+        // recording (removed first — the migrated file is a hard link, and
+        // writing through it would also change the legacy copy)
+        std::fs::remove_file(new.join("history.db")).unwrap();
         write_file(&new.join("history.db"), "NEW-DB");
+        std::fs::remove_file(new.join("recordings").join("handy-123.wav")).unwrap();
         write_file(&new.join("recordings").join("handy-123.wav"), "NEW-WAV");
 
         // Marker gone (e.g. user reset settings) -> migration runs again
         std::fs::remove_file(new.join("settings_store.json")).unwrap();
-        migrate_between(&old, &new, true);
+        migrate_between(&old, &new);
 
         assert_eq!(
             std::fs::read_to_string(new.join("history.db")).unwrap(),
@@ -630,11 +654,11 @@ mod tests {
         let old = root.join("com.pais.handy");
         let new = root.join("ru.egorsokolov.klava-nevinovata");
         seed_legacy_dir(&old);
-        // Occupy the recordings destination with a file so the move fails
+        // Occupy the recordings destination with a file so the link fails
         std::fs::create_dir_all(&new).unwrap();
         write_file(&new.join("recordings"), "in the way");
 
-        migrate_between(&old, &new, false);
+        migrate_between(&old, &new);
 
         assert!(!new.join("settings_store.json").exists());
         assert!(!new.join("settings_store.json.migrating").exists());
@@ -650,7 +674,7 @@ mod tests {
         std::fs::create_dir_all(old.join("models")).unwrap();
         write_file(&old.join("models").join("ggml-small.bin"), "model");
 
-        migrate_between(&old, &new, false);
+        migrate_between(&old, &new);
 
         assert!(new.join("models").join("ggml-small.bin").exists());
         assert!(!new.join("settings_store.json").exists());
@@ -667,7 +691,7 @@ mod tests {
         std::fs::create_dir_all(new.join("logs")).unwrap();
         write_file(&new.join("logs").join("handy.log"), "log");
 
-        migrate_between(&old, &new, false);
+        migrate_between(&old, &new);
 
         assert!(new.join("settings_store.json").exists());
         assert!(new.join("logs").join("handy.log").exists());
@@ -757,6 +781,55 @@ mod tests {
             std::fs::read_to_string(new.join("history.db")).unwrap(),
             "NEW-DB"
         );
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn test_copy_history_db_reports_failure_on_locked_db() {
+        use std::os::windows::fs::OpenOptionsExt;
+        let root = temp_dir("sqlite_locked");
+        let old = root.join("old");
+        let new = root.join("new");
+        std::fs::create_dir_all(&old).unwrap();
+        std::fs::create_dir_all(&new).unwrap();
+        create_sqlite_db(&old.join("history.db"), "locked");
+
+        // Exclusive handle with no sharing, like an AV/backup agent would hold
+        let _guard = std::fs::OpenOptions::new()
+            .read(true)
+            .share_mode(0)
+            .open(old.join("history.db"))
+            .unwrap();
+
+        // A real database we cannot read is a failure (marker must be
+        // withheld), not a silent "skip the history"
+        assert!(!copy_history_db(&old, &new));
+        assert!(!new.join("history.db").exists());
+        drop(_guard);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn test_copied_db_is_sound_rejects_truncated_db() {
+        let root = temp_dir("sqlite_torn");
+        let db = root.join("history.db");
+        {
+            let conn = rusqlite::Connection::open(&db).unwrap();
+            // Force several pages so truncation actually tears the file
+            conn.execute_batch("CREATE TABLE t (v BLOB);").unwrap();
+            let blob = vec![0u8; 16384];
+            conn.execute("INSERT INTO t (v) VALUES (?1)", [&blob])
+                .unwrap();
+        }
+        assert!(copied_db_is_sound(&db));
+
+        // Tear off everything past the first page, like a copy taken while
+        // the legacy app was still writing
+        let f = std::fs::OpenOptions::new().write(true).open(&db).unwrap();
+        f.set_len(1024).unwrap();
+        drop(f);
+        assert!(!copied_db_is_sound(&db));
         std::fs::remove_dir_all(root).unwrap();
     }
 
