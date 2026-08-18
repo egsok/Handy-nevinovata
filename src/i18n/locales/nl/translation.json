@@ -121,7 +121,8 @@
         "description": "Als Handy of een oudere versie van deze app eerder was geïnstalleerd, verwijder dan hun vermeldingen uit de lijst Toegankelijkheid met de knop “−” en verwijder de oude app. Reset daarna hieronder de machtiging en verleen deze opnieuw.",
         "resetButton": "Machtiging resetten",
         "restartButton": "App herstarten",
-        "resetSuccess": "Machtiging gereset. Klik op “Machtiging verlenen” om de app opnieuw toe te voegen.",
+        "restartFailed": "Automatisch herstarten is mislukt. Sluit de app en open deze handmatig opnieuw.",
+        "resetSuccess": "Machtiging gereset. Herstart de app nu en verleen de machtiging daarna opnieuw.",
         "resetFailed": "Automatisch resetten mislukt. Voer dit uit in Terminal: {{command}}"
       },
       "errors": {

@@ -121,7 +121,8 @@
         "description": "Hvis Handy eller en ældre version af denne app tidligere var installeret, skal du fjerne deres poster fra listen Tilgængelighed med knappen ”−” og slette den gamle app. Nulstil derefter tilladelsen nedenfor, og giv den igen.",
         "resetButton": "Nulstil tilladelse",
         "restartButton": "Genstart appen",
-        "resetSuccess": "Tilladelsen er nulstillet. Klik på ”Giv tilladelse” for at tilføje appen igen.",
+        "restartFailed": "Kunne ikke genstarte automatisk. Luk appen, og åbn den igen manuelt.",
+        "resetSuccess": "Tilladelsen er nulstillet. Genstart appen nu, og giv derefter tilladelsen igen.",
         "resetFailed": "Automatisk nulstilling mislykkedes. Kør dette i Terminal: {{command}}"
       },
       "errors": {

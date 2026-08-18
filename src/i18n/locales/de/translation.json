@@ -121,7 +121,8 @@
         "description": "Wenn Handy oder eine ältere Version dieser App früher installiert war, entferne deren Einträge mit der Taste „−“ aus der Liste „Bedienungshilfen“ und lösche die alte App. Setze anschließend die Berechtigung unten zurück und erteile sie erneut.",
         "resetButton": "Berechtigung zurücksetzen",
         "restartButton": "App neu starten",
-        "resetSuccess": "Berechtigung zurückgesetzt. Klicke auf „Berechtigung erteilen“, um die App erneut hinzuzufügen.",
+        "restartFailed": "Automatischer Neustart fehlgeschlagen. Beende die App und öffne sie manuell erneut.",
+        "resetSuccess": "Berechtigung zurückgesetzt. Starte die App jetzt neu und erteile die Berechtigung danach erneut.",
         "resetFailed": "Automatisches Zurücksetzen fehlgeschlagen. Führe dies im Terminal aus: {{command}}"
       },
       "errors": {

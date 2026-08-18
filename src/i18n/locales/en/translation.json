@@ -121,7 +121,8 @@
         "description": "If Handy or an older version of this app was installed before, remove their entries from the Accessibility list using the \"−\" button and delete the old app. Then reset the permission below and grant it again.",
         "resetButton": "Reset permission",
         "restartButton": "Restart app",
-        "resetSuccess": "Permission reset. Click Grant Permission to add the app again.",
+        "restartFailed": "Could not restart automatically. Please quit the app and open it again manually.",
+        "resetSuccess": "Permission reset. Restart the app now, then grant the permission again.",
         "resetFailed": "Automatic reset failed. Run this in Terminal: {{command}}"
       },
       "errors": {

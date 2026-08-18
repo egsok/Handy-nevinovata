@@ -121,7 +121,8 @@
         "description": "Om Handy eller en äldre version av den här appen har varit installerad tidigare tar du bort deras poster från listan Hjälpmedel med knappen ”−” och raderar den gamla appen. Återställ sedan behörigheten nedan och bevilja den igen.",
         "resetButton": "Återställ behörighet",
         "restartButton": "Starta om appen",
-        "resetSuccess": "Behörigheten är återställd. Klicka på ”Bevilja behörighet” för att lägga till appen igen.",
+        "restartFailed": "Kunde inte starta om automatiskt. Avsluta appen och öppna den igen manuellt.",
+        "resetSuccess": "Behörigheten är återställd. Starta om appen nu och bevilja sedan behörigheten igen.",
         "resetFailed": "Automatisk återställning misslyckades. Kör detta i Terminal: {{command}}"
       },
       "errors": {

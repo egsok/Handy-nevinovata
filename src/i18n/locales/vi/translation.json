@@ -121,7 +121,8 @@
         "description": "Nếu Handy hoặc một phiên bản cũ của ứng dụng này từng được cài đặt, hãy xóa các mục của chúng khỏi danh sách Trợ năng bằng nút “−” và xóa ứng dụng cũ. Sau đó đặt lại quyền bên dưới và cấp lại.",
         "resetButton": "Đặt lại quyền",
         "restartButton": "Khởi động lại ứng dụng",
-        "resetSuccess": "Đã đặt lại quyền. Nhấn “Cấp quyền” để thêm lại ứng dụng.",
+        "restartFailed": "Không thể tự động khởi động lại. Vui lòng thoát ứng dụng và mở lại theo cách thủ công.",
+        "resetSuccess": "Đã đặt lại quyền. Bây giờ hãy khởi động lại ứng dụng, sau đó cấp lại quyền.",
         "resetFailed": "Đặt lại tự động không thành công. Hãy chạy lệnh này trong Terminal: {{command}}"
       },
       "errors": {

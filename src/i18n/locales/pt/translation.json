@@ -121,7 +121,8 @@
         "description": "Se o Handy ou uma versão antiga deste app já estiveram instalados, remova as entradas deles da lista de Acessibilidade com o botão “−” e exclua o app antigo. Depois, redefina a permissão abaixo e conceda-a novamente.",
         "resetButton": "Redefinir permissão",
         "restartButton": "Reiniciar o app",
-        "resetSuccess": "Permissão redefinida. Clique em “Conceder Permissão” para adicionar o app novamente.",
+        "restartFailed": "Não foi possível reiniciar automaticamente. Feche o app e abra-o novamente de forma manual.",
+        "resetSuccess": "Permissão redefinida. Reinicie o app agora e conceda a permissão novamente.",
         "resetFailed": "A redefinição automática falhou. Execute isto no Terminal: {{command}}"
       },
       "errors": {

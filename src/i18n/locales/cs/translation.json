@@ -121,7 +121,8 @@
         "description": "Pokud byl dříve nainstalovaný Handy nebo starší verze této aplikace, odeberte jejich záznamy ze seznamu Usnadnění tlačítkem „−“ a starou aplikaci smažte. Potom níže resetujte oprávnění a udělte ho znovu.",
         "resetButton": "Resetovat oprávnění",
         "restartButton": "Restartovat aplikaci",
-        "resetSuccess": "Oprávnění bylo resetováno. Klikněte na „Udělit oprávnění“ a přidejte aplikaci znovu.",
+        "restartFailed": "Automatický restart se nezdařil. Ukončete aplikaci a otevřete ji znovu ručně.",
+        "resetSuccess": "Oprávnění bylo resetováno. Nyní restartujte aplikaci a poté oprávnění znovu udělte.",
         "resetFailed": "Automatický reset se nepovedl. Spusťte v Terminálu: {{command}}"
       },
       "errors": {

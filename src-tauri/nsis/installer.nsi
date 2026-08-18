@@ -776,7 +776,7 @@ Section Install
       Delete "$R2\uninstall.exe"
       RMDir "$R2"
       ; Belt and braces: drop the old autostart entry even if the uninstaller
-      ; failed, so a stale build cannot grab the single-instance mutex at login
+      ; failed, so a stale build does not keep launching at login
       DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Handy"
       ; The legacy uninstaller keeps its manufacturer key (install location,
       ; installer language) unless the delete-app-data box was ticked

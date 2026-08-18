@@ -36,6 +36,10 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
 }) => {
   const { t } = useTranslation();
   const [showTroubleshoot, setShowTroubleshoot] = useState(false);
+  // After a successful TCC reset the only reliable next step is a restart:
+  // this process may keep seeing a stale "granted", so steer the user to the
+  // Restart button instead of back to Grant Permission
+  const [resetDone, setResetDone] = useState(false);
   const refreshAudioDevices = useSettingsStore(
     (state) => state.refreshAudioDevices,
   );
@@ -319,8 +323,15 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
         timeoutRef.current = null;
       }
       // Demote local state: polling only ever promotes needed -> granted, so
-      // without this the screen would keep showing a stale "granted"
-      setPermissions((prev) => ({ ...prev, accessibility: "needed" }));
+      // without this the screen would keep showing a stale "granted". The
+      // microphone card would otherwise spin forever on "waiting" — its
+      // polling was just stopped together with the shared interval.
+      setPermissions((prev) => ({
+        ...prev,
+        accessibility: "needed",
+        microphone: prev.microphone === "waiting" ? "needed" : prev.microphone,
+      }));
+      setResetDone(true);
       toast.success(t("onboarding.permissions.troubleshoot.resetSuccess"));
     } catch (error) {
       console.error("Failed to reset accessibility permission:", error);
@@ -337,6 +348,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
       await relaunch();
     } catch (error) {
       console.error("Failed to relaunch app:", error);
+      toast.error(t("onboarding.permissions.troubleshoot.restartFailed"));
     }
   };
 
@@ -509,7 +521,9 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
               {showTroubleshoot && (
                 <div className="w-full mt-2 p-4 rounded-lg bg-white/5 border border-mid-gray/20 flex flex-col gap-3">
                   <p className="text-sm text-text/60">
-                    {t("onboarding.permissions.troubleshoot.description")}
+                    {resetDone
+                      ? t("onboarding.permissions.troubleshoot.resetSuccess")
+                      : t("onboarding.permissions.troubleshoot.description")}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -520,7 +534,11 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
                     </button>
                     <button
                       onClick={handleRestartApp}
-                      className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-text text-sm font-medium transition-colors"
+                      className={
+                        resetDone
+                          ? "px-3 py-1.5 rounded-lg bg-logo-primary hover:bg-logo-primary/90 text-white text-sm font-medium transition-colors"
+                          : "px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-text text-sm font-medium transition-colors"
+                      }
                     >
                       {t("onboarding.permissions.troubleshoot.restartButton")}
                     </button>

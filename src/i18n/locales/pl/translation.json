@@ -121,7 +121,8 @@
         "description": "Jeśli Handy lub starsza wersja tej aplikacji były wcześniej zainstalowane, usuń ich wpisy z listy Dostępność przyciskiem „−” i skasuj starą aplikację. Następnie zresetuj uprawnienie poniżej i przyznaj je ponownie.",
         "resetButton": "Zresetuj uprawnienie",
         "restartButton": "Uruchom ponownie aplikację",
-        "resetSuccess": "Uprawnienie zostało zresetowane. Kliknij „Przyznaj uprawnienie”, aby ponownie dodać aplikację.",
+        "restartFailed": "Nie udało się automatycznie uruchomić ponownie. Zamknij aplikację i otwórz ją ręcznie jeszcze raz.",
+        "resetSuccess": "Uprawnienie zostało zresetowane. Teraz uruchom aplikację ponownie, a następnie przyznaj uprawnienie jeszcze raz.",
         "resetFailed": "Automatyczny reset się nie udał. Wykonaj w Terminalu: {{command}}"
       },
       "errors": {

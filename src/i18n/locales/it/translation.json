@@ -121,7 +121,8 @@
         "description": "Se Handy o una versione precedente di questa app erano già installati, rimuovi le loro voci dall'elenco Accessibilità con il pulsante «−» ed elimina la vecchia app. Poi reimposta il permesso qui sotto e concedilo di nuovo.",
         "resetButton": "Reimposta permesso",
         "restartButton": "Riavvia l'app",
-        "resetSuccess": "Permesso reimpostato. Fai clic su «Concedi Permesso» per aggiungere di nuovo l'app.",
+        "restartFailed": "Impossibile riavviare automaticamente. Chiudi l'app e riaprila manualmente.",
+        "resetSuccess": "Permesso reimpostato. Riavvia l'app ora, poi concedi di nuovo il permesso.",
         "resetFailed": "La reimpostazione automatica è fallita. Esegui questo comando nel Terminale: {{command}}"
       },
       "errors": {

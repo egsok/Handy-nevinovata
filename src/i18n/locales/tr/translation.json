@@ -121,7 +121,8 @@
         "description": "Handy veya bu uygulamanın eski bir sürümü daha önce kuruluysa, Erişilebilirlik listesindeki kayıtlarını “−” düğmesiyle kaldırın ve eski uygulamayı silin. Ardından aşağıdan izni sıfırlayıp yeniden verin.",
         "resetButton": "İzni sıfırla",
         "restartButton": "Uygulamayı yeniden başlat",
-        "resetSuccess": "İzin sıfırlandı. Uygulamayı yeniden eklemek için “İzin Ver”e tıklayın.",
+        "restartFailed": "Otomatik olarak yeniden başlatılamadı. Uygulamayı kapatıp yeniden elle açın.",
+        "resetSuccess": "İzin sıfırlandı. Şimdi uygulamayı yeniden başlatın, ardından izni tekrar verin.",
         "resetFailed": "Otomatik sıfırlama başarısız oldu. Bunu Terminal'de çalıştırın: {{command}}"
       },
       "errors": {
