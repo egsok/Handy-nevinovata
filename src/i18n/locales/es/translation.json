@@ -651,6 +651,8 @@
     "installing": "Instalando...",
     "preparing": "Preparando...",
     "checkForUpdates": "Buscar actualizaciones",
+    "updateCheckFailed": "No se pudo comprobar si hay actualizaciones. Revisa tu conexión a internet e inténtalo de nuevo.",
+    "updateInstallFailed": "La instalación de la actualización falló. Inténtalo de nuevo o descarga la nueva versión desde GitHub Releases.",
     "portableUpdateTitle": "Actualización manual necesaria",
     "portableUpdateMessage": "Las instalaciones portátiles no se pueden actualizar automáticamente. Descarga abajo el instalador para tu sistema, ejecútalo e instálalo en la misma carpeta: tu carpeta Data/ (ajustes, modelos, grabaciones) se conserva.",
     "portableUpdateButton": "Descargar instalador",

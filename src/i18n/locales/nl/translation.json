@@ -651,6 +651,8 @@
     "installing": "Installeren...",
     "preparing": "Voorbereiden...",
     "checkForUpdates": "Controleren op updates",
+    "updateCheckFailed": "Kan niet op updates controleren. Controleer je internetverbinding en probeer het opnieuw.",
+    "updateInstallFailed": "Installatie van de update is mislukt. Probeer het opnieuw of download de nieuwe versie via GitHub Releases.",
     "portableUpdateTitle": "Handmatige update vereist",
     "portableUpdateMessage": "Draagbare (portable) installaties kunnen niet automatisch worden bijgewerkt. Download hieronder het installatiebestand voor je systeem, voer het uit en installeer in dezelfde map — je Data/-map (instellingen, modellen, opnames) blijft behouden.",
     "portableUpdateButton": "Installatiebestand downloaden",

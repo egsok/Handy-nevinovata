@@ -651,6 +651,8 @@
     "installing": "Instalace...",
     "preparing": "Příprava...",
     "checkForUpdates": "Zkontrolovat aktualizace",
+    "updateCheckFailed": "Kontrola aktualizací se nezdařila. Zkontrolujte připojení k internetu a zkuste to znovu.",
+    "updateInstallFailed": "Instalace aktualizace se nezdařila. Zkuste to znovu, nebo si stáhněte novou verzi z GitHub Releases.",
     "portableUpdateTitle": "Vyžadována ruční aktualizace",
     "portableUpdateMessage": "Přenosné instalace nelze aktualizovat automaticky. Níže stáhněte instalátor pro svůj systém, spusťte jej a nainstalujte do stejné složky — vaše složka Data/ (nastavení, modely, nahrávky) zůstane na místě.",
     "portableUpdateButton": "Stáhnout instalátor",

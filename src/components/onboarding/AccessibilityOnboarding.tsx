@@ -335,6 +335,8 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
       toast.success(t("onboarding.permissions.troubleshoot.resetSuccess"));
     } catch (error) {
       console.error("Failed to reset accessibility permission:", error);
+      // A failed (re-)reset must not leave the panel claiming success
+      setResetDone(false);
       toast.error(
         t("onboarding.permissions.troubleshoot.resetFailed", {
           command: TCC_RESET_COMMAND,
@@ -498,7 +500,11 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
                 ) : (
                   <button
                     onClick={handleGrantAccessibility}
-                    className="px-4 py-2 rounded-lg bg-logo-primary hover:bg-logo-primary/90 text-white text-sm font-medium transition-colors"
+                    // After a TCC reset this process may still see a stale
+                    // "granted" and would complete onboarding without a real
+                    // permission — the only reliable next step is a restart
+                    disabled={resetDone}
+                    className="px-4 py-2 rounded-lg bg-logo-primary hover:bg-logo-primary/90 text-white text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {t("onboarding.permissions.grant")}
                   </button>
@@ -520,10 +526,15 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
               </button>
               {showTroubleshoot && (
                 <div className="w-full mt-2 p-4 rounded-lg bg-white/5 border border-mid-gray/20 flex flex-col gap-3">
+                  {resetDone && (
+                    <p className="text-sm font-medium text-text">
+                      {t("onboarding.permissions.troubleshoot.resetSuccess")}
+                    </p>
+                  )}
+                  {/* Keep the remove-stale-entries recipe visible even after a
+                      reset — it may be the user's actual problem */}
                   <p className="text-sm text-text/60">
-                    {resetDone
-                      ? t("onboarding.permissions.troubleshoot.resetSuccess")
-                      : t("onboarding.permissions.troubleshoot.description")}
+                    {t("onboarding.permissions.troubleshoot.description")}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <button

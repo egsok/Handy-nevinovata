@@ -651,6 +651,8 @@
     "installing": "Instalando...",
     "preparing": "Preparando...",
     "checkForUpdates": "Verificar atualizações",
+    "updateCheckFailed": "Não foi possível verificar atualizações. Verifique sua conexão com a internet e tente novamente.",
+    "updateInstallFailed": "A instalação da atualização falhou. Tente novamente ou baixe a nova versão em GitHub Releases.",
     "portableUpdateTitle": "Atualização manual necessária",
     "portableUpdateMessage": "Instalações portáteis não podem ser atualizadas automaticamente. Baixe abaixo o instalador para o seu sistema, execute-o e instale na mesma pasta — a sua pasta Data/ (configurações, modelos, gravações) é mantida.",
     "portableUpdateButton": "Baixar instalador",

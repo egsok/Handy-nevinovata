@@ -651,6 +651,8 @@
     "installing": "מתקין...",
     "preparing": "מכין...",
     "checkForUpdates": "בדוק עדכונים",
+    "updateCheckFailed": "לא ניתן לבדוק עדכונים. בדוק את חיבור האינטרנט ונסה שוב.",
+    "updateInstallFailed": "התקנת העדכון נכשלה. נסה שוב או הורד את הגרסה החדשה מ-GitHub Releases.",
     "portableUpdateTitle": "נדרש עדכון ידני",
     "portableUpdateMessage": "התקנות ניידות אינן מתעדכנות אוטומטית. הורד למטה את המתקין המתאים למערכת שלך, הפעל אותו והתקן לאותה תיקייה — תיקיית Data/ (הגדרות, מודלים, הקלטות) נשמרת במקומה.",
     "portableUpdateButton": "הורדת המתקין",

@@ -651,6 +651,8 @@
     "installing": "インストール中…",
     "preparing": "準備中…",
     "checkForUpdates": "アップデートを確認",
+    "updateCheckFailed": "更新を確認できませんでした。インターネット接続を確認して、もう一度お試しください。",
+    "updateInstallFailed": "更新のインストールに失敗しました。もう一度試すか、GitHub Releases から新しいバージョンをダウンロードしてください。",
     "portableUpdateTitle": "手動での更新が必要です",
     "portableUpdateMessage": "ポータブル版は自動的に更新できません。下のボタンからお使いのシステム向けのインストーラーをダウンロードし、実行して同じフォルダーにインストールしてください。Data フォルダー(設定、モデル、録音)はそのまま残ります。",
     "portableUpdateButton": "インストーラーをダウンロード",

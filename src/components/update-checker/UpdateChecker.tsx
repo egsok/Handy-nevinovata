@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { listen } from "@tauri-apps/api/event";
@@ -33,10 +34,14 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
 
   const { settings, isLoading } = useSettings();
   const settingsLoaded = !isLoading && settings !== null;
-  const updateChecksEnabled = settings?.update_checks_enabled ?? false;
+  // Fallback matches the Rust-side default (settings.rs) and the toggle
+  const updateChecksEnabled = settings?.update_checks_enabled ?? true;
 
   const upToDateTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const isManualCheckRef = useRef(false);
+  // Ref, not state: the tray-event listener captures the mount-time render,
+  // so a state flag would never guard against a concurrent check
+  const isCheckingRef = useRef(false);
   const downloadedBytesRef = useRef(0);
   const contentLengthRef = useRef(0);
 
@@ -71,9 +76,10 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
 
   // Update checking functions
   const checkForUpdates = async () => {
-    if (!updateChecksEnabled || isChecking) return;
+    if (!updateChecksEnabled || isCheckingRef.current) return;
 
     try {
+      isCheckingRef.current = true;
       setIsChecking(true);
       const update = await check();
 
@@ -100,7 +106,13 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
       }
     } catch (error) {
       console.error("Failed to check for updates:", error);
+      // Only a user-initiated check gets a toast; the automatic one on every
+      // launch must stay quiet offline
+      if (isManualCheckRef.current) {
+        toast.error(t("footer.updateCheckFailed"));
+      }
     } finally {
+      isCheckingRef.current = false;
       setIsChecking(false);
       isManualCheckRef.current = false;
     }
@@ -129,7 +141,10 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
       const update = await check();
 
       if (!update) {
+        // The update disappeared between the check and the click (e.g. release
+        // pulled); reflect reality instead of silently ignoring the click
         console.log("No update available during install attempt");
+        setUpdateAvailable(false);
         return;
       }
 
@@ -155,6 +170,7 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
       await relaunch();
     } catch (error) {
       console.error("Failed to install update:", error);
+      toast.error(t("footer.updateInstallFailed"));
     } finally {
       setIsInstalling(false);
       setDownloadProgress(0);
@@ -165,9 +181,6 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
 
   // Update status functions
   const getUpdateStatusText = () => {
-    if (!updateChecksEnabled) {
-      return t("footer.updateCheckingDisabled");
-    }
     if (isInstalling) {
       return downloadProgress > 0 && downloadProgress < 100
         ? t("footer.downloading", {
@@ -198,6 +211,10 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
   // When no installer could be resolved for this target the button falls back to
   // the releases index, so the dialog has to say "browse" rather than "download".
   const hasDirectInstaller = portableInstallerUrl !== PORTABLE_RELEASES_URL;
+
+  // Turned off means quiet: no permanent "checking disabled" label in the
+  // footer chrome (the tray item is greyed out by the same setting)
+  if (!updateChecksEnabled) return null;
 
   return (
     <>
@@ -234,12 +251,12 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
           </div>
         </div>
       )}
-      <div className={`flex items-center gap-3 ${className}`}>
+      <div className={`flex items-center gap-3 min-w-0 ${className}`}>
         {isUpdateClickable ? (
           <button
             onClick={getUpdateStatusAction()}
             disabled={isUpdateDisabled}
-            className={`transition-colors disabled:opacity-50 tabular-nums ${
+            className={`transition-colors disabled:opacity-50 tabular-nums min-w-0 truncate ${
               updateAvailable
                 ? "text-logo-primary hover:text-logo-primary/80 font-medium"
                 : "text-text/60 hover:text-text/80"
@@ -248,7 +265,7 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
             {getUpdateStatusText()}
           </button>
         ) : (
-          <span className="text-text/60 tabular-nums">
+          <span className="text-text/60 tabular-nums min-w-0 truncate">
             {getUpdateStatusText()}
           </span>
         )}
@@ -264,6 +281,11 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
             size="large"
           />
         )}
+        {/* Separator lives here so it disappears together with the checker;
+            -ml-2 trims this flexbox's gap-3 down to the footer's gap-1 rhythm */}
+        <span aria-hidden="true" className="-ml-2">
+          •
+        </span>
       </div>
     </>
   );

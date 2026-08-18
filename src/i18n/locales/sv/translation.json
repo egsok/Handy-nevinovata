@@ -651,6 +651,8 @@
     "installing": "Installerar...",
     "preparing": "Förbereder...",
     "checkForUpdates": "Sök efter uppdateringar",
+    "updateCheckFailed": "Det gick inte att söka efter uppdateringar. Kontrollera din internetanslutning och försök igen.",
+    "updateInstallFailed": "Installationen av uppdateringen misslyckades. Försök igen eller hämta den nya versionen från GitHub Releases.",
     "portableUpdateTitle": "Manuell uppdatering krävs",
     "portableUpdateMessage": "Portabla installationer kan inte uppdateras automatiskt. Ladda ner installeraren för ditt system nedan, kör den och installera i samma mapp — din Data/-mapp (inställningar, modeller, inspelningar) behålls.",
     "portableUpdateButton": "Ladda ner installeraren",

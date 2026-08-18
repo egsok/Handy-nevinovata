@@ -651,6 +651,8 @@
     "installing": "安装中...",
     "preparing": "准备中...",
     "checkForUpdates": "检查更新",
+    "updateCheckFailed": "无法检查更新。请检查网络连接后重试。",
+    "updateInstallFailed": "更新安装失败。请重试，或从 GitHub Releases 下载新版本。",
     "portableUpdateTitle": "需要手动更新",
     "portableUpdateMessage": "便携版无法自动更新。请通过下方按钮下载适用于你的系统的安装程序，运行后安装到同一文件夹，你的 Data/ 文件夹（设置、模型、录音）会保留在原处。",
     "portableUpdateButton": "下载安装程序",

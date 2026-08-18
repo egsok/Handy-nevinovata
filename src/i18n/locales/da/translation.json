@@ -651,6 +651,8 @@
     "installing": "Installerer...",
     "preparing": "Forbereder...",
     "checkForUpdates": "Tjek for opdateringer",
+    "updateCheckFailed": "Kunne ikke søge efter opdateringer. Tjek din internetforbindelse, og prøv igen.",
+    "updateInstallFailed": "Installation af opdateringen mislykkedes. Prøv igen, eller hent den nye version fra GitHub Releases.",
     "portableUpdateTitle": "Manuel opdatering påkrævet",
     "portableUpdateMessage": "Flytbare installationer kan ikke opdateres automatisk. Download installeren til dit system nedenfor, kør den, og installer i den samme mappe — din Data/-mappe (indstillinger, modeller, optagelser) bliver bevaret.",
     "portableUpdateButton": "Download installer",

@@ -651,6 +651,8 @@
     "installing": "Yükleniyor...",
     "preparing": "Hazırlanıyor...",
     "checkForUpdates": "Güncellemeleri kontrol et",
+    "updateCheckFailed": "Güncellemeler denetlenemedi. İnternet bağlantınızı kontrol edip yeniden deneyin.",
+    "updateInstallFailed": "Güncelleme yüklenemedi. Yeniden deneyin veya yeni sürümü GitHub Releases sayfasından indirin.",
     "portableUpdateTitle": "Manuel güncelleme gerekli",
     "portableUpdateMessage": "Taşınabilir kurulumlar otomatik olarak güncellenemez. Aşağıdan sisteminize uygun yükleyiciyi indirin, çalıştırın ve aynı klasöre kurun — Data/ klasörünüz (ayarlar, modeller, kayıtlar) yerinde kalır.",
     "portableUpdateButton": "Yükleyiciyi indir",

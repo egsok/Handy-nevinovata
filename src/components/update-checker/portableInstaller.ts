@@ -8,6 +8,8 @@
 // if asset names or the repo slug change, and it points at the immutable
 // `releases/download/v<version>/…` tag URL instead of a moving `latest` link.
 
+import { REPO_URL } from "@/lib/constants/brand";
+
 export const PORTABLE_RELEASES_URL = `${REPO_URL}/releases/latest`;
 
 /**
@@ -38,4 +40,3 @@ export function resolvePortableInstallerUrl(
   const url = (entry as Record<string, unknown>).url;
   return typeof url === "string" ? url : PORTABLE_RELEASES_URL;
 }
-import { REPO_URL } from "@/lib/constants/brand";

@@ -651,6 +651,8 @@
     "installing": "Instalowanie...",
     "preparing": "Przygotowywanie...",
     "checkForUpdates": "Sprawdź aktualizacje",
+    "updateCheckFailed": "Nie udało się sprawdzić aktualizacji. Sprawdź połączenie z internetem i spróbuj ponownie.",
+    "updateInstallFailed": "Instalacja aktualizacji nie powiodła się. Spróbuj ponownie lub pobierz nową wersję z GitHub Releases.",
     "portableUpdateTitle": "Wymagana ręczna aktualizacja",
     "portableUpdateMessage": "Instalacji przenośnych nie można aktualizować automatycznie. Pobierz poniżej instalator dla swojego systemu, uruchom go i zainstaluj w tym samym folderze — Twój folder Data/ (ustawienia, modele, nagrania) pozostaje na miejscu.",
     "portableUpdateButton": "Pobierz instalator",
