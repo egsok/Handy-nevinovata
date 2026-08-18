@@ -12,6 +12,7 @@ import { SoundPicker } from "../SoundPicker";
 import { ClamshellMicrophoneSelector } from "../ClamshellMicrophoneSelector";
 import { WhatsNewPreview } from "./WhatsNewPreview";
 import { KeyboardDiagnostic } from "./KeyboardDiagnostic";
+import { UpdateChecksToggle } from "../UpdateChecksToggle";
 
 export const DebugSettings: React.FC = () => {
   const { t } = useTranslation();
@@ -21,6 +22,7 @@ export const DebugSettings: React.FC = () => {
       <SettingsGroup title={t("settings.debug.title")}>
         <LogLevelSelector grouped={true} />
         <WhatsNewPreview descriptionMode="tooltip" grouped={true} />
+        <UpdateChecksToggle descriptionMode="tooltip" grouped={true} />
         <SoundPicker
           label={t("settings.debug.soundTheme.label")}
           description={t("settings.debug.soundTheme.description")}

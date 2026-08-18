@@ -4,6 +4,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { Send } from "lucide-react";
 
 import ModelSelector from "../model-selector";
+import UpdateChecker from "../update-checker";
 import {
   TELEGRAM_CHANNEL_NAME,
   TELEGRAM_URL_FOOTER,
@@ -44,8 +45,12 @@ const Footer: React.FC = () => {
           <span>{TELEGRAM_CHANNEL_NAME}</span>
         </button>
 
-        {/* eslint-disable-next-line i18next/no-literal-string */}
-        <span className="justify-self-end text-text/55">v{version}</span>
+        <div className="flex items-center gap-1 justify-self-end text-text/55">
+          <UpdateChecker />
+          <span>•</span>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
+          <span>v{version}</span>
+        </div>
       </div>
     </div>
   );
