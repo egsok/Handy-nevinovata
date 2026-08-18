@@ -553,9 +553,14 @@ jobs:
         if: ${{ !inputs.sign-binaries }}
         uses: tauri-apps/tauri-action@v0
         env:
-          # No APPLE_* / AZURE_* / TAURI_SIGNING_* env vars — tauri-action skips
-          # macOS/Windows signing paths when these are absent (not just empty).
+          # No APPLE_* / AZURE_* env vars — tauri-action skips macOS/Windows
+          # code-signing paths when these are absent (not just empty).
+          # TAURI_SIGNING_* is separate: it signs *updater artifacts* with the
+          # fork's own minisign key (independent of OS code signing) and makes
+          # tauri-action emit latest.json for the in-app updater.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           LINUXDEPLOY_EXCLUDED_LIBRARIES: ${{ contains(inputs.platform, 'ubuntu') && 'libvulkan.so*;libwayland-client.so*' || '' }}
           LINUXDEPLOY_OUTPUT_VERSION: ${{ contains(inputs.platform, 'ubuntu') && steps.get-version.outputs.version || '' }}
         with:
