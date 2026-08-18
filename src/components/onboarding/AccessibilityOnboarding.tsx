@@ -40,6 +40,11 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
   // this process may keep seeing a stale "granted", so steer the user to the
   // Restart button instead of back to Grant Permission
   const [resetDone, setResetDone] = useState(false);
+  // Monotonic companion to resetDone: once ANY reset succeeded in this
+  // process, Grant must stay blocked even if a later re-reset fails (resetDone
+  // then flips back to keep the panel texts honest). Ref is fine — every flip
+  // of it is accompanied by a state update that re-renders.
+  const resetEverSucceededRef = useRef(false);
   const refreshAudioDevices = useSettingsStore(
     (state) => state.refreshAudioDevices,
   );
@@ -331,6 +336,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
         accessibility: "needed",
         microphone: prev.microphone === "waiting" ? "needed" : prev.microphone,
       }));
+      resetEverSucceededRef.current = true;
       setResetDone(true);
       toast.success(t("onboarding.permissions.troubleshoot.resetSuccess"));
     } catch (error) {
@@ -503,7 +509,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
                     // After a TCC reset this process may still see a stale
                     // "granted" and would complete onboarding without a real
                     // permission — the only reliable next step is a restart
-                    disabled={resetDone}
+                    disabled={resetEverSucceededRef.current}
                     className="px-4 py-2 rounded-lg bg-logo-primary hover:bg-logo-primary/90 text-white text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {t("onboarding.permissions.grant")}
@@ -524,7 +530,10 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
               >
                 {t("onboarding.permissions.troubleshoot.link")}
               </button>
-              {showTroubleshoot && (
+              {/* Once a reset succeeded, Grant is blocked for good — keep the
+                  panel (with the Restart button) open so the blocked button
+                  never sits there unexplained */}
+              {(showTroubleshoot || resetEverSucceededRef.current) && (
                 <div className="w-full mt-2 p-4 rounded-lg bg-white/5 border border-mid-gray/20 flex flex-col gap-3">
                   {resetDone && (
                     <p className="text-sm font-medium text-text">
