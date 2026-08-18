@@ -8,6 +8,8 @@
   </picture>
 </p>
 
+> **⚠️ ARCHIVED LINE.** This branch carries the retired 0.8.3 release line (last release: v0.8.3-6, August 2026). It received the fork's features during the migration to the 0.9 base and is kept only as a rollback point. Active development and all current releases live on the [`port/v0.9.0`](https://github.com/egsok/klava-nevinovata/tree/port/v0.9.0) branch.
+
 > Personal fork of [cjpais/Handy](https://github.com/cjpais/Handy) with Russian-language transcription tweaks.
 > Pre-built installers (unsigned) on [Releases](https://github.com/egsok/klava-nevinovata/releases). Build from source for everything else.
 > [English] · [Русский](README.ru.md)
