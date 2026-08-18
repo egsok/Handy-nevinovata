@@ -6,15 +6,21 @@
 //! copied, models and recordings are hard-linked (same-volume by construction,
 //! so this is instant and costs no disk; both apps can keep using the files),
 //! and the legacy directory is never deleted. Nothing already present in the
-//! new directory is ever overwritten, so an accidental re-run (e.g. after the
-//! user deletes their settings file) cannot clobber data the new app has
-//! written since.
+//! new directory is ever overwritten, so a re-run cannot clobber data the new
+//! app has written since.
+//!
+//! Completion is recorded in a dedicated marker file, written only when the
+//! important items (history, recordings) made it across. A transient failure
+//! (e.g. an antivirus holding history.db on first launch) therefore gets a
+//! real retry on the next launch — the app will have created its own settings
+//! by then, but history and recordings are still picked up.
 
 use std::fs;
 use std::path::Path;
 
 const LEGACY_IDENTIFIER: &str = "com.pais.handy";
 const SETTINGS_FILE: &str = "settings_store.json";
+const MARKER_FILE: &str = ".migrated-from-com.pais.handy";
 
 /// Best-effort migration; never fails and never blocks startup on errors.
 /// Must run before the settings store, models dir or history db are first
@@ -33,10 +39,7 @@ pub fn migrate_legacy_data(app: &tauri::AppHandle) {
         }
     };
 
-    // The settings file doubles as the "already migrated / already in use"
-    // marker. Checking directory existence would misfire: on Linux the log
-    // plugin creates <new_dir>/logs before setup() runs.
-    if new_dir.join(SETTINGS_FILE).exists() {
+    if new_dir.join(MARKER_FILE).exists() {
         return;
     }
 
@@ -95,36 +98,51 @@ fn migrate_between(old_dir: &Path, new_dir: &Path) {
         );
     }
 
-    // Settings are copied last: the file is the skip-marker, so it only lands
-    // when the important items above made it across.
-    let old_settings = old_dir.join(SETTINGS_FILE);
-    if !old_settings.is_file() {
-        log::info!("migration: legacy dir has no {}, done", SETTINGS_FILE);
-        return;
-    }
     if ok_history && ok_recordings {
-        // Copy via temp file + rename so an interrupted copy cannot leave a
-        // partial settings file behind (its mere existence is the skip-marker)
-        let tmp = new_dir.join("settings_store.json.migrating");
-        let result = fs::copy(&old_settings, &tmp)
-            .and_then(|_| fs::rename(&tmp, new_dir.join(SETTINGS_FILE)));
-        match result {
-            Ok(_) => log::info!(
-                "migration: complete; legacy settings and history kept at {}",
-                old_dir.display()
-            ),
-            Err(e) => {
-                let _ = fs::remove_file(&tmp);
-                log::error!(
-                    "migration: failed to copy settings: {}; legacy data remains at {}",
-                    e,
-                    old_dir.display()
-                );
-            }
+        copy_settings(old_dir, new_dir);
+        // Only now is the migration recorded as done. A missing marker means
+        // the whole (idempotent) flow runs again on the next launch.
+        if let Err(e) = fs::write(new_dir.join(MARKER_FILE), b"") {
+            log::warn!("migration: cannot write completion marker: {}", e);
         }
+        log::info!(
+            "migration: complete; legacy data kept at {}",
+            old_dir.display()
+        );
     } else {
         log::error!(
-            "migration: important items failed; settings not copied, defaults will apply. Legacy data remains at {}",
+            "migration: important items failed; will retry on next launch. Legacy data remains at {}",
+            old_dir.display()
+        );
+    }
+}
+
+/// Copy the legacy settings file, never overwriting one the app has already
+/// written (on a retry run the app has long since created its own defaults —
+/// those may have been edited and must win).
+fn copy_settings(old_dir: &Path, new_dir: &Path) {
+    let old_settings = old_dir.join(SETTINGS_FILE);
+    if !old_settings.is_file() {
+        log::info!("migration: legacy dir has no {}", SETTINGS_FILE);
+        return;
+    }
+    let dst = new_dir.join(SETTINGS_FILE);
+    if dst.exists() {
+        log::info!(
+            "migration: {} already present in the new dir, keeping it",
+            SETTINGS_FILE
+        );
+        return;
+    }
+    // Copy via temp file + rename so an interrupted copy cannot leave a
+    // partial settings file for the store plugin to choke on
+    let tmp = new_dir.join("settings_store.json.migrating");
+    let result = fs::copy(&old_settings, &tmp).and_then(|_| fs::rename(&tmp, &dst));
+    if let Err(e) = result {
+        let _ = fs::remove_file(&tmp);
+        log::error!(
+            "migration: failed to copy settings: {}; defaults will apply, legacy copy remains at {}",
+            e,
             old_dir.display()
         );
     }
@@ -167,49 +185,64 @@ fn copy_history_db(old_dir: &Path, new_dir: &Path) -> bool {
         }
         SchemaCheck::Unreadable(e) => {
             // Transient I/O failure (AV lock, permissions): a real database we
-            // simply could not read right now. Report failure so the settings
-            // marker is withheld rather than silently abandoning the history.
+            // simply could not read right now. Report failure so the completion
+            // marker is withheld and the next launch retries.
             log::error!(
-                "migration: cannot open legacy history.db ({}); history not migrated",
+                "migration: cannot open legacy history.db ({}); history not migrated, will retry",
                 e
             );
             return false;
         }
     }
 
-    match sqlite_backup(&src, &dst) {
+    let backup_failure = match sqlite_backup(&src, &dst) {
         Ok(()) => {
             log::info!("migration: history.db snapshotted via sqlite backup");
-            true
+            return true;
         }
-        Err(e) => {
-            log::warn!(
-                "migration: sqlite backup of history.db failed ({}), falling back to file copy",
-                e
-            );
-            let ok = copy_file_with_retry(&src, &dst);
-            if ok {
-                copy_file_best_effort(
-                    &old_dir.join("history.db-wal"),
-                    &new_dir.join("history.db-wal"),
-                );
-                // A plain copy taken while the legacy app was writing can be
-                // torn; never hand HistoryManager a corrupt database
-                if !copied_db_is_sound(&dst) {
-                    log::error!(
-                        "migration: file copy of history.db is not consistent (legacy app still writing?); dropping it"
-                    );
-                    let _ = fs::remove_file(&dst);
-                    let _ = fs::remove_file(new_dir.join("history.db-wal"));
-                    return false;
-                }
-            } else {
-                // Don't leave a partial database for HistoryManager to choke on
-                let _ = fs::remove_file(&dst);
-            }
-            ok
-        }
+        Err(failure) => failure,
+    };
+    log::warn!(
+        "migration: sqlite backup of history.db failed ({}), falling back to file copy",
+        backup_failure
+    );
+    // Copy the WAL sidecar first: capturing it before the main file can only
+    // make the replayed copy older than the main file, never newer
+    copy_file_best_effort(
+        &old_dir.join("history.db-wal"),
+        &new_dir.join("history.db-wal"),
+    );
+    if !copy_file_with_retry(&src, &dst) {
+        // Don't leave a partial database for HistoryManager to choke on
+        let _ = fs::remove_file(&dst);
+        let _ = fs::remove_file(new_dir.join("history.db-wal"));
+        return false;
     }
+    // A plain copy taken while the legacy app was writing can be torn; never
+    // hand HistoryManager a corrupt database
+    if !copied_db_is_sound(&dst) {
+        let _ = fs::remove_file(&dst);
+        let _ = fs::remove_file(new_dir.join("history.db-wal"));
+        return match backup_failure {
+            // The backup gave up on a lock, so the tear is most likely the
+            // concurrent writer — a retry on the next launch can succeed
+            BackupFailure::LockTimeout => {
+                log::error!(
+                    "migration: file copy of history.db is not consistent (legacy app still writing?); will retry"
+                );
+                false
+            }
+            // The backup saw a real database error: the source itself is bad,
+            // retrying will not help. Drop the history, migrate everything else.
+            BackupFailure::Failed(_) => {
+                log::error!(
+                    "migration: legacy history.db appears damaged; skipping history (it stays in the legacy dir)"
+                );
+                true
+            }
+        };
+    }
+    true
 }
 
 enum SchemaCheck {
@@ -264,26 +297,46 @@ fn legacy_schema_version(src: &Path) -> Result<i32, rusqlite::Error> {
     conn.pragma_query_value(None, "user_version", |row| row.get(0))
 }
 
-fn sqlite_backup(src: &Path, dst: &Path) -> Result<(), String> {
+enum BackupFailure {
+    /// Could not finish within the deadline (source locked or restarted by a
+    /// concurrent writer) — transient
+    LockTimeout,
+    /// A real SQLite error from the source database — permanent
+    Failed(String),
+}
+
+impl std::fmt::Display for BackupFailure {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            BackupFailure::LockTimeout => f.write_str("timed out waiting for the database lock"),
+            BackupFailure::Failed(e) => f.write_str(e),
+        }
+    }
+}
+
+fn sqlite_backup(src: &Path, dst: &Path) -> Result<(), BackupFailure> {
     use rusqlite::backup::{Backup, StepResult};
     use rusqlite::{Connection, OpenFlags};
-    let src_conn = Connection::open_with_flags(src, OpenFlags::SQLITE_OPEN_READ_ONLY)
-        .map_err(|e| e.to_string())?;
-    let mut dst_conn = Connection::open(dst).map_err(|e| e.to_string())?;
-    let backup = Backup::new(&src_conn, &mut dst_conn).map_err(|e| e.to_string())?;
+    let fail = |e: rusqlite::Error| BackupFailure::Failed(e.to_string());
+    let src_conn =
+        Connection::open_with_flags(src, OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(fail)?;
+    let mut dst_conn = Connection::open(dst).map_err(fail)?;
+    let backup = Backup::new(&src_conn, &mut dst_conn).map_err(fail)?;
     // Stepped manually instead of run_to_completion: with the legacy app still
     // writing, run_to_completion retries Busy/Locked forever (and with a zero
-    // pause would spin at full CPU) right on the startup path. Bound it.
+    // pause would spin at full CPU) right on the startup path. The deadline is
+    // checked on every iteration — an external writer restarts the backup from
+    // page 1, so even a steady stream of More results must be bounded.
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
     loop {
-        match backup.step(1024).map_err(|e| e.to_string())? {
+        if std::time::Instant::now() >= deadline {
+            return Err(BackupFailure::LockTimeout);
+        }
+        match backup.step(1024).map_err(fail)? {
             StepResult::Done => return Ok(()),
             StepResult::More => {}
             // The enum is non_exhaustive; treat unknown results like Busy
             StepResult::Busy | StepResult::Locked | _ => {
-                if std::time::Instant::now() >= deadline {
-                    return Err("timed out waiting for the legacy database lock".to_string());
-                }
                 std::thread::sleep(std::time::Duration::from_millis(50));
             }
         }
@@ -363,8 +416,10 @@ fn link_dir_recursive(src: &Path, dst: &Path, depth: u32, skip_suffixes: &[&str]
         return true;
     }
     if depth > 8 {
+        // Anything this deep is not a layout the app ever produced; report
+        // failure rather than pretending the truncated tree is complete
         log::warn!("migration: depth cap reached at {}", src.display());
-        return true;
+        return false;
     }
     if let Err(e) = fs::create_dir_all(dst) {
         log::error!("migration: cannot create {}: {}", dst.display(), e);
@@ -483,6 +538,16 @@ mod tests {
         // Source stays fully in place (legacy dir doubles as backup)
         assert_eq!(std::fs::read_to_string(src.join("a.wav")).unwrap(), "aaa");
         assert!(src.join("sub").join("b.wav").exists());
+        // Pin the hard-link semantics, not just the copied content: reverting
+        // to fs::copy must fail this
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            let src_meta = std::fs::metadata(src.join("a.wav")).unwrap();
+            let dst_meta = std::fs::metadata(dst.join("a.wav")).unwrap();
+            assert_eq!(src_meta.ino(), dst_meta.ino());
+            assert_eq!(src_meta.nlink(), 2);
+        }
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -613,6 +678,8 @@ mod tests {
         assert!(old.join("models").join("ggml-small.bin").exists());
         assert!(old.join("models").join("foo.bin.partial").exists());
         assert_eq!(read_sqlite_value(&old.join("history.db")), "legacy");
+        // Completion marker landed
+        assert!(new.join(MARKER_FILE).exists());
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -625,16 +692,18 @@ mod tests {
 
         migrate_between(&old, &new);
 
-        // The new app worked for a while: fresh history and a replaced
-        // recording (removed first — the migrated file is a hard link, and
-        // writing through it would also change the legacy copy)
+        // The new app worked for a while: fresh history, edited settings and a
+        // replaced recording (removed first — the migrated file is a hard
+        // link, and writing through it would also change the legacy copy)
         std::fs::remove_file(new.join("history.db")).unwrap();
         write_file(&new.join("history.db"), "NEW-DB");
         std::fs::remove_file(new.join("recordings").join("handy-123.wav")).unwrap();
         write_file(&new.join("recordings").join("handy-123.wav"), "NEW-WAV");
-
-        // Marker gone (e.g. user reset settings) -> migration runs again
         std::fs::remove_file(new.join("settings_store.json")).unwrap();
+        write_file(&new.join("settings_store.json"), "{\"edited\":true}");
+
+        // Marker gone -> migration runs again
+        std::fs::remove_file(new.join(MARKER_FILE)).unwrap();
         migrate_between(&old, &new);
 
         assert_eq!(
@@ -645,6 +714,12 @@ mod tests {
             std::fs::read_to_string(new.join("recordings").join("handy-123.wav")).unwrap(),
             "NEW-WAV"
         );
+        // The app's own settings win over the legacy ones on a re-run
+        assert_eq!(
+            std::fs::read_to_string(new.join("settings_store.json")).unwrap(),
+            "{\"edited\":true}"
+        );
+        assert!(new.join(MARKER_FILE).exists());
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -660,8 +735,39 @@ mod tests {
 
         migrate_between(&old, &new);
 
+        assert!(!new.join(MARKER_FILE).exists());
         assert!(!new.join("settings_store.json").exists());
         assert!(!new.join("settings_store.json.migrating").exists());
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn test_migrate_between_retries_after_transient_failure() {
+        // First run fails on recordings; the blocker goes away and the next
+        // launch picks the history and recordings up
+        let root = temp_dir("retry");
+        let old = root.join("com.pais.handy");
+        let new = root.join("ru.egorsokolov.klava-nevinovata");
+        seed_legacy_dir(&old);
+        std::fs::create_dir_all(&new).unwrap();
+        write_file(&new.join("recordings"), "in the way");
+
+        migrate_between(&old, &new);
+        assert!(!new.join(MARKER_FILE).exists());
+        // The app meanwhile created its own settings (defaults)
+        write_file(&new.join("settings_store.json"), "{\"defaults\":true}");
+
+        std::fs::remove_file(new.join("recordings")).unwrap();
+        migrate_between(&old, &new);
+
+        assert!(new.join(MARKER_FILE).exists());
+        assert_eq!(read_sqlite_value(&new.join("history.db")), "legacy");
+        assert!(new.join("recordings").join("handy-123.wav").exists());
+        // Settings created since the failed run are kept, not overwritten
+        assert_eq!(
+            std::fs::read_to_string(new.join("settings_store.json")).unwrap(),
+            "{\"defaults\":true}"
+        );
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -678,6 +784,8 @@ mod tests {
 
         assert!(new.join("models").join("ggml-small.bin").exists());
         assert!(!new.join("settings_store.json").exists());
+        // Marker still lands so later launches skip the whole flow
+        assert!(new.join(MARKER_FILE).exists());
         std::fs::remove_dir_all(root).unwrap();
     }
 

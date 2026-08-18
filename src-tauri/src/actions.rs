@@ -685,8 +685,19 @@ impl ShortcutAction for TranscribeAction {
                 } else {
                     // Save WAV concurrently with transcription
                     let sample_count = samples.len();
-                    let file_name = format!("handy-{}.wav", chrono::Utc::now().timestamp());
-                    let wav_path = hm.recordings_dir().join(&file_name);
+                    // Never reuse an existing name: recordings migrated from the
+                    // legacy dir are hard links, and truncating one in place
+                    // would also destroy the legacy (backup / upstream Handy)
+                    // copy. A same-second collision gets a numbered suffix.
+                    let ts = chrono::Utc::now().timestamp();
+                    let mut file_name = format!("handy-{}.wav", ts);
+                    let mut wav_path = hm.recordings_dir().join(&file_name);
+                    let mut dedup = 1u32;
+                    while wav_path.exists() {
+                        file_name = format!("handy-{}-{}.wav", ts, dedup);
+                        wav_path = hm.recordings_dir().join(&file_name);
+                        dedup += 1;
+                    }
                     let wav_path_for_verify = wav_path.clone();
                     let samples_for_wav = samples.clone();
                     let wav_handle = tauri::async_runtime::spawn_blocking(move || {
