@@ -13,7 +13,10 @@
 //! important items (history, recordings) made it across. A transient failure
 //! (e.g. an antivirus holding history.db on first launch) therefore gets a
 //! real retry on the next launch — the app will have created its own settings
-//! by then, but history and recordings are still picked up.
+//! by then, but history and recordings are still picked up. Retries are
+//! bounded: after [`MAX_MIGRATION_ATTEMPTS`] failed runs (tracked in a sidecar
+//! file) the marker is written anyway, so a permanent blocker cannot keep
+//! adding the migration's cost to every startup forever.
 
 use std::fs;
 use std::path::Path;
@@ -21,10 +24,14 @@ use std::path::Path;
 const LEGACY_IDENTIFIER: &str = "com.pais.handy";
 const SETTINGS_FILE: &str = "settings_store.json";
 const MARKER_FILE: &str = ".migrated-from-com.pais.handy";
+/// Sidecar next to the marker counting failed runs; deleted on success.
+const ATTEMPTS_FILE: &str = ".migration-attempts";
+const MAX_MIGRATION_ATTEMPTS: u32 = 3;
 
-/// Best-effort migration; never fails and never blocks startup on errors.
-/// Must run before the settings store, models dir or history db are first
-/// opened.
+/// Best-effort migration; never fails, but runs synchronously in setup, so a
+/// failing run can hold startup for up to ~10s (the sqlite backup deadline) —
+/// hence the attempt cap. Must run before the settings store, models dir or
+/// history db are first opened.
 pub fn migrate_legacy_data(app: &tauri::AppHandle) {
     if crate::portable::is_portable() {
         // Portable data lives next to the exe, independent of the identifier
@@ -52,6 +59,8 @@ pub fn migrate_legacy_data(app: &tauri::AppHandle) {
     };
     if !old_dir.is_dir() {
         log::info!("migration: no legacy data at {}", old_dir.display());
+        // Record completion so future launches skip even this probe
+        write_marker(&new_dir);
         return;
     }
 
@@ -61,6 +70,9 @@ pub fn migrate_legacy_data(app: &tauri::AppHandle) {
 /// Path-based core of the migration, separated from AppHandle resolution so
 /// the whole flow is unit-testable against temp directories.
 fn migrate_between(old_dir: &Path, new_dir: &Path) {
+    if new_dir.join(MARKER_FILE).exists() {
+        return;
+    }
     log::info!(
         "migration: migrating legacy data from {} to {}",
         old_dir.display(),
@@ -102,19 +114,50 @@ fn migrate_between(old_dir: &Path, new_dir: &Path) {
         copy_settings(old_dir, new_dir);
         // Only now is the migration recorded as done. A missing marker means
         // the whole (idempotent) flow runs again on the next launch.
-        if let Err(e) = fs::write(new_dir.join(MARKER_FILE), b"") {
-            log::warn!("migration: cannot write completion marker: {}", e);
-        }
+        write_marker(new_dir);
+        let _ = fs::remove_file(new_dir.join(ATTEMPTS_FILE));
         log::info!(
             "migration: complete; legacy data kept at {}",
             old_dir.display()
         );
     } else {
-        log::error!(
-            "migration: important items failed; will retry on next launch. Legacy data remains at {}",
-            old_dir.display()
-        );
+        let attempts_file = new_dir.join(ATTEMPTS_FILE);
+        let attempts = read_attempts(&attempts_file) + 1;
+        if attempts >= MAX_MIGRATION_ATTEMPTS {
+            log::error!(
+                "migration: important items failed {} times; giving up. Legacy data remains at {}",
+                attempts,
+                old_dir.display()
+            );
+            write_marker(new_dir);
+            let _ = fs::remove_file(&attempts_file);
+        } else {
+            if let Err(e) = fs::write(&attempts_file, attempts.to_string()) {
+                log::warn!("migration: cannot record attempt count: {}", e);
+            }
+            log::error!(
+                "migration: important items failed (attempt {}/{}); will retry on next launch. Legacy data remains at {}",
+                attempts,
+                MAX_MIGRATION_ATTEMPTS,
+                old_dir.display()
+            );
+        }
     }
+}
+
+fn write_marker(new_dir: &Path) {
+    let result =
+        fs::create_dir_all(new_dir).and_then(|_| fs::write(new_dir.join(MARKER_FILE), b""));
+    if let Err(e) = result {
+        log::warn!("migration: cannot write completion marker: {}", e);
+    }
+}
+
+fn read_attempts(path: &Path) -> u32 {
+    fs::read_to_string(path)
+        .ok()
+        .and_then(|s| s.trim().parse().ok())
+        .unwrap_or(0)
 }
 
 /// Copy the legacy settings file, never overwriting one the app has already
@@ -216,6 +259,7 @@ fn copy_history_db(old_dir: &Path, new_dir: &Path) -> bool {
         // Don't leave a partial database for HistoryManager to choke on
         let _ = fs::remove_file(&dst);
         let _ = fs::remove_file(new_dir.join("history.db-wal"));
+        let _ = fs::remove_file(new_dir.join("history.db-shm"));
         return false;
     }
     // A plain copy taken while the legacy app was writing can be torn; never
@@ -223,6 +267,8 @@ fn copy_history_db(old_dir: &Path, new_dir: &Path) -> bool {
     if !copied_db_is_sound(&dst) {
         let _ = fs::remove_file(&dst);
         let _ = fs::remove_file(new_dir.join("history.db-wal"));
+        // quick_check itself creates the -shm sidecar on a WAL database
+        let _ = fs::remove_file(new_dir.join("history.db-shm"));
         return match backup_failure {
             // The backup gave up on a lock, so the tear is most likely the
             // concurrent writer — a retry on the next launch can succeed
@@ -548,6 +594,23 @@ mod tests {
             assert_eq!(src_meta.ino(), dst_meta.ino());
             assert_eq!(src_meta.nlink(), 2);
         }
+        #[cfg(windows)]
+        {
+            // std's file_index() is still unstable (windows_by_handle), so
+            // prove the link by writing through one name and reading the
+            // other — a revert to fs::copy leaves the source untouched
+            use std::io::Write;
+            let mut f = std::fs::OpenOptions::new()
+                .append(true)
+                .open(dst.join("a.wav"))
+                .unwrap();
+            write!(f, "-linked").unwrap();
+            drop(f);
+            assert_eq!(
+                std::fs::read_to_string(src.join("a.wav")).unwrap(),
+                "aaa-linked"
+            );
+        }
         std::fs::remove_dir_all(root).unwrap();
     }
 
@@ -768,6 +831,66 @@ mod tests {
             std::fs::read_to_string(new.join("settings_store.json")).unwrap(),
             "{\"defaults\":true}"
         );
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn test_migrate_between_gives_up_after_three_failures() {
+        let root = temp_dir("give_up");
+        let old = root.join("com.pais.handy");
+        let new = root.join("ru.egorsokolov.klava-nevinovata");
+        seed_legacy_dir(&old);
+        // Permanent blocker: the recordings destination is occupied by a file
+        std::fs::create_dir_all(&new).unwrap();
+        write_file(&new.join("recordings"), "in the way");
+
+        migrate_between(&old, &new);
+        assert!(!new.join(MARKER_FILE).exists());
+        assert_eq!(
+            std::fs::read_to_string(new.join(ATTEMPTS_FILE)).unwrap(),
+            "1"
+        );
+
+        migrate_between(&old, &new);
+        assert!(!new.join(MARKER_FILE).exists());
+        assert_eq!(
+            std::fs::read_to_string(new.join(ATTEMPTS_FILE)).unwrap(),
+            "2"
+        );
+
+        migrate_between(&old, &new);
+        // Third failure: give up — marker written, counter cleaned up
+        assert!(new.join(MARKER_FILE).exists());
+        assert!(!new.join(ATTEMPTS_FILE).exists());
+
+        // A fourth run is a no-op: even with the blocker gone, nothing is
+        // picked up any more
+        std::fs::remove_file(new.join("recordings")).unwrap();
+        migrate_between(&old, &new);
+        assert!(!new.join("recordings").exists());
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn test_migrate_between_clears_attempt_counter_on_success() {
+        let root = temp_dir("counter_cleared");
+        let old = root.join("com.pais.handy");
+        let new = root.join("ru.egorsokolov.klava-nevinovata");
+        seed_legacy_dir(&old);
+        std::fs::create_dir_all(&new).unwrap();
+        write_file(&new.join("recordings"), "in the way");
+
+        migrate_between(&old, &new);
+        assert!(new.join(ATTEMPTS_FILE).exists());
+
+        // The blocker goes away before the attempts run out
+        std::fs::remove_file(new.join("recordings")).unwrap();
+        migrate_between(&old, &new);
+
+        assert!(new.join(MARKER_FILE).exists());
+        assert!(!new.join(ATTEMPTS_FILE).exists());
+        assert_eq!(read_sqlite_value(&new.join("history.db")), "legacy");
+        assert!(new.join("recordings").join("handy-123.wav").exists());
         std::fs::remove_dir_all(root).unwrap();
     }
 
