@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { WordCorrectionThreshold } from "./WordCorrectionThreshold";
+import { RmsSilenceThreshold } from "./RmsSilenceThreshold";
 import { LogLevelSelector } from "./LogLevelSelector";
 import { LiveLogViewer } from "./LiveLogViewer";
 import { PasteDelay } from "./PasteDelay";
@@ -28,6 +29,7 @@ export const DebugSettings: React.FC = () => {
           description={t("settings.debug.soundTheme.description")}
         />
         <WordCorrectionThreshold descriptionMode="tooltip" grouped={true} />
+        <RmsSilenceThreshold descriptionMode="tooltip" grouped={true} />
         <PasteDelay descriptionMode="tooltip" grouped={true} />
         <PasteDelay
           descriptionMode="tooltip"
