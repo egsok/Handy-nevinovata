@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "Füllwörter entfernen",
+        "description": "Entfernt häufige Verzögerungslaute aus Transkriptionen. Deaktivieren Sie diese Option, um sie beizubehalten."
       }
     },
     "postProcessing": {

@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "फिलर शब्दहरू हटाउनुहोस्",
+        "description": "ट्रान्सक्रिप्सनबाट सामान्य हिचकिचाहटका शब्दहरू हटाउँछ। तिनलाई राख्न यो विकल्प बन्द गर्नुहोस्।"
       }
     },
     "postProcessing": {

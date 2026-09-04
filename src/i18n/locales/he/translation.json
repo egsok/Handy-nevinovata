@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "הסרת מילות מילוי",
+        "description": "מסיר מילות היסוס נפוצות מתמלולים. השבת כדי להשאיר אותן."
       }
     },
     "postProcessing": {

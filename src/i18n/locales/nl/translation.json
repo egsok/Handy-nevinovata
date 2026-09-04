@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "Opvulwoorden verwijderen",
+        "description": "Verwijdert veelvoorkomende aarzelwoorden uit transcripties. Schakel dit uit om ze te behouden."
       }
     },
     "postProcessing": {

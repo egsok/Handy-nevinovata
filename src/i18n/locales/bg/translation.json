@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "Премахване на думи паразити",
+        "description": "Премахва често срещаните думи за колебание от транскрипциите. Изключете, за да ги запазите."
       }
     },
     "postProcessing": {

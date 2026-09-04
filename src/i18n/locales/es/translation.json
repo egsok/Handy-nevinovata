@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "Eliminar muletillas",
+        "description": "Elimina las muletillas más comunes de las transcripciones. Desactívalo para conservarlas."
       }
     },
     "postProcessing": {

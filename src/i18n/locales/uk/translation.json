@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "Видаляти слова-паразити",
+        "description": "Видаляє поширені слова-вагання з транскрипцій. Вимкніть, щоб зберегти їх."
       }
     },
     "postProcessing": {

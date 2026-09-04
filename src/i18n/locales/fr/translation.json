@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "Supprimer les mots de remplissage",
+        "description": "Supprime les hésitations courantes des transcriptions. Désactivez cette option pour les conserver."
       }
     },
     "postProcessing": {

@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "Fjern fyldord",
+        "description": "Fjerner almindelige tøveord fra transskriptioner. Slå fra for at beholde dem."
       }
     },
     "postProcessing": {

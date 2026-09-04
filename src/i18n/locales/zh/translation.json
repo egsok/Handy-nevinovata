@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "移除语气词",
+        "description": "从转录中移除常见的语气词。关闭此选项即可保留这些词。"
       }
     },
     "postProcessing": {

@@ -412,6 +412,10 @@
           "chineseSimplified": "中文（简体）",
           "chineseTraditional": "中文（繁體）"
         }
+      },
+      "fillerWordRemoval": {
+        "title": "移除語助詞",
+        "description": "從轉錄中移除常見的語助詞。關閉此選項即可保留這些詞。"
       }
     },
     "postProcessing": {

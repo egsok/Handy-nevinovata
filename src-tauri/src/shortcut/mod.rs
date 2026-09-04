@@ -598,7 +598,6 @@ pub fn change_sound_theme_setting(app: AppHandle, theme: String) -> Result<(), S
 #[tauri::command]
 #[specta::specta]
 pub fn change_theme_setting(app: AppHandle, theme: String) -> Result<(), String> {
-    let mut settings = settings::get_settings(&app);
     let parsed = match theme.as_str() {
         "system" => Theme::System,
         "light" => Theme::Light,
@@ -608,18 +607,25 @@ pub fn change_theme_setting(app: AppHandle, theme: String) -> Result<(), String>
             Theme::System
         }
     };
-    settings.theme = parsed;
-    settings::write_settings(&app, settings);
-    #[cfg(target_os = "windows")]
+    settings::update_settings(&app, |s| s.theme = parsed);
+    #[cfg(any(target_os = "windows", target_os = "macos"))]
     apply_window_theme(&app, parsed);
+    // Notify other webviews (the recording overlay) so they re-apply the palette
+    // live — they set `data-theme` on their own document and can't see this one.
+    let _ = app.emit("theme-changed", parsed);
     Ok(())
 }
 
-/// Applies the appearance setting to the Windows title bar, which CSS
-/// `data-theme` cannot reach. `System` clears the override so the window follows
-/// Windows. Call this on startup and whenever the setting changes to keep the
-/// title bar in sync with the in-app palette.
-#[cfg(target_os = "windows")]
+/// Applies the appearance setting to the native window chrome (title bar), which
+/// CSS `data-theme` cannot reach. `System` clears the override so the window
+/// follows the OS. Call this on startup and whenever the setting changes to keep
+/// the title bar in sync with the in-app palette.
+///
+/// On Windows this themes the title bar only. On macOS `set_theme` sets
+/// `NSApp.appearance` app-wide, which is what we want here: it darkens the title
+/// bar and keeps the overlay in step. Linux is left to `data-theme` alone, since
+/// its window theming is backend-dependent and unreliable.
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub fn apply_window_theme(app: &AppHandle, theme: Theme) {
     let window_theme = match theme {
         Theme::System => None,
@@ -848,18 +854,14 @@ pub fn change_paste_delay_ms_setting(app: AppHandle, ms: u64) -> Result<(), Stri
 #[tauri::command]
 #[specta::specta]
 pub fn change_paste_delay_after_ms_setting(app: AppHandle, ms: u64) -> Result<(), String> {
-    let mut settings = settings::get_settings(&app);
-    settings.paste_delay_after_ms = ms;
-    settings::write_settings(&app, settings);
+    settings::update_settings(&app, |s| s.paste_delay_after_ms = ms);
     Ok(())
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn change_reliable_paste_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
-    let mut settings = settings::get_settings(&app);
-    settings.reliable_paste = enabled;
-    settings::write_settings(&app, settings);
+    settings::update_settings(&app, |s| s.reliable_paste = enabled);
     Ok(())
 }
 
@@ -1237,11 +1239,21 @@ pub fn change_vad_enabled_setting(app: AppHandle, enabled: bool) -> Result<(), S
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_filler_word_removal_enabled_setting(
+    app: AppHandle,
+    enabled: bool,
+) -> Result<(), String> {
+    settings::update_settings(&app, |s| s.filler_word_removal_enabled = enabled);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_app_language_setting(app: AppHandle, language: String) -> Result<(), String> {
     settings::update_settings(&app, |s| s.app_language = language.clone());
 
     // Refresh the tray menu with the new language
-    tray::update_tray_menu(&app, Some(&language));
+    tray::update_tray_menu(&app);
 
     Ok(())
 }
@@ -1290,7 +1302,7 @@ pub fn change_ort_accelerator_setting(
 
 #[tauri::command]
 #[specta::specta]
-pub fn change_transcribe_gpu_device(app: AppHandle, device: i32) -> Result<(), String> {
+pub fn change_transcribe_gpu_device(app: AppHandle, device: Option<String>) -> Result<(), String> {
     settings::update_settings(&app, |s| s.transcribe_gpu_device = device);
     reload_accelerator_on_next_use(&app);
     Ok(())

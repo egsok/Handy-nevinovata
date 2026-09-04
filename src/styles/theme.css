@@ -6,7 +6,7 @@
 :root {
   /* Palette source of truth. Each themed color is defined once as a
      light/dark pair; the active tokens below and the `data-theme` overrides
-     in App.css reference these, so a hex value lives in exactly one place. */
+     below reference these, so a hex value lives in exactly one place. */
 
   /* Kraft sheet */
   --light-color-text: #2c1a72; /* violet — body text on paper */
@@ -60,7 +60,7 @@
   --dark-color-error: var(--dark-color-logo-primary);
 
   /* Active palette — defaults to light, follows the OS via the media query
-     below, or is forced by `data-theme` (see App.css). */
+     below, or is forced by `data-theme` (see the overrides below). */
   --color-text: var(--light-color-text);
   --color-background: var(--light-color-background);
   --color-background-ui: var(--light-color-background-ui);
@@ -82,4 +82,36 @@
     --color-warning: var(--dark-color-warning);
     --color-error: var(--dark-color-error);
   }
+}
+
+/*
+ * Explicit theme override, driven by the `theme` setting via
+ * `document.documentElement.dataset.theme`. When set, the higher-specificity
+ * attribute selectors win over the `prefers-color-scheme` media query above,
+ * so a user can keep Handy light or dark regardless of the OS setting.
+ * `system` (or no attribute) leaves the OS in charge.
+ *
+ * Lives here (not in App.css) so every window that imports the shared palette —
+ * the settings window and the recording overlay alike — honours the override.
+ */
+:root[data-theme="light"] {
+  --color-text: var(--light-color-text);
+  --color-background: var(--light-color-background);
+  --color-logo-primary: var(--light-color-logo-primary);
+  --color-background-ui: var(--light-color-background-ui);
+  --color-mid-gray: var(--light-color-mid-gray);
+  --color-state-soft: var(--light-color-state-soft);
+  --color-warning: var(--light-color-warning);
+  --color-error: var(--light-color-error);
+}
+
+:root[data-theme="dark"] {
+  --color-text: var(--dark-color-text);
+  --color-background: var(--dark-color-background);
+  --color-logo-primary: var(--dark-color-logo-primary);
+  --color-background-ui: var(--dark-color-background-ui);
+  --color-mid-gray: var(--dark-color-mid-gray);
+  --color-state-soft: var(--dark-color-state-soft);
+  --color-warning: var(--dark-color-warning);
+  --color-error: var(--dark-color-error);
 }

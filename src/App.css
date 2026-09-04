@@ -80,37 +80,16 @@
   }
 }
 
-/*
- * Explicit theme override, driven by the `theme` setting via
- * `document.documentElement.dataset.theme`. When set, the higher-specificity
- * attribute selectors win over the `prefers-color-scheme` media query above,
- * so a user can keep Handy light or dark regardless of the OS setting.
- * `system` (or no attribute) leaves the OS in charge.
- */
+/* Match type rendering to the explicit theme; palette overrides live in
+   theme.css so every window shares the complete brand palette. */
 :root[data-theme="light"] {
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
-  --color-text: var(--light-color-text);
-  --color-background: var(--light-color-background);
-  --color-background-ui: var(--light-color-background-ui);
-  --color-logo-primary: var(--light-color-logo-primary);
-  --color-mid-gray: var(--light-color-mid-gray);
-  --color-state-soft: var(--light-color-state-soft);
-  --color-warning: var(--light-color-warning);
-  --color-error: var(--light-color-error);
 }
 
 :root[data-theme="dark"] {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --color-text: var(--dark-color-text);
-  --color-background: var(--dark-color-background);
-  --color-background-ui: var(--dark-color-background-ui);
-  --color-logo-primary: var(--dark-color-logo-primary);
-  --color-mid-gray: var(--dark-color-mid-gray);
-  --color-state-soft: var(--dark-color-state-soft);
-  --color-warning: var(--dark-color-warning);
-  --color-error: var(--dark-color-error);
 }
 
 /* macOS - tint native overlay scrollbar thumb */
