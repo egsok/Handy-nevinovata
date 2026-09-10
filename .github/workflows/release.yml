@@ -49,7 +49,7 @@ jobs:
               repo: context.repo.repo,
               tag_name: `v${version}`,
               target_commitish: context.sha,
-              name: `Клава не виновата v${version}`,
+              name: `klava-nevinovata v${version}`,
               body,
               draft: true,
               prerelease: false,
