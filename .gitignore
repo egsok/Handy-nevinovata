@@ -46,3 +46,8 @@ result
 
 # Python bytecode (scripts/)
 __pycache__/
+
+# Local agent working documents
+/CLAUDE.md
+/STATE.md
+/TASKS.md
