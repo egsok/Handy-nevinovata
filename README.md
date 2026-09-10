@@ -14,7 +14,7 @@
 
 `klava-nevinovata` is my daily-driver fork of Handy, the offline speech-to-text desktop app. It stays close to upstream while adding fixes for recognition quality and reliability issues I encounter in everyday Russian dictation on Windows.
 
-Current fork release: `0.9.5-1`, based on upstream `v0.9.5`.
+Current fork release: `0.9.6-1`, based on upstream `v0.9.6`.
 
 ## What's different from upstream
 
@@ -46,9 +46,11 @@ The [Russian IT-speech benchmark](https://egorsokolov.ru/ai/whisper-asr-benchmar
 
 ## Download
 
+**Already using an installed copy of 0.9.5-3 or newer?** Click **Check for updates → Update available** at the bottom of the app window. Downloading and installation start only after your click. Portable copies open a manual download link; keep your `Data/` folder when updating.
+
 Pre-built unsigned installers are published on [Releases](https://github.com/egsok/klava-nevinovata/releases). The older `0.8.3-N` stable line remains there as a fallback.
 
-- **Windows:** download `klava-nevinovata_0.9.5-1_x64-setup.exe` (NSIS) or the `.msi`. If SmartScreen shows “Windows protected your PC”, select **More info → Run anyway**.
+- **Windows:** download `klava-nevinovata_0.9.6-1_x64-setup.exe` (NSIS) or the `.msi`. If SmartScreen shows “Windows protected your PC”, select **More info → Run anyway**.
 - **Linux:** download the `.deb`, `.AppImage`, or `.rpm` build for your distribution.
 - **macOS:** use `aarch64.dmg` for Apple Silicon or `x64.dmg` for Intel Macs, then drag `klava-nevinovata.app` to `/Applications`.
 

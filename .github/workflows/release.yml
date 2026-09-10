@@ -30,14 +30,19 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
+            const fs = require('node:fs');
+            const version = '${{ steps.get-version.outputs.version }}';
+            const body = fs.readFileSync(`RELEASE-NOTES-v${version}.md`, 'utf8');
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `v${{ steps.get-version.outputs.version }}`,
-              name: `v${{ steps.get-version.outputs.version }}`,
+              tag_name: `v${version}`,
+              target_commitish: context.sha,
+              name: `Клава не виновата v${version}`,
+              body,
               draft: true,
               prerelease: false,
-              generate_release_notes: true
+              generate_release_notes: false
             })
             return data.id
 
