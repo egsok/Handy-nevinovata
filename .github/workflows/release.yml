@@ -33,6 +33,17 @@ jobs:
             const fs = require('node:fs');
             const version = '${{ steps.get-version.outputs.version }}';
             const body = fs.readFileSync(`RELEASE-NOTES-v${version}.md`, 'utf8');
+            // A failed build leaves its draft behind. Resume it without moving the tag.
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            const existing = releases.find(release => release.tag_name === `v${version}`);
+            if (existing) {
+              if (!existing.draft) throw new Error(`Release v${version} is already published`);
+              return existing.id;
+            }
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -79,6 +90,8 @@ jobs:
       asset-prefix: "klava-nevinovata"
       upload-artifacts: false
       release-id: ${{ needs.create-release.outputs.release-id }}
+      # A manual CI repair must build the same tagged application source.
+      ref: v${{ needs.create-release.outputs.version }}
       # Releases always build from scratch — never restore the Rust cache, so a
       # stale cached native lib can never be linked into a shipped artifact.
       no-cache: true

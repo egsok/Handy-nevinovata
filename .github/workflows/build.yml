@@ -490,8 +490,9 @@ jobs:
           sudo ldconfig
 
       # Tauri's mirrored linuxdeploy is too old for library exclusions. Pin the
-      # release-asset ID and verify its digest before execution; upgrading the
-      # tool is therefore an explicit review point.
+      # versioned release asset and verify its digest before execution. Assets
+      # from the moving continuous release are deleted on each upstream build.
+      # linuxdeploy 1-alpha-20251107-1 supports LINUXDEPLOY_EXCLUDED_LIBRARIES.
       - name: Install verified linuxdeploy with library exclusion support
         if: contains(inputs.platform, 'ubuntu') && contains(inputs.build-args, 'appimage')
         shell: bash
@@ -500,13 +501,13 @@ jobs:
           case "$(uname -m)" in
             x86_64)
               arch="x86_64"
-              asset_id="497463883"
-              expected_sha256="421ca71d5c69ea97c6309276232990d43df1dcece0edfaa26bbf926ff96ed12e"
+              asset_id="313839329"
+              expected_sha256="c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d"
               ;;
             aarch64|arm64)
               arch="aarch64"
-              asset_id="497463664"
-              expected_sha256="9f04c4c2a8b69c392c4bbcc1a88bdd4d0a8ac03f587cf5242814cb7ae47b78e5"
+              asset_id="313839294"
+              expected_sha256="620095110d693282b8ebeb244a95b5e911cf8f65f76c88b4b47d16ae6346fcff"
               ;;
             *) echo "Unsupported linuxdeploy architecture: $(uname -m)" >&2; exit 1 ;;
           esac
